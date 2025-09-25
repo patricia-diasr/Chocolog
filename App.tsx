@@ -1,21 +1,27 @@
-import React, { useCallback } from "react";
+import "react-native-gesture-handler";
+import "react-native-reanimated";
+import React, { useCallback, useEffect } from "react";
 import { NativeBaseProvider } from "native-base";
 import { useFonts } from "expo-font";
+import { BerkshireSwash_400Regular } from "@expo-google-fonts/berkshire-swash";
 import * as SplashScreen from "expo-splash-screen";
 import { View } from "react-native";
 import { theme } from "./theme";
+import { Navigator } from "./navigation/Navigator";
+import { Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold } from "@expo-google-fonts/poppins";
+
 SplashScreen.preventAutoHideAsync();
 
 export default function App() {
     const [fontsLoaded, fontError] = useFonts({
-        Poppins_400Regular: require("./assets/fonts/Poppins-Regular.ttf"),
-        Poppins_500Medium: require("./assets/fonts/Poppins-Medium.ttf"),
-        Poppins_600SemiBold: require("./assets/fonts/Poppins-SemiBold.ttf"),
-        Poppins_700Bold: require("./assets/fonts/Poppins-Bold.ttf"),
-        BerkshireSwash_400Regular: require("./assets/fonts/BerkshireSwash-Regular.ttf"),
+        BerkshireSwash_400Regular,
+        Poppins_400Regular,
+        Poppins_500Medium,
+        Poppins_600SemiBold,
+        Poppins_700Bold,
     });
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (fontError) {
             console.error("ERRO NO CARREGAMENTO DA FONTE:", fontError);
         }
@@ -34,6 +40,7 @@ export default function App() {
     return (
         <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
             <NativeBaseProvider theme={theme}>
+                <Navigator />
             </NativeBaseProvider>
         </View>
     );

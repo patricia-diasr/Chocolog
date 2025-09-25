@@ -55,7 +55,7 @@ export const theme = extendTheme({
                 normal: "Poppins_700Bold",
             },
         },
-        BerkshireSwash: {
+        BerkshireSwash_400Regular: {
             400: {
                 normal: "BerkshireSwash_400Regular",
             },
@@ -63,7 +63,7 @@ export const theme = extendTheme({
     },
 
     fonts: {
-        heading: "BerkshireSwash",
+        heading: "BerkshireSwash_400Regular",
         body: "Poppins",
         mono: "Poppins",
     },
