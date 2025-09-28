@@ -1,14 +1,14 @@
 import React from "react";
-import { Box, HStack, Text, Pressable, Icon } from "native-base";
+import { Center, HStack, Text, Pressable, Icon } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
-import type { IoniconsGlyph } from "@expo/vector-icons/build/Ionicons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Platform } from "react-native";
+import { useAppColors } from "../../hooks/useAppColors";
 
 type Props = {
     title: string;
     onMenuPress: () => void;
-    icon?: keyof IoniconsGlyph; 
+    icon?: string;
 };
 
 export const Header = ({
@@ -16,26 +16,28 @@ export const Header = ({
     onMenuPress,
     icon = "menu-outline",
 }: Props) => {
+    const { primaryColor, whiteColor } = useAppColors();
     const insets = useSafeAreaInsets();
 
     return (
-        <Box
-            bg="primary.600"
+        <Center
+            bg={primaryColor}
             pt={`${insets.top}px`}
             shadow={Platform.select({ ios: 2, android: 4 })}
         >
             <HStack
                 alignItems="center"
                 justifyContent="space-between"
-                px={4}
                 py={2}
+                w="100%"
+                maxW={{ md: "960px", lg: "1250px" }}
+                px={4}
                 minH="12"
             >
                 <Text
-                    fontFamily="BerkshireSwash"
-                    fontSize="xl"
-                    fontWeight="bold"
-                    color="white"
+                    fontFamily="BerkshireSwash_400Regular"
+                    fontSize="2xl"
+                    color={whiteColor}
                     numberOfLines={1}
                     flex={1}
                 >
@@ -52,9 +54,14 @@ export const Header = ({
                     accessibilityRole="button"
                     accessibilityLabel="Acessar menu"
                 >
-                    <Icon as={Ionicons} name={icon} size="lg" color="white" />
+                    <Icon
+                        as={Ionicons}
+                        name={icon}
+                        size="xl"
+                        color={whiteColor}
+                    />
                 </Pressable>
             </HStack>
-        </Box>
+        </Center>
     );
 };

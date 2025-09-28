@@ -18,20 +18,16 @@ import {
     createBottomTabNavigator,
     type BottomTabBarProps,
 } from "@react-navigation/bottom-tabs";
-import {
-    createDrawerNavigator,
-} from "@react-navigation/drawer";
-import {
-    createNativeStackNavigator,
-} from "@react-navigation/native-stack";
+import { createDrawerNavigator } from "@react-navigation/drawer";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import { ScheduleScreen } from "../screens/schedule";
-import { CustomersScreen } from "../screens/customers";
 import { StockScreen } from "../screens/stock";
 import { ReportsScreen } from "../screens/reports";
 import { MenuScreen } from "../screens/menu";
+import CustomersScreen from "../screens/customers";
 
-import { Header } from "../components/Header";
+import { Header } from "../components/layout/Header";
 
 const TAB_CONFIG = {
     schedule: {
@@ -239,7 +235,7 @@ function DesktopNavigator() {
 }
 
 export const Navigator = () => {
-    const isMobile = useBreakpointValue({ base: true, lg: false });
+    const isMobile = useBreakpointValue({ base: true, md: false });
 
     return (
         <NavigationContainer>
