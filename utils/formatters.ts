@@ -1,3 +1,22 @@
+export const formatPrice = (value: number): string => {
+    return value.toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+    });
+};
+
+export const formatDate = (dateString: string): string => {
+    if (!dateString) return "N/A";
+    try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString("pt-BR", {
+            timeZone: "UTC",
+        });
+    } catch (error) {
+        return "Data inválida";
+    }
+};
+
 export const maskPhone = (value: string) => {
     value = value.replace(/\D/g, "");
     value = value.slice(0, 11);
@@ -9,4 +28,3 @@ export const maskPhone = (value: string) => {
 };
 
 export const unmaskPhone = (value: string) => value.replace(/\D/g, "") || "";
-

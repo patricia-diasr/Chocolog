@@ -1,4 +1,4 @@
-import { Box, VStack, HStack, Text, Icon, Divider } from "native-base";
+import { Box, VStack, HStack, Text, Icon } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
 import { StatsCardProps } from "../../types/stats";
 import { useAppColors } from "../../hooks/useAppColors";

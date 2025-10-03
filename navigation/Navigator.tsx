@@ -19,13 +19,16 @@ import {
     type BottomTabBarProps,
 } from "@react-navigation/bottom-tabs";
 import { createDrawerNavigator } from "@react-navigation/drawer";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import {
+    createNativeStackNavigator,
+} from "@react-navigation/native-stack";
 
 import { ScheduleScreen } from "../screens/schedule";
 import { StockScreen } from "../screens/stock";
 import { ReportsScreen } from "../screens/reports";
 import { MenuScreen } from "../screens/menu";
 import CustomersScreen from "../screens/customers";
+import CustomerScreen from "../screens/customer"; 
 
 import { Header } from "../components/layout/Header";
 
@@ -65,6 +68,7 @@ const TAB_ENTRIES = Object.entries(TAB_CONFIG) as [
 type RootStackParamList = {
     MainTabs: undefined;
     Menu: undefined;
+    Customer: undefined;
 };
 
 type RootDrawerParamList = {
@@ -78,6 +82,19 @@ interface TabBarButtonProps extends BottomTabBarProps {
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Drawer = createDrawerNavigator<RootDrawerParamList>();
+const CustomerStack = createNativeStackNavigator();
+
+function CustomerStackNavigator() {
+    return (
+        <CustomerStack.Navigator screenOptions={{ headerShown: false }}>
+            <CustomerStack.Screen
+                name="CustomersList"
+                component={CustomersScreen}
+            />
+            <CustomerStack.Screen name="Customer" component={CustomerScreen} />
+        </CustomerStack.Navigator>
+    );
+}
 
 function TabBarButton({ name, state, navigation }: TabBarButtonProps) {
     const isFocused = state.routes[state.index].name === name;
@@ -206,6 +223,19 @@ function MobileNavigator() {
                     ),
                 })}
             />
+            <Stack.Screen
+                name="Customer"
+                component={CustomerScreen}
+                options={({ navigation }) => ({
+                    header: () => (
+                        <Header
+                            title="Cliente"
+                            onMenuPress={() => navigation.goBack()}
+                            icon="arrow-back-outline"
+                        />
+                    ),
+                })}
+            />
         </Stack.Navigator>
     );
 }
@@ -213,23 +243,48 @@ function MobileNavigator() {
 function DesktopNavigator() {
     return (
         <Drawer.Navigator
-            screenOptions={({ navigation, route }) => ({
-                header: () => (
-                    <Header
-                        title={route.name}
-                        onMenuPress={() => navigation.toggleDrawer()}
-                    />
-                ),
-                drawerPosition: "left",
-            })}
+            screenOptions={({ navigation, route }) => {
+                // Lógica para determinar o título dinamicamente
+                let title = route.name;
+
+                // Se estivermos na seção "Clientes"
+                if (route.name === TAB_CONFIG.customers.title) {
+                    const focusedRoute = getFocusedRouteNameFromRoute(route);
+                    // Verificamos se a rota focada é a de detalhe
+                    if (focusedRoute === "Customer") {
+                        title = "Cliente"; // Título no singular
+                    }
+                }
+
+                return {
+                    header: () => (
+                        <Header
+                            title={title} // Usamos a variável com o título correto
+                            onMenuPress={() => navigation.toggleDrawer()}
+                        />
+                    ),
+                    drawerPosition: "left",
+                };
+            }}
         >
-            {TAB_ENTRIES.map(([name, config]) => (
-                <Drawer.Screen
-                    key={name}
-                    name={config.title}
-                    component={config.component}
-                />
-            ))}
+            {TAB_ENTRIES.map(([name, config]) => {
+                if (name === "customers") {
+                    return (
+                        <Drawer.Screen
+                            key={name}
+                            name={config.title}
+                            component={CustomerStackNavigator}
+                        />
+                    );
+                }
+                return (
+                    <Drawer.Screen
+                        key={name}
+                        name={config.title}
+                        component={config.component}
+                    />
+                );
+            })}
         </Drawer.Navigator>
     );
 }

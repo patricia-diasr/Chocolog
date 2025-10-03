@@ -25,7 +25,7 @@ interface CustomerFormModalProps {
     customerData: Customer | null;
 }
 
-export function CustomerFormModal({
+export default function CustomerFormModal({
     title,
     isOpen,
     onClose,

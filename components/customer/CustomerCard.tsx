@@ -5,16 +5,17 @@ import { Customer } from "../../types/customer";
 import LabelBadge from "../layout/LabelBadge";
 import { useAppColors } from "../../hooks/useAppColors";
 import { maskPhone } from "../../utils/formatters";
+import { useNavigation } from "@react-navigation/native";
 
 const CustomerCard: React.FC<Customer> = ({ name, phone, isReseller }) => {
-    const {
-        borderColor,
-        whiteColor,
-        secondaryColor,
-        darkGreyColor,
-    } = useAppColors();
+    const { borderColor, whiteColor, secondaryColor, darkGreyColor } =
+        useAppColors();
 
-    const handleNavigate = () => {};
+    const navigation = useNavigation();
+
+    const handleNavigate = () => {
+        navigation.navigate("Customer" as never);
+    };
 
     return (
         <Pressable

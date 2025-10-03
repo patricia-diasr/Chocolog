@@ -11,6 +11,7 @@ export const useAppColors = () => {
     const mediumGreyColor = useColorModeValue("gray.500", "gray.500")
     const darkGreyColor = useColorModeValue("gray.600", "gray.600");
     const borderColor = useColorModeValue("gray.100", "gray.100");
+    const invalidColor = useColorModeValue("red.500", "red.400");
 
     return {
         backgroundColor,
@@ -23,5 +24,6 @@ export const useAppColors = () => {
         mediumGreyColor,
         darkGreyColor,
         borderColor,
+        invalidColor,
     };
 };
