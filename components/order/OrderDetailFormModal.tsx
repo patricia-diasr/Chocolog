@@ -53,6 +53,7 @@ export default function OrderDetailFormModal({
         lightGreyColor,
         primaryColor,
         secondaryColor,
+        tertiaryColor,
         borderColor,
         invalidColor,
     } = useAppColors();
@@ -376,8 +377,8 @@ export default function OrderDetailFormModal({
                             size="lg"
                             colorScheme="secondary"
                             rounded="xl"
-                            _pressed={{ bg: "tertiary.600" }}
-                            _hover={{ bg: "tertiary.600" }}
+                            _pressed={{ bg: tertiaryColor }}
+                            _hover={{ bg: tertiaryColor }}
                             flex={1}
                             py={3}
                             shadow={2}

@@ -1,8 +1,12 @@
 import React from "react";
-import { Box, Text, Center } from "native-base";
+import { Text, Center, Button } from "native-base";
 
-export const MenuScreen = () => (
-    <Center flex={1}>
-        <Text fontSize="xl">menu</Text>
-    </Center>
-);
+export const MenuScreen = ({ onLogout }: { onLogout: () => void }) => {
+    return (
+        <Center flex={1}>
+            <Button onPress={onLogout}>
+                Sair
+            </Button>
+        </Center>
+    );
+};

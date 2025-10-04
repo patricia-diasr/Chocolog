@@ -14,7 +14,7 @@ type Props = {
 export const Header = ({
     title,
     onMenuPress,
-    icon = "menu-outline",
+    icon = "menu",
 }: Props) => {
     const { primaryColor, whiteColor } = useAppColors();
     const insets = useSafeAreaInsets();

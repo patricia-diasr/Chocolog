@@ -184,7 +184,7 @@ export default function CustomersScreen() {
                                     <VStack alignItems="center" space={4}>
                                         <Icon
                                             as={Ionicons}
-                                            name="cube-outline"
+                                            name="cube"
                                             size={20}
                                             color={mediumGreyColor}
                                         />
@@ -212,7 +212,7 @@ export default function CustomersScreen() {
                                     <VStack alignItems="center" space={4}>
                                         <Icon
                                             as={Ionicons}
-                                            name="search-outline"
+                                            name="search"
                                             size={20}
                                             color={mediumGreyColor}
                                         />

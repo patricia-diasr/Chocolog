@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
     useBreakpointValue,
     Box,
@@ -18,19 +18,24 @@ import {
     createBottomTabNavigator,
     type BottomTabBarProps,
 } from "@react-navigation/bottom-tabs";
-import { createDrawerNavigator } from "@react-navigation/drawer";
 import {
-    createNativeStackNavigator,
-} from "@react-navigation/native-stack";
+    createDrawerNavigator,
+    DrawerContentScrollView,
+    DrawerItem,
+    DrawerItemList,
+} from "@react-navigation/drawer";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import { ScheduleScreen } from "../screens/schedule";
 import { StockScreen } from "../screens/stock";
 import { ReportsScreen } from "../screens/reports";
 import { MenuScreen } from "../screens/menu";
 import CustomersScreen from "../screens/customers";
-import CustomerScreen from "../screens/customer"; 
+import CustomerScreen from "../screens/customer";
 
 import { Header } from "../components/layout/Header";
+import LoginScreen from "../screens/login";
+import { useAppColors } from "../hooks/useAppColors";
 
 const TAB_CONFIG = {
     schedule: {
@@ -67,8 +72,9 @@ const TAB_ENTRIES = Object.entries(TAB_CONFIG) as [
 
 type RootStackParamList = {
     MainTabs: undefined;
-    Menu: undefined;
+    Menu: { onLogout: () => void };
     Customer: undefined;
+    Login: { onLogin: () => void };
 };
 
 type RootDrawerParamList = {
@@ -81,6 +87,7 @@ interface TabBarButtonProps extends BottomTabBarProps {
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator<RootStackParamList>();
+const AuthStack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator<RootDrawerParamList>();
 const CustomerStack = createNativeStackNavigator();
 
@@ -148,9 +155,11 @@ function TabBarButton({ name, state, navigation }: TabBarButtonProps) {
 }
 
 function CustomTabBar(props: BottomTabBarProps) {
+    const { primaryColor } = useAppColors();
+
     return (
         <Box
-            bg="primary.600"
+            bg={primaryColor}
             shadow={Platform.select({ ios: 8, android: 16 })}
             borderTopWidth={Platform.select({ android: 0.5 })}
             borderTopColor="rgba(255,255,255,0.1)"
@@ -189,7 +198,7 @@ function MobileTabNavigator() {
     );
 }
 
-function MobileNavigator() {
+function MobileNavigator({ onLogout }: { onLogout: () => void }) {
     return (
         <Stack.Navigator>
             <Stack.Screen
@@ -204,7 +213,9 @@ function MobileNavigator() {
                         header: () => (
                             <Header
                                 title={title}
-                                onMenuPress={() => navigation.navigate("Menu")}
+                                onMenuPress={() =>
+                                    navigation.navigate("Menu", { onLogout })
+                                }
                             />
                         ),
                     };
@@ -212,17 +223,19 @@ function MobileNavigator() {
             />
             <Stack.Screen
                 name="Menu"
-                component={MenuScreen}
                 options={({ navigation }) => ({
                     header: () => (
                         <Header
                             title="Menu"
                             onMenuPress={() => navigation.goBack()}
-                            icon="arrow-back-outline"
+                            icon="arrow-back"
                         />
                     ),
                 })}
-            />
+            >
+                {(props) => <MenuScreen {...props.route.params} />}
+            </Stack.Screen>
+
             <Stack.Screen
                 name="Customer"
                 component={CustomerScreen}
@@ -231,7 +244,7 @@ function MobileNavigator() {
                         <Header
                             title="Cliente"
                             onMenuPress={() => navigation.goBack()}
-                            icon="arrow-back-outline"
+                            icon="arrow-back"
                         />
                     ),
                 })}
@@ -240,26 +253,34 @@ function MobileNavigator() {
     );
 }
 
-function DesktopNavigator() {
+function CustomDrawerContent(props: any) {
+    return (
+        <DrawerContentScrollView {...props}>
+            <DrawerItemList {...props} />
+            <DrawerItem label="Sair" onPress={props.onLogout} />
+        </DrawerContentScrollView>
+    );
+}
+function DesktopNavigator({ onLogout }: { onLogout: () => void }) {
     return (
         <Drawer.Navigator
+            drawerContent={(props) => (
+                <CustomDrawerContent {...props} onLogout={onLogout} />
+            )}
             screenOptions={({ navigation, route }) => {
-                // Lógica para determinar o título dinamicamente
                 let title = route.name;
 
-                // Se estivermos na seção "Clientes"
                 if (route.name === TAB_CONFIG.customers.title) {
                     const focusedRoute = getFocusedRouteNameFromRoute(route);
-                    // Verificamos se a rota focada é a de detalhe
                     if (focusedRoute === "Customer") {
-                        title = "Cliente"; // Título no singular
+                        title = "Cliente";
                     }
                 }
 
                 return {
                     header: () => (
                         <Header
-                            title={title} // Usamos a variável com o título correto
+                            title={title}
                             onMenuPress={() => navigation.toggleDrawer()}
                         />
                     ),
@@ -277,6 +298,7 @@ function DesktopNavigator() {
                         />
                     );
                 }
+
                 return (
                     <Drawer.Screen
                         key={name}
@@ -289,12 +311,34 @@ function DesktopNavigator() {
     );
 }
 
+function AuthNavigator({ onLogin }: { onLogin: () => void }) {
+    return (
+        <AuthStack.Navigator screenOptions={{ headerShown: false }}>
+            <AuthStack.Screen name="Login">
+                {(props) => <LoginScreen {...props} onLogin={onLogin} />}
+            </AuthStack.Screen>
+        </AuthStack.Navigator>
+    );
+}
+
 export const Navigator = () => {
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const isMobile = useBreakpointValue({ base: true, md: false });
+
+    const handleLogin = () => setIsAuthenticated(true);
+    const handleLogout = () => setIsAuthenticated(false);
 
     return (
         <NavigationContainer>
-            {isMobile ? <MobileNavigator /> : <DesktopNavigator />}
+            {isAuthenticated ? (
+                isMobile ? (
+                    <MobileNavigator onLogout={handleLogout} />
+                ) : (
+                    <DesktopNavigator onLogout={handleLogout} />
+                )
+            ) : (
+                <AuthNavigator onLogin={handleLogin} />
+            )}
         </NavigationContainer>
     );
 };
