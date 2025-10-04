@@ -17,7 +17,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useAppColors } from "../../hooks/useAppColors";
 import { Payment } from "../../types/order";
 import { formatDate } from "../../utils/formatters";
-import { PAYMENT_METHODS } from "../../constants/order";
+import { PAYMENT_METHODS } from "../../configs/order";
 
 interface Props {
     title: string;

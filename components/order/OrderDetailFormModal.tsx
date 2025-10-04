@@ -16,7 +16,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useAppColors } from "../../hooks/useAppColors";
 import { OrderDetail } from "../../types/order";
-import { flavors, sizes } from "../../constants/order";
+import { flavors, sizes } from "../../configs/order";
 
 interface Props {
     title: string;
