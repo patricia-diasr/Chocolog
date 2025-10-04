@@ -1,3 +1,12 @@
+export const PAYMENT_METHODS: string[] = [
+    "Dinheiro",
+    "Pix",
+    "Crédito",
+    "Débito",
+    "Cheque",
+    "Outro",
+];
+
 export const flavors: String[] = [
     "Prestígio",
     "Brigadeiro",

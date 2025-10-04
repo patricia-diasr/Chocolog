@@ -25,17 +25,17 @@ import {
     DrawerItemList,
 } from "@react-navigation/drawer";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { useAppColors } from "../hooks/useAppColors";
 
+import Header from "../components/layout/Header";
+import LoginScreen from "../screens/login";
 import { ScheduleScreen } from "../screens/schedule";
 import { StockScreen } from "../screens/stock";
 import { ReportsScreen } from "../screens/reports";
 import { MenuScreen } from "../screens/menu";
 import CustomersScreen from "../screens/customers";
 import CustomerScreen from "../screens/customer";
-
-import { Header } from "../components/layout/Header";
-import LoginScreen from "../screens/login";
-import { useAppColors } from "../hooks/useAppColors";
+import OrderScreen from "../screens/order";
 
 const TAB_CONFIG = {
     schedule: {
@@ -74,6 +74,7 @@ type RootStackParamList = {
     MainTabs: undefined;
     Menu: { onLogout: () => void };
     Customer: undefined;
+    Order: undefined;
     Login: { onLogin: () => void };
 };
 
@@ -249,6 +250,19 @@ function MobileNavigator({ onLogout }: { onLogout: () => void }) {
                     ),
                 })}
             />
+            <Stack.Screen
+                name="Order"
+                component={OrderScreen}
+                options={({ navigation }) => ({
+                    header: () => (
+                        <Header
+                            title="Pedido"
+                            onMenuPress={() => navigation.goBack()}
+                            icon="arrow-back"
+                        />
+                    ),
+                })}
+            />
         </Stack.Navigator>
     );
 }
@@ -269,12 +283,16 @@ function DesktopNavigator({ onLogout }: { onLogout: () => void }) {
             )}
             screenOptions={({ navigation, route }) => {
                 let title = route.name;
+                const focusedRoute = getFocusedRouteNameFromRoute(route);
 
                 if (route.name === TAB_CONFIG.customers.title) {
-                    const focusedRoute = getFocusedRouteNameFromRoute(route);
                     if (focusedRoute === "Customer") {
                         title = "Cliente";
                     }
+                }
+
+                if (route.name === "Order" || focusedRoute === "Order") {
+                    title = "Pedido";
                 }
 
                 return {
@@ -307,6 +325,14 @@ function DesktopNavigator({ onLogout }: { onLogout: () => void }) {
                     />
                 );
             })}
+            <Drawer.Screen
+                name="Order"
+                component={OrderScreen}
+                options={{
+                    title: "Pedido",
+                    drawerItemStyle: { height: 0 },
+                }}
+            />
         </Drawer.Navigator>
     );
 }

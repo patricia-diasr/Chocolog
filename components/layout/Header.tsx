@@ -1,21 +1,17 @@
 import React from "react";
+import { Platform } from "react-native";
 import { Center, HStack, Text, Pressable, Icon } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Platform } from "react-native";
 import { useAppColors } from "../../hooks/useAppColors";
 
-type Props = {
+interface Props {
     title: string;
     onMenuPress: () => void;
     icon?: string;
 };
 
-export const Header = ({
-    title,
-    onMenuPress,
-    icon = "menu",
-}: Props) => {
+export default function Header({ title, onMenuPress, icon = "menu" }: Props) {
     const { primaryColor, whiteColor } = useAppColors();
     const insets = useSafeAreaInsets();
 

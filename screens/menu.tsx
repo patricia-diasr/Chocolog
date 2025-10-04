@@ -1,5 +1,5 @@
 import React from "react";
-import { Text, Center, Button } from "native-base";
+import { Center, Button } from "native-base";
 
 export const MenuScreen = ({ onLogout }: { onLogout: () => void }) => {
     return (

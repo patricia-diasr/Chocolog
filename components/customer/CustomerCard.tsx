@@ -1,13 +1,13 @@
 import React from "react";
+import { useNavigation } from "@react-navigation/native";
 import { Text, VStack, HStack, Icon, Pressable } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
 import { Customer } from "../../types/customer";
 import LabelBadge from "../layout/LabelBadge";
 import { useAppColors } from "../../hooks/useAppColors";
 import { maskPhone } from "../../utils/formatters";
-import { useNavigation } from "@react-navigation/native";
 
-const CustomerCard: React.FC<Customer> = ({ name, phone, isReseller }) => {
+export default function ({ name, phone, isReseller }: Customer) {
     const { borderColor, whiteColor, secondaryColor, darkGreyColor } =
         useAppColors();
 
@@ -64,5 +64,3 @@ const CustomerCard: React.FC<Customer> = ({ name, phone, isReseller }) => {
         </Pressable>
     );
 };
-
-export default CustomerCard;

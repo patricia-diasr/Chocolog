@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Text, Center } from "native-base";
+import { Text, Center } from "native-base";
 
 export const StockScreen = () => (
     <Center flex={1}>

@@ -18,7 +18,7 @@ import { useAppColors } from "../../hooks/useAppColors";
 import { OrderDetail } from "../../types/order";
 import { flavors, sizes } from "../../constants/order";
 
-interface OrderDetailFormModalProps {
+interface Props {
     title: string;
     isOpen: boolean;
     onClose: () => void;
@@ -45,7 +45,7 @@ export default function OrderDetailFormModal({
     onClose,
     onSave,
     orderDetailData,
-}: OrderDetailFormModalProps) {
+}: Props) {
     const toast = useToast();
     const {
         backgroundColor,

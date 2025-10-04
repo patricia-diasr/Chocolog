@@ -11,13 +11,15 @@ import {
 } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
 import { useState, useMemo } from "react";
-import { useAppColors } from "../hooks/useAppColors";
+
 import StatsCard from "../components/layout/StatsCard";
 import SearchInput from "../components/layout/Searchbar";
 import FabButton from "../components/layout/FabButton";
 import SortButtons, { SortOption } from "../components/layout/SortButtons";
 import CustomerCard from "../components/customer/CustomerCard";
 import CustomerFormModal from "../components/customer/CustomerFormModal";
+
+import { useAppColors } from "../hooks/useAppColors";
 import { Customer } from "../types/customer";
 import { StatItem } from "../types/stats";
 

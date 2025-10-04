@@ -1,12 +1,15 @@
 import { useCallback, useMemo, useState } from "react";
+import { useNavigation } from "@react-navigation/native";
 import { Box, Center, ScrollView, VStack } from "native-base";
-import { useAppColors } from "../hooks/useAppColors";
+
 import InfoList from "../components/layout/InfoList";
 import FabButton from "../components/layout/FabButton";
 import CustomerInfoCard from "../components/customer/CustomerInfoCard";
 import CustomerFormModal from "../components/customer/CustomerFormModal";
 import OrderFormModal from "../components/order/OrderFormModal";
 import OrderDetailFormModal from "../components/order/OrderDetailFormModal";
+
+import { useAppColors } from "../hooks/useAppColors";
 import { Customer } from "../types/customer";
 import { Charge, Order, OrderDetail } from "../types/order";
 import { getStatusDetails } from "../utils/statusConfig";
@@ -104,7 +107,8 @@ const chargesDataMock: Charge[] = [
 type VisibleModal = "editCustomer" | "addOrder" | "addOrderDetail";
 
 export default function CustomerScreen() {
-    const { backgroundColor, } = useAppColors();
+    const { backgroundColor } = useAppColors();
+    const navigation = useNavigation();
 
     const [customerData, setCustomerData] =
         useState<Customer>(customerDataMock);
@@ -126,9 +130,13 @@ export default function CustomerScreen() {
         setVisibleModal(null);
     }, []);
 
-    const handleNavigateToOrder = () => {};
+    const handleNavigateToOrder = () => {
+        navigation.navigate("Order" as never);
+    };
 
-    const handleNavigateToCharge = () => {};
+    const handleNavigateToCharge = () => {
+        navigation.navigate("Customer" as never);
+    };
 
     const orderItems = useMemo(() => {
         return ordersData.map((order) => {

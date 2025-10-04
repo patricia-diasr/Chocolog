@@ -17,7 +17,7 @@ import { useAppColors } from "../../hooks/useAppColors";
 import { Customer } from "../../types/customer";
 import { maskPhone, unmaskPhone } from "../../utils/formatters";
 
-interface CustomerFormModalProps {
+interface Props {
     title: string;
     isOpen: boolean;
     onClose: () => void;
@@ -31,7 +31,7 @@ export default function CustomerFormModal({
     onClose,
     onSave,
     customerData,
-}: CustomerFormModalProps) {
+}: Props) {
     const toast = useToast();
     const {
         whiteColor,

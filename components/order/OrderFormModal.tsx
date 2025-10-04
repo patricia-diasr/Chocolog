@@ -8,7 +8,6 @@ import {
     HStack,
     Text,
     Icon,
-    Divider,
     useToast,
     Select,
     CheckIcon,
@@ -17,9 +16,9 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useAppColors } from "../../hooks/useAppColors";
 import { Order, ORDER_STATUS } from "../../types/order";
-import { formatDateForInput } from "../../utils/formatters";
+import { formatDate } from "../../utils/formatters";
 
-interface OrderFormModalProps {
+interface Props {
     title: string;
     isOpen: boolean;
     onClose: () => void;
@@ -52,7 +51,7 @@ export default function OrderFormModal({
     onClose,
     onSave,
     orderData,
-}: OrderFormModalProps) {
+}: Props) {
     const toast = useToast();
     const {
         borderColor,
@@ -243,10 +242,10 @@ export default function OrderFormModal({
                             </FormControl.Label>
 
                             <Input
-                                value={formData.due_date}
+                                value={formatDate(formData.due_date)}
                                 placeholder="Selecione uma data"
                                 onChangeText={(text) =>
-                                    handleInputChange("due_date", text)
+                                    handleInputChange("due_date", formatDate(text))
                                 }
                                 bg={backgroundColor}
                                 variant="filled"
@@ -278,10 +277,10 @@ export default function OrderFormModal({
                                 </FormControl.Label>
 
                                 <Input
-                                    value={formData.pickup_date}
+                                    value={formData.pickup_date && formatDate(formData.pickup_date)}
                                     placeholder="Selecione uma data"
                                     onChangeText={(text) =>
-                                        handleInputChange("pickup_date", text)
+                                        handleInputChange("pickup_date", formatDate(text))
                                     }
                                     bg={backgroundColor}
                                     variant="filled"

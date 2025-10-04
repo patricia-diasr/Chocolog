@@ -18,7 +18,7 @@ export interface LoginCredentials {
     password: string;
 }
 
-interface LoginFormProps {
+interface Props {
     onLoginSubmit: (credentials: LoginCredentials) => void;
     isLoading: boolean;
 }
@@ -26,7 +26,7 @@ interface LoginFormProps {
 export default function LoginForm({
     onLoginSubmit,
     isLoading,
-}: LoginFormProps) {
+}: Props) {
     const toast = useToast();
 
     const {

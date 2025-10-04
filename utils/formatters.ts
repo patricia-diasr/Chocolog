@@ -1,3 +1,5 @@
+import { OrderDetail } from "../types/order";
+
 export const formatPrice = (value: number): string => {
     return value.toLocaleString("pt-BR", {
         style: "currency",
@@ -15,6 +17,11 @@ export const formatDate = (dateString: string): string => {
     } catch (error) {
         return "Data inválida";
     }
+};
+
+export const formatOrderDetailTitle = (detail: OrderDetail): string => {
+    const baseTitle = `${detail.quantity}x ${detail.size} - ${detail.flavor1}`;
+    return detail.flavor2 ? `${baseTitle} / ${detail.flavor2}` : baseTitle;
 };
 
 export const maskPhone = (value: string) => {

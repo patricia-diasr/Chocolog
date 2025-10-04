@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useMemo } from "react";
+import { Animated, Easing, StyleSheet } from "react-native";
 import { Box, Circle } from "native-base";
 import { LinearGradient } from "expo-linear-gradient";
-import { Animated, Easing, StyleSheet } from "react-native";
 import { theme } from "../../theme";
 
-interface FloatingParticleProps {
+interface Props {
     size?: number;
     top: string | number;
     left: string | number;
@@ -20,7 +20,7 @@ function FloatingParticle({
     delay = 0,
     animationDuration = 6000,
     color = "white",
-}: FloatingParticleProps) {
+}: Props) {
     const fadeAnim = useRef(new Animated.Value(0.3)).current;
     const scaleAnim = useRef(new Animated.Value(0.8)).current;
 
