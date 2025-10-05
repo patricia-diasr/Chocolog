@@ -39,6 +39,9 @@ export default function ItemNavigation({
             bg={whiteColor}
             borderRadius="xl"
             p={3}
+            shadow={4}
+            borderWidth={1}
+            borderColor={borderColor}
             _hover={{ bg: borderColor }}
             _pressed={{ bg: borderColor }}
         >

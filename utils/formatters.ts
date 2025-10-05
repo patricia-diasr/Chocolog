@@ -35,3 +35,9 @@ export const maskPhone = (value: string) => {
 };
 
 export const unmaskPhone = (value: string) => value.replace(/\D/g, "") || "";
+
+export const normalizeText = (text: string) =>
+    text
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase();

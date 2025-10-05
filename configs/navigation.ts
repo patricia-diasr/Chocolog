@@ -1,5 +1,5 @@
 import { ScheduleScreen } from "../screens/schedule";
-import { StockScreen } from "../screens/stock";
+import StockScreen from "../screens/stock";
 import { ReportsScreen } from "../screens/reports";
 import CustomersScreen from "../screens/customers";
 import { ComponentType } from "react";
