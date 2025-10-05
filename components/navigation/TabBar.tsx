@@ -4,33 +4,44 @@ import { Ionicons } from "@expo/vector-icons";
 import { Platform } from "react-native";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { useAppColors } from "../../hooks/useAppColors";
-import { TAB_CONFIG, TAB_ENTRIES, TabName } from "../../configs/navigation";
+import { SCREEN_CONFIG, AppScreenName } from "../../configs/navigation";
 
 function TabBarButton({
-    name,
-    state,
+    route,
+    isFocused,
     navigation,
-}: { name: TabName } & BottomTabBarProps) {
-    const isFocused = state.routes[state.index].name === name;
-    const config = TAB_CONFIG[name];
+}: {
+    route: { key: string; name: string };
+    isFocused: boolean;
+    navigation: BottomTabBarProps["navigation"];
+}) {
+    const config = SCREEN_CONFIG[route.name as AppScreenName];
+    if (!config || !config.isTab) {
+        return null;
+    }
 
     const onPress = () => {
         const event = navigation.emit({
             type: "tabPress",
-            target: state.routes.find((r) => r.name === name)?.key,
+            target: route.key,
             canPreventDefault: true,
         });
+
         if (!isFocused && !event.defaultPrevented) {
-            navigation.navigate(name);
+            navigation.navigate(route.name);
         }
     };
+
+    const color = isFocused ? "white" : "rgba(255,255,255,0.8)";
 
     return (
         <Pressable
             flex={1}
             onPress={onPress}
             _pressed={{ opacity: 0.7 }}
-            accessibilityRole="tab"
+            accessibilityRole="button"
+            accessibilityState={isFocused ? { selected: true } : {}}
+            accessibilityLabel={config.title}
         >
             <Center
                 py="2"
@@ -41,26 +52,27 @@ function TabBarButton({
             >
                 <Icon
                     as={Ionicons}
-                    name={config.icon}
+                    name={config.icon || "ellipse"}
                     size="xl"
-                    color={isFocused ? "white" : "rgba(255,255,255,0.8)"}
+                    color={color}
                     mb="1"
                 />
                 <Text
                     fontSize="xs"
-                    color={isFocused ? "white" : "rgba(255,255,255,0.8)"}
+                    color={color}
                     textAlign="center"
                     numberOfLines={1}
                 >
-                    {config.label}
+                    {config.title}
                 </Text>
             </Center>
         </Pressable>
     );
 }
 
-export default function TabBar(props: BottomTabBarProps) {
+export default function TabBar({ state, navigation }: BottomTabBarProps) {
     const { primaryColor } = useAppColors();
+
     return (
         <Box
             bg={primaryColor}
@@ -76,9 +88,17 @@ export default function TabBar(props: BottomTabBarProps) {
                 px="3"
                 minH="16"
             >
-                {TAB_ENTRIES.map(([name]) => (
-                    <TabBarButton key={name} name={name} {...props} />
-                ))}
+                {state.routes.map((route, index) => {
+                    const isFocused = state.index === index;
+                    return (
+                        <TabBarButton
+                            key={route.key}
+                            route={route}
+                            isFocused={isFocused}
+                            navigation={navigation}
+                        />
+                    );
+                })}
             </HStack>
         </Box>
     );

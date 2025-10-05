@@ -24,6 +24,7 @@ export default function StatsCard({ title, icon, stats }: StatsCardProps) {
                 base: "100%",
                 lg: "600px",
             }}
+            maxWidth="100%"
         >
             <VStack space={4}>
                 <HStack alignItems="center" space={2}>

@@ -1,5 +1,5 @@
 import { NavigatorScreenParams } from "@react-navigation/native";
-import { TAB_CONFIG } from "../navigation/config";
+import { TAB_CONFIG } from "../configs/navigation";
 
 export type CustomerStackParamList = {
     CustomersList: undefined;
@@ -15,14 +15,16 @@ export type RootDrawerParamList = {
         ? NavigatorScreenParams<CustomerStackParamList>
         : undefined;
 } & {
-    Sabores: undefined;
-    Funcionarios: undefined;
+    FlavorList: undefined;
+    Employees: undefined;
     Order: { orderId: string }; 
 };
 
 export type RootStackParamList = {
     MainTabs: NavigatorScreenParams<MobileTabParamList>;
     Menu: { onLogout: () => void };
+    FlavorList: undefined;
+    Employees: undefined;
     Customer: { customerId: string };
     Order: { orderId: string };
 };

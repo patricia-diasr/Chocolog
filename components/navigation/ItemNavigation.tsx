@@ -2,40 +2,26 @@ import React from "react";
 import { Center, HStack, Icon, Pressable, Text, VStack } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
 import { useAppColors } from "../../hooks/useAppColors";
-import { RootDrawerParamList } from "../../types/navigation";
-import { NavigationProp } from "@react-navigation/native";
 
 interface Props {
     name: string;
     subtitle: string;
     icon: keyof typeof Ionicons.glyphMap;
-    route?: keyof RootDrawerParamList;
-    onPress?: () => void;
-    navigation?: NavigationProp<RootDrawerParamList>;
+    onPress: () => void; 
 }
 
 export default function ItemNavigation({
     name,
     subtitle,
     icon,
-    route,
     onPress,
-    navigation,
 }: Props) {
     const { secondaryColor, whiteColor, darkGreyColor, borderColor } =
         useAppColors();
 
-    const handlePress = () => {
-        if (onPress) {
-            onPress();
-        } else if (route && navigation) {
-            navigation.navigate(route);
-        }
-    };
-
     return (
         <Pressable
-            onPress={handlePress}
+            onPress={onPress}
             bg={whiteColor}
             borderRadius="xl"
             p={3}

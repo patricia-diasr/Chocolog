@@ -23,9 +23,14 @@ export default function DrawerContent(props: Props) {
                 {MENU_ITEMS.map((item) => (
                     <ItemNavigation
                         key={item.name}
-                        {...item}
-                        route={item.route as keyof RootDrawerParamList}
-                        navigation={props.navigation}
+                        name={item.name}
+                        subtitle={item.subtitle}
+                        icon={item.icon}
+                        onPress={() =>
+                            props.navigation.navigate(
+                                item.route as keyof RootDrawerParamList,
+                            )
+                        }
                     />
                 ))}
                 <ItemNavigation

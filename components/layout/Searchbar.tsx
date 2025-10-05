@@ -44,6 +44,7 @@ export default function SearchInput({
                 base: "100%",
                 lg: "600px",
             }}
+            maxWidth="100%"
             _hover={{
                 borderColor: primaryColor,
                 backgroundColor: borderColor,
