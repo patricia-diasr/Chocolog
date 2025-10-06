@@ -122,6 +122,7 @@ export default function OrderFormModal({
         const cleanedText = text
             .replace(/[^0-9.]/g, "")
             .replace(/(\..*)\./g, "$1");
+            
         setDiscountText(cleanedText);
         setFormData((prevData) => ({
             ...prevData,
