@@ -23,10 +23,7 @@ interface Props {
     isLoading: boolean;
 }
 
-export default function LoginForm({
-    onLoginSubmit,
-    isLoading,
-}: Props) {
+export default function LoginForm({ onLoginSubmit, isLoading }: Props) {
     const toast = useToast();
 
     const {
@@ -119,7 +116,7 @@ export default function LoginForm({
                 <FormControl isRequired isInvalid={isPasswordInvalid}>
                     <FormControl.Label>
                         <HStack alignItems="center" space={2}>
-                            <Icon as={Ionicons} name="key" size="sm" />
+                            <Icon as={Ionicons} name="lock-closed" size="sm" />
                             <Text fontWeight="medium">Senha </Text>
                         </HStack>
                     </FormControl.Label>

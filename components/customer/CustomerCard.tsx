@@ -7,7 +7,7 @@ import LabelBadge from "../layout/LabelBadge";
 import { useAppColors } from "../../hooks/useAppColors";
 import { maskPhone } from "../../utils/formatters";
 
-export default function ({ name, phone, isReseller }: Customer) {
+export default function CustomerCard ({ name, phone, isReseller }: Customer) {
     const { borderColor, whiteColor, secondaryColor, darkGreyColor } =
         useAppColors();
 

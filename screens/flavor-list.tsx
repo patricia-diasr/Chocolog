@@ -140,12 +140,6 @@ export default function FlavorListScreen() {
 
     const confirmDelete = () => {
         if (!selectedFlavor) return;
-        setFlavors((prev) => prev.filter((f) => f.id !== selectedFlavor.id));
-        toast.show({
-            title: "Sucesso",
-            description: "Sabor excluído.",
-            status: "success",
-        });
         closeModal();
     };
 

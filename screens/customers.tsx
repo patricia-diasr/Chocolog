@@ -200,7 +200,7 @@ export default function CustomersScreen() {
                                             </Text>
                                             <Text
                                                 fontSize="sm"
-                                                color="gray.400"
+                                                color={mediumGreyColor}
                                                 textAlign="center"
                                             >
                                                 Adicione clientes através da

@@ -4,7 +4,7 @@ import ScheduleScreen from "../screens/schedule";
 import CustomersScreen from "../screens/customers";
 import StockScreen from "../screens/stock";
 import { PrintsScreen } from "../screens/prints";
-import { EmployeesScreen } from "../screens/employees";
+import EmployeesScreen from "../screens/employees";
 import FlavorListScreen from "../screens/flavor-list";
 import OrderScreen from "../screens/order";
 import CustomerScreen from "../screens/customer";
