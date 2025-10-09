@@ -24,6 +24,11 @@ export const formatOrderDetailTitle = (detail: OrderDetail): string => {
     return detail.flavor2 ? `${baseTitle} / ${detail.flavor2}` : baseTitle;
 };
 
+export const formatOrderDetailTitleWithNotes = (detail: OrderDetail): string => {
+    const title = formatOrderDetailTitle(detail);
+    return detail.notes ? `${title}\n(${detail.notes})` : title;
+};
+
 export const maskPhone = (value: string) => {
     value = value.replace(/\D/g, "");
     value = value.slice(0, 11);

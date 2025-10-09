@@ -10,7 +10,7 @@ import { Animated } from "react-native";
 interface Props {
     employee: Employee;
     onEdit?: (employee: Employee) => void;
-    onDelete?: (employee: Employee) => void;
+    onDelete?: (id: string) => void;
 }
 
 export default function EmployeeCard({

@@ -136,7 +136,7 @@ export default function InfoList({
                                 <VStack space={1}>
                                     <HStack
                                         justifyContent="space-between"
-                                        alignItems="center"
+                                        alignItems="flex-start"
                                     >
                                         <Text
                                             fontWeight="bold"
@@ -155,7 +155,7 @@ export default function InfoList({
                                     </HStack>
                                     <HStack
                                         justifyContent="space-between"
-                                        alignItems="center"
+                                        alignItems="flex-end"
                                     >
                                         <Text fontSize="md" color={darkGreyColor}>
                                             {item.info}

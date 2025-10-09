@@ -69,7 +69,7 @@ export default function FlavorCard({ flavor, onEdit, onDelete }: Props) {
                                 fontWeight="bolder"
                                 lineHeight="lg"
                             >
-                                {formatPrice(price.salePrice)}
+                                {formatPrice(price.sale_price)}
                             </Text>
                             <Text
                                 fontSize="xs"
@@ -77,7 +77,7 @@ export default function FlavorCard({ flavor, onEdit, onDelete }: Props) {
                                 fontWeight="medium"
                                 lineHeight="md"
                             >
-                                Custo {formatPrice(price.costPrice)}
+                                Custo {formatPrice(price.cost_price)}
                             </Text>
                         </VStack>
                     ))}
@@ -98,7 +98,7 @@ export default function FlavorCard({ flavor, onEdit, onDelete }: Props) {
                                 fontWeight="bolder"
                                 lineHeight="lg"
                             >
-                                {formatPrice(price.salePrice)}
+                                {formatPrice(price.sale_price)}
                             </Text>
                             <Text
                                 fontSize="xs"
@@ -106,7 +106,7 @@ export default function FlavorCard({ flavor, onEdit, onDelete }: Props) {
                                 fontWeight="medium"
                                 lineHeight="md"
                             >
-                                Custo {formatPrice(price.costPrice)}
+                                Custo {formatPrice(price.cost_price)}
                             </Text>
                         </VStack>
                     ))}

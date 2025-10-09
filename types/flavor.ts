@@ -1,7 +1,7 @@
 export interface Price {
     size: string;
-    salePrice: number; 
-    costPrice: number; 
+    sale_price: number;
+    cost_price: number;
 }
 
 export interface Flavor {
@@ -12,8 +12,8 @@ export interface Flavor {
 
 interface PriceInput {
     size: string;
-    salePrice: string; 
-    costPrice: string; 
+    sale_price: string;
+    cost_price: string;
 }
 
 export interface InputData {

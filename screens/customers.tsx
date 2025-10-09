@@ -28,31 +28,31 @@ const customersMock: Customer[] = [
         id: "1",
         name: "Maria Silva",
         phone: "11999999999",
-        isReseller: true,
+        is_reseller: true,
     },
     {
         id: "2",
         name: "João Santos",
         phone: "11888888888",
-        isReseller: false,
+        is_reseller: false,
     },
     {
         id: "3",
         name: "Ana Costa",
         phone: "11777777777",
-        isReseller: false,
+        is_reseller: false,
     },
     {
         id: "4",
         name: "Pedro Oliveira",
         phone: "11666666666",
-        isReseller: false,
+        is_reseller: false,
     },
     {
         id: "5",
         name: "Lucia Ferreira",
         phone: "11555555555",
-        isReseller: true,
+        is_reseller: true,
     },
 ];
 
@@ -61,7 +61,7 @@ const newCustomerTemplate: Customer = {
     name: "",
     phone: "",
     notes: "",
-    isReseller: false,
+    is_reseller: false,
 };
 
 export default function CustomersScreen() {
@@ -89,7 +89,7 @@ export default function CustomersScreen() {
     const customerStats = useMemo(() => {
         const totalCustomers = customers.length;
         const resellerCount = customers.filter(
-            (customer) => customer.isReseller,
+            (customer) => customer.is_reseller,
         ).length;
         const regularCount = totalCustomers - resellerCount;
 
@@ -125,7 +125,7 @@ export default function CustomersScreen() {
         }
 
         if (filterBy === "reseller") {
-            filtered = filtered.filter((customer) => customer.isReseller);
+            filtered = filtered.filter((customer) => customer.is_reseller);
         }
 
         return filtered;
@@ -186,7 +186,7 @@ export default function CustomersScreen() {
                                     <VStack alignItems="center" space={4}>
                                         <Icon
                                             as={Ionicons}
-                                            name="cube"
+                                            name="pe"
                                             size={20}
                                             color={mediumGreyColor}
                                         />
@@ -291,8 +291,8 @@ export default function CustomersScreen() {
                                                     id={customer.id}
                                                     name={customer.name}
                                                     phone={customer.phone}
-                                                    isReseller={
-                                                        customer.isReseller
+                                                    is_reseller={
+                                                        customer.is_reseller
                                                     }
                                                 />
                                             </Box>

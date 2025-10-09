@@ -1,12 +1,5 @@
 import { useState } from "react";
-import {
-    Box,
-    VStack,
-    ScrollView,
-    useToast,
-    Center,
-    Flex,
-} from "native-base";
+import { Box, VStack, ScrollView, useToast, Center, Flex } from "native-base";
 import FlavorCard from "../components/flavor/FlavorCard";
 import FlavorFormModal from "../components/flavor/FlavorFormModal";
 import DeleteAlert from "../components/layout/DeleteAlert";
@@ -19,70 +12,70 @@ const initialFlavors: Flavor[] = [
         id: 1,
         flavor: "Prestígio",
         prices: [
-            { size: "350g", salePrice: 25, costPrice: 20 },
-            { size: "500g", salePrice: 35, costPrice: 28 },
-            { size: "Coração", salePrice: 40, costPrice: 30 },
-            { size: "1Kg", salePrice: 60, costPrice: 45 },
+            { size: "350g", sale_price: 25, cost_price: 20 },
+            { size: "500g", sale_price: 35, cost_price: 28 },
+            { size: "Coração", sale_price: 40, cost_price: 30 },
+            { size: "1Kg", sale_price: 60, cost_price: 45 },
         ],
     },
     {
         id: 2,
         flavor: "Brigadeiro",
         prices: [
-            { size: "350g", salePrice: 25, costPrice: 20 },
-            { size: "500g", salePrice: 35, costPrice: 28 },
-            { size: "Coração", salePrice: 40, costPrice: 30 },
-            { size: "1Kg", salePrice: 60, costPrice: 45 },
+            { size: "350g", sale_price: 25, cost_price: 20 },
+            { size: "500g", sale_price: 35, cost_price: 28 },
+            { size: "Coração", sale_price: 40, cost_price: 30 },
+            { size: "1Kg", sale_price: 60, cost_price: 45 },
         ],
     },
     {
         id: 3,
         flavor: "Ninho",
         prices: [
-            { size: "350g", salePrice: 25, costPrice: 20 },
-            { size: "500g", salePrice: 35, costPrice: 28 },
-            { size: "Coração", salePrice: 40, costPrice: 30 },
-            { size: "1Kg", salePrice: 60, costPrice: 45 },
+            { size: "350g", sale_price: 25, cost_price: 20 },
+            { size: "500g", sale_price: 35, cost_price: 28 },
+            { size: "Coração", sale_price: 40, cost_price: 30 },
+            { size: "1Kg", sale_price: 60, cost_price: 45 },
         ],
     },
     {
         id: 4,
         flavor: "Sensação",
         prices: [
-            { size: "350g", salePrice: 25, costPrice: 20 },
-            { size: "500g", salePrice: 35, costPrice: 28 },
-            { size: "Coração", salePrice: 40, costPrice: 30 },
-            { size: "1Kg", salePrice: 60, costPrice: 45 },
+            { size: "350g", sale_price: 25, cost_price: 20 },
+            { size: "500g", sale_price: 35, cost_price: 28 },
+            { size: "Coração", sale_price: 40, cost_price: 30 },
+            { size: "1Kg", sale_price: 60, cost_price: 45 },
         ],
     },
     {
         id: 5,
         flavor: "Maracujá",
         prices: [
-            { size: "350g", salePrice: 25, costPrice: 20 },
-            { size: "500g", salePrice: 35, costPrice: 28 },
-            { size: "Coração", salePrice: 40, costPrice: 30 },
-            { size: "1Kg", salePrice: 60, costPrice: 45 },
+            { size: "350g", sale_price: 25, cost_price: 20 },
+            { size: "500g", sale_price: 35, cost_price: 28 },
+            { size: "Coração", sale_price: 40, cost_price: 30 },
+            { size: "1Kg", sale_price: 60, cost_price: 45 },
         ],
     },
     {
         id: 6,
         flavor: "Limão",
         prices: [
-            { size: "350g", salePrice: 25, costPrice: 20 },
-            { size: "500g", salePrice: 35, costPrice: 28 },
-            { size: "Coração", salePrice: 40, costPrice: 30 },
-            { size: "1Kg", salePrice: 60, costPrice: 45 },
+            { size: "350g", sale_price: 25, cost_price: 20 },
+            { size: "500g", sale_price: 35, cost_price: 28 },
+            { size: "Coração", sale_price: 40, cost_price: 30 },
+            { size: "1Kg", sale_price: 60, cost_price: 45 },
         ],
     },
     {
         id: 7,
         flavor: "Doce de Leite",
         prices: [
-            { size: "350g", salePrice: 25, costPrice: 20 },
-            { size: "500g", salePrice: 35, costPrice: 28 },
-            { size: "Coração", salePrice: 40, costPrice: 30 },
-            { size: "1Kg", salePrice: 60, costPrice: 45 },
+            { size: "350g", sale_price: 25, cost_price: 20 },
+            { size: "500g", sale_price: 35, cost_price: 28 },
+            { size: "Coração", sale_price: 40, cost_price: 30 },
+            { size: "1Kg", sale_price: 60, cost_price: 45 },
         ],
     },
 ];
@@ -90,10 +83,10 @@ const initialFlavors: Flavor[] = [
 const initialFormData: FlavorFormData = {
     flavor: "",
     prices: [
-        { size: "350g", costPrice: 0, salePrice: 0 },
-        { size: "500g", costPrice: 0, salePrice: 0 },
-        { size: "Coração", costPrice: 0, salePrice: 0 },
-        { size: "1Kg", costPrice: 0, salePrice: 0 },
+        { size: "350g", cost_price: 0, sale_price: 0 },
+        { size: "500g", cost_price: 0, sale_price: 0 },
+        { size: "Coração", cost_price: 0, sale_price: 0 },
+        { size: "1Kg", cost_price: 0, sale_price: 0 },
     ],
 };
 
@@ -107,8 +100,7 @@ export default function FlavorListScreen() {
 
     const toast = useToast();
 
-    const { backgroundColor } =
-        useAppColors();
+    const { backgroundColor } = useAppColors();
 
     const openAddModal = () => {
         setSelectedFlavor(null);

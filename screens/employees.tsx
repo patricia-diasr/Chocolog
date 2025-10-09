@@ -128,7 +128,7 @@ export default function EmployeesScreen() {
             },
             {
                 value: adminCount,
-                label: "Administradores",
+                label: "Admin",
             },
             {
                 value: regularCount,

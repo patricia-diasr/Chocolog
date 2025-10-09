@@ -3,5 +3,5 @@ export type Customer = {
     name: string;
     phone: string;
     notes?: string;
-    isReseller: boolean;
+    is_reseller: boolean;
 };

@@ -203,9 +203,9 @@ export default function CustomerFormModal({
                             </HStack>
                             <Switch
                                 size="md"
-                                isChecked={formData.isReseller}
+                                isChecked={formData.is_reseller}
                                 onToggle={(value) =>
-                                    handleInputChange("isReseller", value)
+                                    handleInputChange("is_reseller", value)
                                 }
                                 colorScheme="primary"
                             />

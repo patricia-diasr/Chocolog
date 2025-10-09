@@ -40,7 +40,7 @@ export default function CustomerInfoCard({ customer }: Props) {
                         >
                             {customer.name}
                         </Text>
-                        {customer.isReseller && (
+                        {customer.is_reseller && (
                             <LabelBadge
                                 color="green"
                                 icon="business"

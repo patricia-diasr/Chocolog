@@ -7,7 +7,7 @@ import LabelBadge from "../layout/LabelBadge";
 import { useAppColors } from "../../hooks/useAppColors";
 import { maskPhone } from "../../utils/formatters";
 
-export default function CustomerCard ({ name, phone, isReseller }: Customer) {
+export default function CustomerCard({ name, phone, is_reseller }: Customer) {
     const { borderColor, whiteColor, secondaryColor, darkGreyColor } =
         useAppColors();
 
@@ -41,7 +41,7 @@ export default function CustomerCard ({ name, phone, isReseller }: Customer) {
                             {name}
                         </Text>
                     </HStack>
-                    {isReseller && (
+                    {is_reseller && (
                         <LabelBadge
                             color="green"
                             icon="business"
@@ -63,4 +63,4 @@ export default function CustomerCard ({ name, phone, isReseller }: Customer) {
             </VStack>
         </Pressable>
     );
-};
+}

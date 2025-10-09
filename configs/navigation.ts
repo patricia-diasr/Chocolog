@@ -3,12 +3,13 @@ import { Ionicons } from "@expo/vector-icons";
 import ScheduleScreen from "../screens/schedule";
 import CustomersScreen from "../screens/customers";
 import StockScreen from "../screens/stock";
-import { PrintsScreen } from "../screens/prints";
+import PrintBatchesScreen from "../screens/print-batches";
 import EmployeesScreen from "../screens/employees";
 import FlavorListScreen from "../screens/flavor-list";
 import OrderScreen from "../screens/order";
 import CustomerScreen from "../screens/customer";
 import MenuScreen from "../screens/menu";
+import PrintBatchScreen from "../screens/print-batch";
 
 type IconName = keyof typeof Ionicons.glyphMap;
 
@@ -47,8 +48,8 @@ export const SCREEN_CONFIG: Record<string, ScreenConfig> = {
         isMenuItem: true,
     },
     Prints: {
-        component: PrintsScreen,
-        title: "Imprimir",
+        component: PrintBatchesScreen,
+        title: "Impressões",
         icon: "print",
         subtitle: "Gerencie a impressão de pedidos",
         isTab: true,
@@ -75,6 +76,10 @@ export const SCREEN_CONFIG: Record<string, ScreenConfig> = {
     Customer: {
         component: CustomerScreen,
         title: "Cliente",
+    },
+    PrintBatch: {
+        component: PrintBatchScreen,
+        title: "Impressão",
     },
     Menu: {
         component: MenuScreen,

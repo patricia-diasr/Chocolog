@@ -194,7 +194,11 @@ export default function EmployeeFormModal({
                                 onChangeText={(text) =>
                                     handleInputChange("password", text)
                                 }
-                                placeholder="Deixe em branco para não alterar"
+                                placeholder={
+                                    formData.id
+                                        ? "Deixe em branco para não alterar"
+                                        : "Senha do usuario"
+                                }
                                 bg={backgroundColor}
                                 size="lg"
                                 variant="filled"

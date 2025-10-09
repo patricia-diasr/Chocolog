@@ -22,7 +22,10 @@ import MonthlyCalendar from "../components/schedule/MonthlyCalendar";
 import { StatItem } from "../types/stats";
 import { Order } from "../types/order";
 import { useAppColors } from "../hooks/useAppColors";
-import { formatDate, formatOrderDetailTitle } from "../utils/formatters";
+import {
+    formatDate,
+    formatOrderDetailTitleWithNotes,
+} from "../utils/formatters";
 import { getStatusDetails } from "../utils/statusConfig";
 
 const ordersMock: Order[] = [
@@ -68,7 +71,7 @@ const ordersMock: Order[] = [
             id: "1",
             name: "Maria Silva",
             phone: "11999999999",
-            isReseller: true,
+            is_reseller: true,
         },
     },
     {
@@ -103,7 +106,7 @@ const ordersMock: Order[] = [
             id: "2",
             name: "João Santos",
             phone: "11888888888",
-            isReseller: false,
+            is_reseller: false,
         },
     },
     {
@@ -136,7 +139,7 @@ const ordersMock: Order[] = [
             id: "3",
             name: "Ana Costa",
             phone: "11777777777",
-            isReseller: true,
+            is_reseller: true,
         },
     },
     {
@@ -169,7 +172,7 @@ const ordersMock: Order[] = [
             id: "4",
             name: "Carlos Oliveira",
             phone: "11666666666",
-            isReseller: false,
+            is_reseller: false,
         },
     },
 ];
@@ -239,7 +242,9 @@ export default function ScheduleScreen() {
                 id: order.id,
                 title: order.customer?.name,
                 info: order.details
-                    .map((orderDetail) => formatOrderDetailTitle(orderDetail))
+                    .map((orderDetail) =>
+                        formatOrderDetailTitleWithNotes(orderDetail),
+                    )
                     .join("\n"),
                 badgeColor: status.colorScheme,
                 badgeIcon: status.icon,
@@ -338,7 +343,7 @@ export default function ScheduleScreen() {
                                 {!isEmptyInitial && (
                                     <StatsCard
                                         title="Resumo do Dia"
-                                        icon="cube"
+                                        icon="calendar"
                                         stats={ordersStats.stats}
                                     />
                                 )}

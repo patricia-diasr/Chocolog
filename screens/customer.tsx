@@ -20,7 +20,7 @@ const customerDataMock: Customer = {
     name: "Maria Silva",
     phone: "11999999999",
     notes: "Observação adicional sobre o cliente. Pode conter informações relevantes para o atendimento.",
-    isReseller: true,
+    is_reseller: true,
 };
 
 const ordersDataMock: Order[] = [

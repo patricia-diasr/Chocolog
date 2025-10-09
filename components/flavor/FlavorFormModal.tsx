@@ -63,15 +63,15 @@ export default function FlavorFormModal({
                 );
                 return {
                     size: size,
-                    salePrice: existingPrice?.salePrice || 0,
-                    costPrice: existingPrice?.costPrice || 0,
+                    sale_price: existingPrice?.sale_price || 0,
+                    cost_price: existingPrice?.cost_price || 0,
                 };
             });
 
             const initialInputPrices = initialPrices.map((p) => ({
                 size: p.size,
-                salePrice: p.salePrice > 0 ? p.salePrice.toString() : "",
-                costPrice: p.costPrice > 0 ? p.costPrice.toString() : "",
+                sale_price: p.sale_price > 0 ? p.sale_price.toString() : "",
+                cost_price: p.cost_price > 0 ? p.cost_price.toString() : "",
             }));
 
             setFormData({ flavor: formData.flavor, prices: initialPrices });
@@ -92,7 +92,7 @@ export default function FlavorFormModal({
 
     const handlePriceChange = (
         size: string,
-        priceType: "salePrice" | "costPrice",
+        priceType: "sale_price" | "cost_price",
         text: string,
     ) => {
         const cleanedText = text
@@ -131,7 +131,7 @@ export default function FlavorFormModal({
 
         const isFlavorValid = formData.flavor.trim() !== "";
         const areAllPricesValid = formData.prices.every(
-            (p) => p.salePrice > 0 && p.costPrice > 0,
+            (p) => p.sale_price > 0 && p.cost_price > 0,
         );
 
         if (!isFlavorValid || !areAllPricesValid) {
@@ -244,19 +244,19 @@ export default function FlavorFormModal({
                                         const isInvalid =
                                             hasAttemptedSave &&
                                             (!priceItem ||
-                                                priceItem.salePrice <= 0);
+                                                priceItem.sale_price <= 0);
 
                                         return (
                                             <PriceInputRow
                                                 key={`${size}-sale`}
                                                 size={size}
                                                 value={
-                                                    inputItem?.salePrice || ""
+                                                    inputItem?.sale_price || ""
                                                 }
                                                 onChange={(text) =>
                                                     handlePriceChange(
                                                         size,
-                                                        "salePrice",
+                                                        "sale_price",
                                                         text,
                                                     )
                                                 }
@@ -299,19 +299,19 @@ export default function FlavorFormModal({
                                         const isInvalid =
                                             hasAttemptedSave &&
                                             (!priceItem ||
-                                                priceItem.costPrice <= 0);
+                                                priceItem.cost_price <= 0);
 
                                         return (
                                             <PriceInputRow
                                                 key={`${size}-cost`}
                                                 size={size}
                                                 value={
-                                                    inputItem?.costPrice || ""
+                                                    inputItem?.cost_price || ""
                                                 }
                                                 onChange={(text) =>
                                                     handlePriceChange(
                                                         size,
-                                                        "costPrice",
+                                                        "cost_price",
                                                         text,
                                                     )
                                                 }
