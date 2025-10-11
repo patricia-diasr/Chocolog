@@ -186,7 +186,7 @@ export default function CustomersScreen() {
                                     <VStack alignItems="center" space={4}>
                                         <Icon
                                             as={Ionicons}
-                                            name="pe"
+                                            name="people"
                                             size={20}
                                             color={mediumGreyColor}
                                         />

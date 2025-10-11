@@ -8,6 +8,7 @@ export type ItemPrintBatch = {
     due_date: string;
     order_detail: OrderDetail;
     customer: Customer;
+    is_printed?: boolean;
 };
 
 export type PrintBatch = {

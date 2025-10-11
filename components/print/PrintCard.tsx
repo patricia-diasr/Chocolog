@@ -1,9 +1,9 @@
 import React from "react";
 import { useNavigation } from "@react-navigation/native";
 import { Text, VStack, HStack, Pressable } from "native-base";
+import InfoRow from "../layout/InfoRow";
 import { useAppColors } from "../../hooks/useAppColors";
 import { PrintBatch } from "../../types/prints";
-import InfoRow from "../layout/InfoRow";
 import { formatDate } from "../../utils/formatters";
 
 export default function PrintCard({

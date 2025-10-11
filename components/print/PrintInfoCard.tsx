@@ -1,8 +1,8 @@
 import { VStack, HStack, Box, Text, Icon, Button } from "native-base";
+import InfoRow from "../layout/InfoRow";
 import { Ionicons } from "@expo/vector-icons";
 import { formatDate } from "../../utils/formatters";
 import { useAppColors } from "../../hooks/useAppColors";
-import InfoRow from "../layout/InfoRow";
 
 interface Props {
     id: string;

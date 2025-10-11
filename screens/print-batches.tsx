@@ -1,10 +1,11 @@
-import { ScrollView, Flex, Box, VStack, Icon, Text, Center } from "native-base";
-import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
+import { ScrollView, Flex, Box, VStack, Icon, Text, Center } from "native-base";
+import { useNavigation } from "@react-navigation/native";
+import { Ionicons } from "@expo/vector-icons";
 import FabButton from "../components/layout/FabButton";
-import { useAppColors } from "../hooks/useAppColors";
-import { PrintBatch } from "../types/prints";
 import PrintCard from "../components/print/PrintCard";
+import { PrintBatch } from "../types/prints";
+import { useAppColors } from "../hooks/useAppColors";
 
 const printBatchesMock: PrintBatch[] = [
     {
@@ -124,11 +125,15 @@ const printBatchesMock: PrintBatch[] = [
 
 export default function PrintBatchesScreen() {
     const { backgroundColor, mediumGreyColor } = useAppColors();
+    const navigation = useNavigation();
+
     const [printBatches, setPrintBatches] =
         useState<PrintBatch[]>(printBatchesMock);
     const isEmptyInitial = printBatches.length === 0;
 
-    const handleAdd = () => {};
+    const handleAdd = () => {
+        navigation.navigate("NewPrintBatch" as never);
+    };
 
     return (
         <>

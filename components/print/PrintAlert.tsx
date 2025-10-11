@@ -6,16 +6,14 @@ interface Props {
     isOpen: boolean;
     onClose: () => void;
     onConfirm: () => void;
-    prefixMessage: string;
-    itemName?: string;
+    selectedCount: number;
 }
 
-export default function DeleteAlert({
+export default function PrintAlert({
     isOpen,
     onClose,
     onConfirm,
-    prefixMessage,
-    itemName,
+    selectedCount,
 }: Props) {
     const cancelRef = useRef(null);
     const {
@@ -27,6 +25,16 @@ export default function DeleteAlert({
         tertiaryColor,
         borderColor,
     } = useAppColors();
+
+    const message =
+        selectedCount === 1
+            ? "Deseja imprimir o"
+            : "Deseja imprimir os";
+
+    const itemName =
+        selectedCount === 1
+            ? `${selectedCount} pedido selecionado`
+            : `${selectedCount} pedidos selecionados`;
 
     return (
         <AlertDialog
@@ -77,7 +85,7 @@ export default function DeleteAlert({
                             textAlign="center"
                             lineHeight="md"
                         >
-                            {prefixMessage}{" "}
+                            {message}{" "}
                             <Text fontWeight="bold" color={secondaryColor}>
                                 {itemName}
                             </Text>
@@ -89,7 +97,8 @@ export default function DeleteAlert({
                             color={mediumGreyColor}
                             textAlign="center"
                         >
-                            Esta ação não pode ser desfeita.
+                            Um arquivo PDF com os pedidos será gerado e o
+                            download iniciará em seguida.
                         </Text>
                     </VStack>
                 </AlertDialog.Body>
@@ -126,7 +135,7 @@ export default function DeleteAlert({
                                 fontWeight: "medium",
                             }}
                         >
-                            Excluir
+                            Imprimir
                         </Button>
                     </Button.Group>
                 </AlertDialog.Footer>

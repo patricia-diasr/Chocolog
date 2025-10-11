@@ -10,6 +10,7 @@ import OrderScreen from "../screens/order";
 import CustomerScreen from "../screens/customer";
 import MenuScreen from "../screens/menu";
 import PrintBatchScreen from "../screens/print-batch";
+import NewPrintBatchScreen from "../screens/new-print-batch";
 
 type IconName = keyof typeof Ionicons.glyphMap;
 
@@ -80,6 +81,10 @@ export const SCREEN_CONFIG: Record<string, ScreenConfig> = {
     PrintBatch: {
         component: PrintBatchScreen,
         title: "Impressão",
+    },
+    NewPrintBatch: {
+        component: NewPrintBatchScreen,
+        title: "Imprimir Pedidos",
     },
     Menu: {
         component: MenuScreen,
