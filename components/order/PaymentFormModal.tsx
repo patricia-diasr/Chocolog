@@ -8,8 +8,6 @@ import {
     HStack,
     Text,
     Icon,
-    Select,
-    CheckIcon,
 } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
 import { useAppColors } from "../../hooks/useAppColors";
@@ -17,6 +15,7 @@ import { useCustomToast } from "../../contexts/ToastProvider";
 import { Payment } from "../../types/order";
 import { formatDate } from "../../utils/formatters";
 import { PAYMENT_METHODS } from "../../configs/order";
+import Select from "../layout/Select";
 
 interface Props {
     title: string;
@@ -227,38 +226,15 @@ export default function PaymentFormModal({
                                 </HStack>
                             </FormControl.Label>
                             <Select
+                                modalTitle="Selecione o Método"
+                                placeholder="Selecione um método"
+                                data={PAYMENT_METHODS}
                                 selectedValue={formData.method}
                                 onValueChange={(value) =>
                                     handleInputChange("method", value)
                                 }
-                                placeholder="Selecione um método"
-                                bg={backgroundColor}
-                                variant="filled"
-                                size="lg"
-                                borderColor={
-                                    isMethodInvalid
-                                        ? invalidColor
-                                        : backgroundColor
-                                }
-                                _focus={{
-                                    borderColor: isMethodInvalid
-                                        ? invalidColor
-                                        : primaryColor,
-                                    bg: backgroundColor,
-                                }}
-                                _selectedItem={{
-                                    bg: "primary.100",
-                                    endIcon: <CheckIcon size="5" />,
-                                }}
-                            >
-                                {PAYMENT_METHODS.map((method) => (
-                                    <Select.Item
-                                        key={method}
-                                        label={method}
-                                        value={method}
-                                    />
-                                ))}
-                            </Select>
+                                isInvalid={isMethodInvalid}
+                            />
                         </FormControl>
                     </VStack>
                 </Modal.Body>

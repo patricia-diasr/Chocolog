@@ -2,9 +2,7 @@ import { useEffect, useState } from "react";
 import {
     Box,
     Button,
-    CheckIcon,
     FormControl,
-    Select,
     VStack,
     Text,
     Input,
@@ -18,6 +16,7 @@ import { StockRecord, RecordItem } from "../../types/stock";
 import { useAppColors } from "../../hooks/useAppColors";
 import { flavors, sizes } from "../../configs/order";
 import { useCustomToast } from "../../contexts/ToastProvider";
+import Select from "../layout/Select";
 
 interface Props {
     isOpen: boolean;
@@ -40,6 +39,7 @@ export default function RecordFormModal({
         secondaryColor,
         tertiaryColor,
         lightGreyColor,
+        darkGreyColor,
         invalidColor,
     } = useAppColors();
 
@@ -172,7 +172,7 @@ export default function RecordFormModal({
                                                 color={
                                                     type === "+"
                                                         ? "green.600"
-                                                        : "gray.600"
+                                                        : darkGreyColor
                                                 }
                                                 fontWeight="medium"
                                             >
@@ -216,7 +216,7 @@ export default function RecordFormModal({
                                                 color={
                                                     type === "-"
                                                         ? "red.600"
-                                                        : "gray.600"
+                                                        : darkGreyColor
                                                 }
                                                 fontWeight="medium"
                                             >
@@ -281,41 +281,13 @@ export default function RecordFormModal({
                                 </HStack>
                             </FormControl.Label>
                             <Select
+                                modalTitle="Selecione um Sabor"
+                                placeholder="Escolha o sabor"
+                                data={flavors}
                                 selectedValue={flavor}
                                 onValueChange={setFlavor}
-                                placeholder="Escolha o sabor"
-                                bg={backgroundColor}
-                                borderColor={
-                                    isFlavorInvalid
-                                        ? invalidColor
-                                        : backgroundColor
-                                }
-                                fontSize="md"
-                                py={2}
-                                size="lg"
-                                variant="filled"
-                                _focus={{
-                                    borderColor: isFlavorInvalid
-                                        ? invalidColor
-                                        : primaryColor,
-                                    bg: backgroundColor,
-                                }}
-                                _selectedItem={{
-                                    bg: "primary.100",
-                                    endIcon: <CheckIcon size="5" />,
-                                }}
-                                _input={{
-                                    showSoftInputOnFocus: false,
-                                }}
-                            >
-                                {flavors.map((flavorOption) => (
-                                    <Select.Item
-                                        key={flavorOption}
-                                        label={flavorOption}
-                                        value={flavorOption}
-                                    />
-                                ))}
-                            </Select>
+                                isInvalid={isFlavorInvalid}
+                            />
                         </FormControl>
 
                         <FormControl isRequired isInvalid={isSizeInvalid}>
@@ -330,41 +302,13 @@ export default function RecordFormModal({
                                 </HStack>
                             </FormControl.Label>
                             <Select
+                                modalTitle="Selecione um Tamanho"
+                                placeholder="Escolha o tamanho"
+                                data={sizes}
                                 selectedValue={size}
                                 onValueChange={setSize}
-                                placeholder="Escolha o tamanho"
-                                bg={backgroundColor}
-                                borderColor={
-                                    isSizeInvalid
-                                        ? invalidColor
-                                        : backgroundColor
-                                }
-                                fontSize="md"
-                                py={2}
-                                size="lg"
-                                variant="filled"
-                                _focus={{
-                                    borderColor: isSizeInvalid
-                                        ? invalidColor
-                                        : primaryColor,
-                                    bg: backgroundColor,
-                                }}
-                                _selectedItem={{
-                                    bg: "primary.100",
-                                    endIcon: <CheckIcon size="5" />,
-                                }}
-                                _input={{
-                                    showSoftInputOnFocus: false,
-                                }}
-                            >
-                                {sizes.map((sizeOption) => (
-                                    <Select.Item
-                                        key={sizeOption}
-                                        label={sizeOption}
-                                        value={sizeOption}
-                                    />
-                                ))}
-                            </Select>
+                                isInvalid={isSizeInvalid}
+                            />
                         </FormControl>
                     </VStack>
                 </Modal.Body>

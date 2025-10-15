@@ -109,11 +109,7 @@ export default function OrderScreen() {
             setOrderData(order);
             toast.showToast({
                 title: "Sucesso!",
-                description: `O pedido foi ${
-                    modalState.type === "editOrder"
-                        ? "atualizado"
-                        : "adicionado"
-                }.`,
+                description: "O pedido foi salvo.",
                 status: "success",
             });
             handleCloseModals();

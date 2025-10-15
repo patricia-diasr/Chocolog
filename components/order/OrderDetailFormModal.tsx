@@ -1,9 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
     Button,
-    CheckIcon,
     FormControl,
-    Select,
     VStack,
     Text,
     Input,
@@ -17,6 +15,7 @@ import { useAppColors } from "../../hooks/useAppColors";
 import { useCustomToast } from "../../contexts/ToastProvider";
 import { OrderDetail } from "../../types/order";
 import { flavors, sizes } from "../../configs/order";
+import Select from "../layout/Select";
 
 interface Props {
     title: string;
@@ -108,7 +107,7 @@ export default function OrderDetailFormModal({
             toast.showToast({
                 title: "Ops! Algo está faltando",
                 description: "Por favor, preencha todos os campos obrigatórios",
-                status: "warning"
+                status: "warning",
             });
 
             return;
@@ -158,7 +157,7 @@ export default function OrderDetailFormModal({
                             </FormControl.Label>
                             <Input
                                 keyboardType="numeric"
-                                value={formData.quantity}
+                                value={formData.quantity.toString()}
                                 onChangeText={(text) => {
                                     const onlyNumbers = text.replace(
                                         /[^0-9]/g,
@@ -198,43 +197,15 @@ export default function OrderDetailFormModal({
                                 </HStack>
                             </FormControl.Label>
                             <Select
+                                modalTitle="Selecione um Tamanho"
+                                placeholder="Escolha o tamanho"
+                                data={sizes}
                                 selectedValue={formData.size}
                                 onValueChange={(value) =>
                                     handleInputChange("size", value)
                                 }
-                                placeholder="Escolha o tamanho"
-                                bg={backgroundColor}
-                                borderColor={
-                                    isSizeInvalid
-                                        ? invalidColor
-                                        : backgroundColor
-                                }
-                                fontSize="md"
-                                py={2}
-                                size="lg"
-                                variant="filled"
-                                _focus={{
-                                    borderColor: isSizeInvalid
-                                        ? invalidColor
-                                        : primaryColor,
-                                    bg: backgroundColor,
-                                }}
-                                _selectedItem={{
-                                    bg: "primary.100",
-                                    endIcon: <CheckIcon size="5" />,
-                                }}
-                                _input={{
-                                    showSoftInputOnFocus: false,
-                                }}
-                            >
-                                {sizes.map((sizeOption) => (
-                                    <Select.Item
-                                        key={sizeOption}
-                                        label={sizeOption}
-                                        value={sizeOption}
-                                    />
-                                ))}
-                            </Select>
+                                isInvalid={isSizeInvalid}
+                            />
                         </FormControl>
 
                         <FormControl isRequired isInvalid={isFlavor1Invalid}>
@@ -249,43 +220,15 @@ export default function OrderDetailFormModal({
                                 </HStack>
                             </FormControl.Label>
                             <Select
+                                modalTitle="Selecione um Sabor"
+                                placeholder="Escolha o primeiro sabor"
+                                data={flavors}
                                 selectedValue={formData.flavor1}
                                 onValueChange={(value) =>
                                     handleInputChange("flavor1", value)
                                 }
-                                placeholder="Escolha o primeiro sabor"
-                                bg={backgroundColor}
-                                borderColor={
-                                    isFlavor1Invalid
-                                        ? invalidColor
-                                        : backgroundColor
-                                }
-                                fontSize="md"
-                                py={2}
-                                size="lg"
-                                variant="filled"
-                                _focus={{
-                                    borderColor: isFlavor1Invalid
-                                        ? invalidColor
-                                        : primaryColor,
-                                    bg: backgroundColor,
-                                }}
-                                _selectedItem={{
-                                    bg: "primary.100",
-                                    endIcon: <CheckIcon size="5" />,
-                                }}
-                                _input={{
-                                    showSoftInputOnFocus: false,
-                                }}
-                            >
-                                {flavors.map((flavorOption) => (
-                                    <Select.Item
-                                        key={flavorOption}
-                                        label={flavorOption}
-                                        value={flavorOption}
-                                    />
-                                ))}
-                            </Select>
+                                isInvalid={isFlavor1Invalid}
+                            />
                         </FormControl>
 
                         <FormControl>
@@ -300,37 +243,16 @@ export default function OrderDetailFormModal({
                                 </HStack>
                             </FormControl.Label>
                             <Select
-                                selectedValue={formData.flavor2}
+                                modalTitle="Selecione um Sabor"
+                                placeholder="Escolha o segundo sabor"
+                                data={flavors}
+                                selectedValue={formData.flavor2 || ""}
                                 onValueChange={(value) =>
                                     handleInputChange("flavor2", value)
                                 }
-                                placeholder="Escolha o segundo sabor"
-                                bg={backgroundColor}
-                                borderColor={backgroundColor}
-                                fontSize="md"
-                                py={2}
-                                size="lg"
-                                variant="filled"
-                                _focus={{
-                                    borderColor: primaryColor,
-                                    bg: backgroundColor,
-                                }}
-                                _selectedItem={{
-                                    bg: primaryColor,
-                                    endIcon: <CheckIcon size="5" />,
-                                }}
-                                _input={{
-                                    showSoftInputOnFocus: false,
-                                }}
-                            >
-                                {flavors.map((flavorOption) => (
-                                    <Select.Item
-                                        key={flavorOption}
-                                        label={flavorOption}
-                                        value={flavorOption}
-                                    />
-                                ))}
-                            </Select>
+                                isInvalid={false}
+                            />
+
                         </FormControl>
 
                         <FormControl>

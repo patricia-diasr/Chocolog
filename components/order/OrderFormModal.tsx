@@ -8,8 +8,6 @@ import {
     HStack,
     Text,
     Icon,
-    Select,
-    CheckIcon,
     TextArea,
 } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
@@ -17,6 +15,7 @@ import { useAppColors } from "../../hooks/useAppColors";
 import { useCustomToast } from "../../contexts/ToastProvider";
 import { Order, ORDER_STATUS } from "../../types/order";
 import { formatDate } from "../../utils/formatters";
+import Select from "../layout/Select";
 
 interface Props {
     title: string;
@@ -202,32 +201,17 @@ export default function OrderFormModal({
                                 </HStack>
                             </FormControl.Label>
                             <Select
+                                modalTitle="Selecione o Status"
+                                placeholder="Selecione um status"
+                                data={ORDER_STATUS}
+                                itemValue={(item) => item.value}
+                                itemLabel={(item) => item.label}
                                 selectedValue={formData.status}
                                 onValueChange={(value) =>
                                     handleInputChange("status", value)
                                 }
-                                placeholder="Selecione o status"
-                                bg={backgroundColor}
-                                variant="filled"
-                                size="lg"
-                                borderColor={
-                                    isStatusInvalid
-                                        ? invalidColor
-                                        : backgroundColor
-                                }
-                                _selectedItem={{
-                                    bg: primaryColor,
-                                    endIcon: <CheckIcon size="5" />,
-                                }}
-                            >
-                                {ORDER_STATUS.map((status) => (
-                                    <Select.Item
-                                        key={status.value}
-                                        label={status.label}
-                                        value={status.value}
-                                    />
-                                ))}
-                            </Select>
+                                isInvalid={isStatusInvalid}
+                            />
                         </FormControl>
 
                         <FormControl isRequired isInvalid={isDueDateInvalid}>
