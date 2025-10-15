@@ -7,11 +7,11 @@ import {
     HStack,
     Text,
     Icon,
-    useToast,
     Pressable,
 } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
 import { useAppColors } from "../../hooks/useAppColors";
+import { useCustomToast } from "../../contexts/ToastProvider";
 
 export interface LoginCredentials {
     login: string;
@@ -24,7 +24,7 @@ interface Props {
 }
 
 export default function LoginForm({ onLoginSubmit, isLoading }: Props) {
-    const toast = useToast();
+    const toast = useCustomToast();
 
     const {
         primaryColor,
@@ -49,11 +49,10 @@ export default function LoginForm({ onLoginSubmit, isLoading }: Props) {
         setHasAttemptedSubmit(true);
 
         if (!login.trim() || !password.trim()) {
-            toast.show({
+            toast.showToast({
                 title: "Campos obrigatórios",
                 description: "Por favor, preencha o e-mail e a senha.",
                 status: "warning",
-                placement: "top",
             });
             return;
         }

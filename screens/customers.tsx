@@ -22,6 +22,7 @@ import CustomerFormModal from "../components/customer/CustomerFormModal";
 import { useAppColors } from "../hooks/useAppColors";
 import { Customer } from "../types/customer";
 import { StatItem } from "../types/stats";
+import { useCustomToast } from "../contexts/ToastProvider";
 
 const customersMock: Customer[] = [
     {
@@ -67,6 +68,7 @@ const newCustomerTemplate: Customer = {
 export default function CustomersScreen() {
     const { backgroundColor, whiteColor, mediumGreyColor, secondaryColor } =
         useAppColors();
+    const toast = useCustomToast();
 
     const [customers, setCustomers] = useState<Customer[]>(customersMock);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -83,6 +85,11 @@ export default function CustomersScreen() {
     };
 
     const handleSaveNewCustomer = (newCustomer: Customer) => {
+        toast.showToast({
+            title: "Sucesso!",
+            description: "O cliente foi adicionado.",
+            status: "success",
+        });
         setIsModalOpen(false);
     };
 

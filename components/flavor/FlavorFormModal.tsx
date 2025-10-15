@@ -9,10 +9,10 @@ import {
     Text,
     Icon,
     Divider,
-    useToast,
 } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
 import { useAppColors } from "../../hooks/useAppColors";
+import { useCustomToast } from "../../contexts/ToastProvider";
 import { FlavorFormData, InputData } from "../../types/flavor";
 import { PriceInputRow } from "./PriceInputRow";
 
@@ -35,7 +35,7 @@ export default function FlavorFormModal({
     formData,
     setFormData,
 }: FlavorFormModalProps) {
-    const toast = useToast();
+    const toast = useCustomToast();
     const {
         primaryColor,
         secondaryColor,
@@ -135,13 +135,11 @@ export default function FlavorFormModal({
         );
 
         if (!isFlavorValid || !areAllPricesValid) {
-            toast.show({
+            toast.showToast({
                 title: "Ops! Campos obrigatórios",
                 description:
                     "Por favor, preencha o nome do sabor e todos os preços de custo e venda.",
                 status: "warning",
-                duration: 3000,
-                placement: "top",
             });
             return;
         }

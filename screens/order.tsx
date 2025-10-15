@@ -18,6 +18,7 @@ import {
     formatOrderDetailTitle,
     formatPrice,
 } from "../utils/formatters";
+import { useCustomToast } from "../contexts/ToastProvider";
 
 const orderDataMock: Order = {
     id: "1",
@@ -93,6 +94,7 @@ type ModalState = {
 
 export default function OrderScreen() {
     const { backgroundColor } = useAppColors();
+    const toast = useCustomToast();
 
     const [orderData, setOrderData] = useState<Order>(orderDataMock);
     const [modalState, setModalState] = useState<ModalState>({ type: null });
@@ -105,6 +107,15 @@ export default function OrderScreen() {
     const handleSaveOrder = useCallback(
         (order: Order) => {
             setOrderData(order);
+            toast.showToast({
+                title: "Sucesso!",
+                description: `O pedido foi ${
+                    modalState.type === "editOrder"
+                        ? "atualizado"
+                        : "adicionado"
+                }.`,
+                status: "success",
+            });
             handleCloseModals();
         },
         [handleCloseModals],
@@ -112,7 +123,11 @@ export default function OrderScreen() {
 
     const handleSaveOrderDetail = useCallback(
         (detail: OrderDetail) => {
-            console.log("Salvando item:", detail);
+            toast.showToast({
+                title: "Sucesso!",
+                description: "O item foi salvo.",
+                status: "success",
+            });
             handleCloseModals();
         },
         [handleCloseModals],
@@ -120,7 +135,11 @@ export default function OrderScreen() {
 
     const handleSavePayment = useCallback(
         (payment: Payment) => {
-            console.log("Salvando pagamento:", payment);
+            toast.showToast({
+                title: "Sucesso!",
+                description: "O pagamento foi salvo.",
+                status: "success",
+            });
             handleCloseModals();
         },
         [handleCloseModals],
@@ -129,7 +148,13 @@ export default function OrderScreen() {
     const handleConfirmDelete = useCallback(() => {
         if (modalState.type !== "deleteItem" || !modalState.data) return;
         const { id, type } = modalState.data as { id: string; type: string };
-
+        toast.showToast({
+            title: "Sucesso!",
+            description: `O ${
+                type === "orderDetail" ? "item" : "pagamento"
+            } foi excluído.`,
+            status: "success",
+        });
         handleCloseModals();
     }, [modalState, handleCloseModals]);
 

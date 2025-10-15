@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Platform } from "react-native";
 import {
     Modal,
     FormControl,
@@ -9,12 +8,12 @@ import {
     HStack,
     Text,
     Icon,
-    useToast,
     Select,
     CheckIcon,
 } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
 import { useAppColors } from "../../hooks/useAppColors";
+import { useCustomToast } from "../../contexts/ToastProvider";
 import { Payment } from "../../types/order";
 import { formatDate } from "../../utils/formatters";
 import { PAYMENT_METHODS } from "../../configs/order";
@@ -41,7 +40,7 @@ export default function PaymentFormModal({
     onSave,
     paymentData,
 }: Props) {
-    const toast = useToast();
+    const toast = useCustomToast();
     const {
         borderColor,
         backgroundColor,
@@ -114,11 +113,11 @@ export default function PaymentFormModal({
             formData.value > 0 && formData.date && formData.method;
 
         if (!isFormValid) {
-            toast.show({
+            toast.showToast({
                 title: "Ops! Campos obrigatórios",
                 description:
                     "Por favor, preencha todos os campos corretamente.",
-                placement: "top",
+                status: "warning",
             });
             return;
         }

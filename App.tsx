@@ -8,7 +8,13 @@ import * as SplashScreen from "expo-splash-screen";
 import { View } from "react-native";
 import { theme } from "./theme";
 import { Navigator } from "./navigation/index";
-import { Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold } from "@expo-google-fonts/poppins";
+import {
+    Poppins_400Regular,
+    Poppins_500Medium,
+    Poppins_600SemiBold,
+    Poppins_700Bold,
+} from "@expo-google-fonts/poppins";
+import { ToastProvider } from "./contexts/ToastProvider";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -40,7 +46,9 @@ export default function App() {
     return (
         <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
             <NativeBaseProvider theme={theme}>
-                <Navigator />
+                <ToastProvider>
+                    <Navigator />
+                </ToastProvider>
             </NativeBaseProvider>
         </View>
     );

@@ -14,6 +14,7 @@ import { Customer } from "../types/customer";
 import { Charge, Order, OrderDetail } from "../types/order";
 import { getStatusDetails } from "../utils/statusConfig";
 import { formatDate, formatPrice } from "../utils/formatters";
+import { useCustomToast } from "../contexts/ToastProvider";
 
 const customerDataMock: Customer = {
     id: "1",
@@ -109,6 +110,7 @@ type VisibleModal = "editCustomer" | "addOrder" | "addOrderDetail";
 export default function CustomerScreen() {
     const { backgroundColor } = useAppColors();
     const navigation = useNavigation();
+    const toast = useCustomToast();
 
     const [customerData, setCustomerData] =
         useState<Customer>(customerDataMock);
@@ -119,6 +121,13 @@ export default function CustomerScreen() {
 
     const handleUpdateCustomer = useCallback((updatedCustomer: Customer) => {
         setCustomerData(updatedCustomer);
+
+        toast.showToast({
+            title: "Sucesso!",
+            description: "O cliente foi atualizado.",
+            status: "success",
+        });
+
         setVisibleModal(null);
     }, []);
 
@@ -127,6 +136,11 @@ export default function CustomerScreen() {
     }, []);
 
     const handleSaveOrderDetail = useCallback((newOrderDetail: OrderDetail) => {
+        toast.showToast({
+            title: "Sucesso!",
+            description: "O pedido foi criado.",
+            status: "success",
+        });
         setVisibleModal(null);
     }, []);
 

@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Box, VStack, ScrollView, useToast, Center, Flex } from "native-base";
+import { Box, VStack, ScrollView, Center, Flex } from "native-base";
 import FlavorCard from "../components/flavor/FlavorCard";
 import FlavorFormModal from "../components/flavor/FlavorFormModal";
 import DeleteAlert from "../components/layout/DeleteAlert";
 import FabButton from "../components/layout/FabButton";
 import { useAppColors } from "../hooks/useAppColors";
 import type { Flavor, FlavorFormData } from "../types/flavor";
+import { useCustomToast } from "../contexts/ToastProvider";
 
 const initialFlavors: Flavor[] = [
     {
@@ -93,14 +94,13 @@ const initialFormData: FlavorFormData = {
 type ModalState = "closed" | "add" | "edit" | "delete";
 
 export default function FlavorListScreen() {
+    const { backgroundColor } = useAppColors();
+    const toast = useCustomToast();
+
     const [flavors, setFlavors] = useState<Flavor[]>(initialFlavors);
     const [selectedFlavor, setSelectedFlavor] = useState<Flavor | null>(null);
     const [formData, setFormData] = useState<FlavorFormData>(initialFormData);
     const [modalState, setModalState] = useState<ModalState>("closed");
-
-    const toast = useToast();
-
-    const { backgroundColor } = useAppColors();
 
     const openAddModal = () => {
         setSelectedFlavor(null);
@@ -127,11 +127,21 @@ export default function FlavorListScreen() {
     };
 
     const handleSave = () => {
+        toast.showToast({
+            title: "Sucesso!",
+            description: "O sabor foi salvo.",
+            status: "success",
+        });
         closeModal();
     };
 
     const confirmDelete = () => {
         if (!selectedFlavor) return;
+        toast.showToast({
+            title: "Sucesso!",
+            description: "O sabor foi excluído.",
+            status: "success",
+        });
         closeModal();
     };
 

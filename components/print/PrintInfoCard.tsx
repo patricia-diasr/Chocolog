@@ -3,6 +3,7 @@ import InfoRow from "../layout/InfoRow";
 import { Ionicons } from "@expo/vector-icons";
 import { formatDate } from "../../utils/formatters";
 import { useAppColors } from "../../hooks/useAppColors";
+import { useCustomToast } from "../../contexts/ToastProvider";
 
 interface Props {
     id: string;
@@ -17,8 +18,15 @@ export default function PrintInfoCard({
 }: Props) {
     const { whiteColor, blackColor, tertiaryColor, borderColor } =
         useAppColors();
+    const toast = useCustomToast();
 
-    const dowloadPrintBatch = () => {};
+    const dowloadPrintBatch = () => {
+        toast.showToast({
+            title: "Realizando dowload...",
+            description: "O arquivo esta sendo baixado.",
+            status: "info",
+        });
+    };
 
     return (
         <Box

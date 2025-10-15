@@ -8,13 +8,13 @@ import {
     HStack,
     Text,
     Icon,
-    useToast,
     Select,
     CheckIcon,
     TextArea,
 } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
 import { useAppColors } from "../../hooks/useAppColors";
+import { useCustomToast } from "../../contexts/ToastProvider";
 import { Order, ORDER_STATUS } from "../../types/order";
 import { formatDate } from "../../utils/formatters";
 
@@ -52,7 +52,7 @@ export default function OrderFormModal({
     onSave,
     orderData,
 }: Props) {
-    const toast = useToast();
+    const toast = useCustomToast();
     const {
         borderColor,
         backgroundColor,
@@ -122,7 +122,7 @@ export default function OrderFormModal({
         const cleanedText = text
             .replace(/[^0-9.]/g, "")
             .replace(/(\..*)\./g, "$1");
-            
+
         setDiscountText(cleanedText);
         setFormData((prevData) => ({
             ...prevData,
@@ -142,11 +142,11 @@ export default function OrderFormModal({
             (formData.status !== "completed" || formData.pickup_date);
 
         if (!isFormValid) {
-            toast.show({
+            toast.showToast({
                 title: "Ops! Campos obrigatórios",
                 description:
                     "Por favor, preencha todos os campos corretamente.",
-                placement: "top",
+                status: "warning",
             });
             return;
         }
@@ -246,7 +246,10 @@ export default function OrderFormModal({
                                 value={formatDate(formData.due_date)}
                                 placeholder="Selecione uma data"
                                 onChangeText={(text) =>
-                                    handleInputChange("due_date", formatDate(text))
+                                    handleInputChange(
+                                        "due_date",
+                                        formatDate(text),
+                                    )
                                 }
                                 bg={backgroundColor}
                                 variant="filled"
@@ -278,10 +281,16 @@ export default function OrderFormModal({
                                 </FormControl.Label>
 
                                 <Input
-                                    value={formData.pickup_date && formatDate(formData.pickup_date)}
+                                    value={
+                                        formData.pickup_date &&
+                                        formatDate(formData.pickup_date)
+                                    }
                                     placeholder="Selecione uma data"
                                     onChangeText={(text) =>
-                                        handleInputChange("pickup_date", formatDate(text))
+                                        handleInputChange(
+                                            "pickup_date",
+                                            formatDate(text),
+                                        )
                                     }
                                     bg={backgroundColor}
                                     variant="filled"

@@ -7,7 +7,6 @@ import {
     Select,
     VStack,
     Text,
-    useToast,
     Input,
     HStack,
     Pressable,
@@ -18,6 +17,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { StockRecord, RecordItem } from "../../types/stock";
 import { useAppColors } from "../../hooks/useAppColors";
 import { flavors, sizes } from "../../configs/order";
+import { useCustomToast } from "../../contexts/ToastProvider";
 
 interface Props {
     isOpen: boolean;
@@ -26,7 +26,12 @@ interface Props {
     title: string;
 }
 
-export default function RecordFormModal({ isOpen, onClose, onSave, title }: Props) {
+export default function RecordFormModal({
+    isOpen,
+    onClose,
+    onSave,
+    title,
+}: Props) {
     const {
         borderColor,
         backgroundColor,
@@ -43,7 +48,7 @@ export default function RecordFormModal({ isOpen, onClose, onSave, title }: Prop
     const [flavor, setFlavor] = useState("");
     const [size, setSize] = useState("");
     const [hasAttemptedSave, setHasAttemptedSave] = useState(false);
-    const toast = useToast();
+    const toast = useCustomToast();
 
     const isQuantityInvalid =
         hasAttemptedSave && (!quantity || parseInt(quantity) <= 0);
@@ -58,12 +63,10 @@ export default function RecordFormModal({ isOpen, onClose, onSave, title }: Prop
         setHasAttemptedSave(true);
 
         if (!type || isQuantityInvalid || isFlavorInvalid || isSizeInvalid) {
-            toast.show({
+            toast.showToast({
                 title: "Ops! Algo está faltando",
                 description: "Por favor, preencha todos os campos obrigatórios",
                 status: "warning",
-                duration: 3000,
-                placement: "top",
             });
             return;
         }
@@ -82,14 +85,12 @@ export default function RecordFormModal({ isOpen, onClose, onSave, title }: Prop
         setSize("");
         setHasAttemptedSave(false);
 
-        toast.show({
+        toast.showToast({
             title: "Sucesso!",
             description: `Registro de ${
                 type === "+" ? "entrada" : "saída"
             } adicionado`,
-            status: "success",
-            duration: 3000,
-            placement: "top",
+            status: "success"
         });
 
         onSave(newRecord);

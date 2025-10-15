@@ -9,8 +9,6 @@ import {
     Pressable,
     HStack,
     Flex,
-    useToast,
-    Divider,
 } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
 import { useAppColors } from "../hooks/useAppColors";
@@ -20,6 +18,7 @@ import SearchInput from "../components/layout/Searchbar";
 import FabButton from "../components/layout/FabButton";
 import PrintItemCard from "../components/print/PrintItemCard";
 import PrintAlert from "../components/print/PrintAlert";
+import { useCustomToast } from "../contexts/ToastProvider";
 
 const printItemsMock: ItemPrintBatch[] = [
     {
@@ -98,7 +97,7 @@ const printItemsMock: ItemPrintBatch[] = [
 export default function NewPrintBatchScreen() {
     const { backgroundColor, whiteColor, mediumGreyColor, secondaryColor } =
         useAppColors();
-    const toast = useToast();
+    const toast = useCustomToast();
 
     const [printItems, setPrintItems] =
         useState<ItemPrintBatch[]>(printItemsMock);
@@ -135,11 +134,10 @@ export default function NewPrintBatchScreen() {
 
     const handleOpenModal = () => {
         if (selectedIds.length === 0) {
-            toast.show({
+            toast.showToast({
                 title: "Nenhum item selecionado",
                 description:
                     "Por favor, selecione ao menos um item para imprimir.",
-                placement: "top",
                 status: "warning",
             });
         } else {
@@ -148,6 +146,11 @@ export default function NewPrintBatchScreen() {
     };
 
     const handleSaveNewPrintBatch = () => {
+        toast.showToast({
+            title: "Sucesso!",
+            description: "O arquivo gerado esta sendo baixado.",
+            status: "success",
+        });
         setIsModalOpen(false);
     };
 
@@ -316,7 +319,11 @@ export default function NewPrintBatchScreen() {
                                             {selectedIds.length} selecionado(s)
                                         </Text>
 
-                                        <HStack alignItems="center" space={3} mt={3}>
+                                        <HStack
+                                            alignItems="center"
+                                            space={3}
+                                            mt={3}
+                                        >
                                             <Pressable
                                                 onPress={handleClearSelection}
                                             >

@@ -8,12 +8,12 @@ import {
     HStack,
     Text,
     Icon,
-    useToast,
     Switch,
     Pressable,
 } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
 import { useAppColors } from "../../hooks/useAppColors";
+import { useCustomToast } from "../../contexts/ToastProvider";
 import { Employee } from "../../types/employee";
 
 interface Props {
@@ -31,7 +31,7 @@ export default function EmployeeFormModal({
     onSave,
     employeeData,
 }: Props) {
-    const toast = useToast();
+    const toast = useCustomToast();
     const {
         whiteColor,
         borderColor,
@@ -74,13 +74,11 @@ export default function EmployeeFormModal({
             !formData.role.trim() ||
             passwordIsRequired
         ) {
-            toast.show({
+            toast.showToast({
                 title: "Ops! Campos obrigatórios",
                 description:
                     "Por favor, preencha nome, login, função e senha (para novos funcionários).",
                 status: "warning",
-                duration: 3000,
-                placement: "top",
             });
             return;
         }

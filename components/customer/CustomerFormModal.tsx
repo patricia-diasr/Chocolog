@@ -8,12 +8,12 @@ import {
     HStack,
     Text,
     Icon,
-    useToast,
     Switch,
     TextArea,
 } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
 import { useAppColors } from "../../hooks/useAppColors";
+import { useCustomToast } from "../../contexts/ToastProvider";
 import { Customer } from "../../types/customer";
 import { maskPhone, unmaskPhone } from "../../utils/formatters";
 
@@ -32,7 +32,7 @@ export default function CustomerFormModal({
     onSave,
     customerData,
 }: Props) {
-    const toast = useToast();
+    const toast = useCustomToast();
     const {
         whiteColor,
         borderColor,
@@ -71,16 +71,15 @@ export default function CustomerFormModal({
         const unmaskedPhone = unmaskPhone(formData?.phone ?? "");
 
         if (!formData || !formData.name.trim() || unmaskedPhone.length < 10) {
-            toast.show({
+            toast.showToast({
                 title: "Ops! Campos obrigatórios",
                 description:
                     "Por favor, preencha o nome e o telefone do cliente.",
                 status: "warning",
-                duration: 3000,
-                placement: "top",
             });
             return;
         }
+        
         onSave(formData);
     };
 

@@ -6,7 +6,6 @@ import {
     Select,
     VStack,
     Text,
-    useToast,
     Input,
     HStack,
     Icon,
@@ -15,6 +14,7 @@ import {
 } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
 import { useAppColors } from "../../hooks/useAppColors";
+import { useCustomToast } from "../../contexts/ToastProvider";
 import { OrderDetail } from "../../types/order";
 import { flavors, sizes } from "../../configs/order";
 
@@ -46,7 +46,7 @@ export default function OrderDetailFormModal({
     onSave,
     orderDetailData,
 }: Props) {
-    const toast = useToast();
+    const toast = useCustomToast();
     const {
         backgroundColor,
         whiteColor,
@@ -105,12 +105,10 @@ export default function OrderDetailFormModal({
             formData.quantity > 0 && formData.flavor1 && formData.size;
 
         if (!isFormValid) {
-            toast.show({
+            toast.showToast({
                 title: "Ops! Algo está faltando",
                 description: "Por favor, preencha todos os campos obrigatórios",
-                status: "warning",
-                duration: 3000,
-                placement: "top",
+                status: "warning"
             });
 
             return;

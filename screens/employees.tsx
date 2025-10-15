@@ -23,6 +23,7 @@ import { useAppColors } from "../hooks/useAppColors";
 import { Employee } from "../types/employee";
 import { StatItem } from "../types/stats";
 import DeleteAlert from "../components/layout/DeleteAlert";
+import { useCustomToast } from "../contexts/ToastProvider";
 
 const employeesMock: Employee[] = [
     {
@@ -70,6 +71,7 @@ type ModalState = "closed" | "add" | "edit" | "delete";
 export default function EmployeesScreen() {
     const { backgroundColor, whiteColor, mediumGreyColor, secondaryColor } =
         useAppColors();
+    const toast = useCustomToast();
 
     const [employees, setEmployees] = useState<Employee[]>(employeesMock);
     const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
@@ -106,11 +108,20 @@ export default function EmployeesScreen() {
     }, []);
 
     const handleSave = useCallback(() => {
+        toast.showToast({
+            title: "Sucesso!",
+            description: "O funcionário foi salvo.",
+            status: "success",
+        });
         closeModal();
     }, [formData, closeModal]);
 
     const confirmDelete = useCallback(() => {
-        if (!formData.id) return;
+        toast.showToast({
+            title: "Sucesso!",
+            description: "O funcionário foi excluído.",
+            status: "success",
+        });
         closeModal();
     }, [formData.id, closeModal]);
 
