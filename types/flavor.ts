@@ -1,24 +1,36 @@
-export interface Price {
-    size: string;
-    sale_price: number;
-    cost_price: number;
+export interface FlavorSize {
+	sizeId: number;
+	name: string;
+	salePrice: number;
+	costPrice: number;
+	totalQuantity: number;
+	remainingQuantity: number;
 }
 
 export interface Flavor {
-    id: number;
-    flavor: string;
-    prices: Price[];
+	id: string;
+	name: string; 
+	sizes: FlavorSize[]; 
+}
+
+export interface PriceFormData {
+	size: string;
+	salePrice: number;
+	costPrice: number;
+}
+
+export interface FlavorFormData {
+	flavor: string;
+	prices: PriceFormData[];
 }
 
 interface PriceInput {
-    size: string;
-    sale_price: string;
-    cost_price: string;
+	size: string;
+	salePrice: string;
+	costPrice: string;
 }
 
 export interface InputData {
-    flavor: string;
-    prices: PriceInput[];
+	flavor: string;
+	prices: PriceInput[];
 }
-
-export type FlavorFormData = Omit<Flavor, "id">;

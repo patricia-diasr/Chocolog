@@ -82,7 +82,7 @@ const ordersMock: Order[] = [
         details: [
             {
                 id: "3",
-                size: "1kg",
+                size: "1Kg",
                 flavor1: "Chocolate",
                 flavor2: "Morango",
                 quantity: 1,

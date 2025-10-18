@@ -35,7 +35,7 @@ export default function FlavorCard({ flavor, onEdit, onDelete }: Props) {
                     color={secondaryColor}
                     flex={1}
                 >
-                    {flavor.flavor}
+                    {flavor.name}
                 </Text>
                 <HStack>
                     <IconButton
@@ -54,22 +54,22 @@ export default function FlavorCard({ flavor, onEdit, onDelete }: Props) {
             </HStack>
             <VStack p={4} space={3}>
                 <HStack justifyContent="space-around">
-                    {flavor.prices.slice(0, 2).map((price) => (
-                        <VStack key={price.size} alignItems="center" flex={1}>
+                    {flavor.sizes.slice(0, 2).map((size) => (
+                        <VStack key={size.sizeId} alignItems="center" flex={1}>
                             <Text
                                 fontSize="sm"
                                 color={secondaryColor}
                                 fontWeight="bold"
                                 lineHeight="sm"
                             >
-                                {price.size}
+                                {size.name}
                             </Text>
                             <Text
                                 fontSize="md"
                                 fontWeight="bolder"
                                 lineHeight="lg"
                             >
-                                {formatPrice(price.sale_price)}
+                                {formatPrice(size.salePrice)}
                             </Text>
                             <Text
                                 fontSize="xs"
@@ -77,28 +77,28 @@ export default function FlavorCard({ flavor, onEdit, onDelete }: Props) {
                                 fontWeight="medium"
                                 lineHeight="md"
                             >
-                                Custo {formatPrice(price.cost_price)}
+                                Custo {formatPrice(size.costPrice)}
                             </Text>
                         </VStack>
                     ))}
                 </HStack>
                 <HStack justifyContent="space-around">
-                    {flavor.prices.slice(2, 4).map((price) => (
-                        <VStack key={price.size} alignItems="center" flex={1}>
+                    {flavor.sizes.slice(2, 4).map((size) => (
+                        <VStack key={size.sizeId} alignItems="center" flex={1}>
                             <Text
                                 fontSize="sm"
                                 color={secondaryColor}
                                 fontWeight="bold"
                                 lineHeight="sm"
                             >
-                                {price.size}
+                                {size.name}
                             </Text>
                             <Text
                                 fontSize="md"
                                 fontWeight="bolder"
                                 lineHeight="lg"
                             >
-                                {formatPrice(price.sale_price)}
+                                {formatPrice(size.salePrice)}
                             </Text>
                             <Text
                                 fontSize="xs"
@@ -106,7 +106,7 @@ export default function FlavorCard({ flavor, onEdit, onDelete }: Props) {
                                 fontWeight="medium"
                                 lineHeight="md"
                             >
-                                Custo {formatPrice(price.cost_price)}
+                                Custo {formatPrice(size.costPrice)}
                             </Text>
                         </VStack>
                     ))}

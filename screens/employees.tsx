@@ -27,15 +27,6 @@ import DeleteAlert from "../components/layout/DeleteAlert";
 import { useCustomToast } from "../contexts/ToastProvider";
 import { getEmployees, createEmployee, updateEmployee, deleteEmployee } from "../services/employeeService";
 
-const employeesMock: Employee[] = [
-    {
-        id: "1",
-        name: "Maria Silva",
-        login: "maria.silva",
-        role: "ADMIN",
-    }
-];
-
 const newEmployeeTemplate: Employee = {
     id: "",
     name: "",
@@ -55,6 +46,7 @@ export default function EmployeesScreen() {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [isSavingLoading, setIsSavingLoading] = useState<boolean>(false);
     const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+    
     const [modalState, setModalState] = useState<ModalState>("closed");
     const [formData, setFormData] = useState<Employee>(newEmployeeTemplate);
     const [searchTerm, setSearchTerm] = useState("");
@@ -84,7 +76,7 @@ export default function EmployeesScreen() {
         fetchEmployees();
     }, [fetchEmployees]);
 
-        const closeModal = useCallback(() => {
+    const closeModal = useCallback(() => {
         setModalState("closed");
     }, []);
 
@@ -130,18 +122,6 @@ export default function EmployeesScreen() {
             setIsSavingLoading(false);
         }
     };
-
-    const confirmDelete = useCallback(async () => {
-        if (!selectedEmployee) return;
-        try {
-            await deleteEmployee(selectedEmployee.id);
-            setEmployees(prev => prev.filter(emp => emp.id !== selectedEmployee.id));
-            toast.showToast({ title: "Sucesso!", description: "O funcionário foi excluído.", status: "success" });
-            closeModal();
-        } catch (error) {
-            toast.showToast({ title: "Erro!", description: "Não foi possível excluir o funcionário.", status: "error" });
-        }
-    }, [selectedEmployee, toast, closeModal]);
 
     const handleDelete = async () => {
         setIsSavingLoading(true);

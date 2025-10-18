@@ -13,16 +13,18 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useAppColors } from "../../hooks/useAppColors";
 import { useCustomToast } from "../../contexts/ToastProvider";
-import { FlavorFormData, InputData } from "../../types/flavor";
+import { Flavor, FlavorFormData, FlavorSize, InputData } from "../../types/flavor";
 import { PriceInputRow } from "./PriceInputRow";
 
 interface FlavorFormModalProps {
+    title: string;
     isOpen: boolean;
     onClose: () => void;
-    onSave: () => void;
-    title: string;
+    onSave: (data: Flavor) => void;
     formData: FlavorFormData;
     setFormData: (data: FlavorFormData) => void;
+    editingFlavor?: Flavor | null;
+    isLoading: boolean;
 }
 
 const SIZES = ["350g", "500g", "Coração", "1Kg"];
@@ -34,6 +36,8 @@ export default function FlavorFormModal({
     title,
     formData,
     setFormData,
+    editingFlavor,
+    isLoading,
 }: FlavorFormModalProps) {
     const toast = useCustomToast();
     const {
@@ -63,15 +67,15 @@ export default function FlavorFormModal({
                 );
                 return {
                     size: size,
-                    sale_price: existingPrice?.sale_price || 0,
-                    cost_price: existingPrice?.cost_price || 0,
+                    salePrice: existingPrice?.salePrice || 0,
+                    costPrice: existingPrice?.costPrice || 0,
                 };
             });
 
             const initialInputPrices = initialPrices.map((p) => ({
                 size: p.size,
-                sale_price: p.sale_price > 0 ? p.sale_price.toString() : "",
-                cost_price: p.cost_price > 0 ? p.cost_price.toString() : "",
+                salePrice: p.salePrice > 0 ? p.salePrice.toString() : "",
+                costPrice: p.costPrice > 0 ? p.costPrice.toString() : "",
             }));
 
             setFormData({ flavor: formData.flavor, prices: initialPrices });
@@ -92,7 +96,7 @@ export default function FlavorFormModal({
 
     const handlePriceChange = (
         size: string,
-        priceType: "sale_price" | "cost_price",
+        priceType: "salePrice" | "costPrice",
         text: string,
     ) => {
         const cleanedText = text
@@ -126,12 +130,12 @@ export default function FlavorFormModal({
         });
     };
 
-    const handleSave = () => {
+    const handleSubmit = () => {
         setHasAttemptedSave(true);
 
         const isFlavorValid = formData.flavor.trim() !== "";
         const areAllPricesValid = formData.prices.every(
-            (p) => p.sale_price > 0 && p.cost_price > 0,
+            (p) => p.salePrice > 0 && p.costPrice > 0,
         );
 
         if (!isFlavorValid || !areAllPricesValid) {
@@ -143,18 +147,39 @@ export default function FlavorFormModal({
             });
             return;
         }
+        
+        const newSizes: FlavorSize[] = formData.prices.map((price, index) => {
+			const originalSize = editingFlavor?.sizes.find(
+				(s) => s.name === price.size,
+			);
 
-        onSave();
-    };
+			return {
+				sizeId: originalSize?.sizeId ?? index + 1,
+				name: price.size,
+				salePrice: price.salePrice,
+				costPrice: price.costPrice,
+				totalQuantity: originalSize?.totalQuantity ?? 0,
+				remainingQuantity: originalSize?.remainingQuantity ?? 0,
+			};
+		});
 
-    const handleClose = () => {
-        onClose();
+		const flavorToSave: Flavor = {
+			id: editingFlavor?.id ?? "",
+			name: formData.flavor.trim(),
+			sizes: newSizes,
+		};
+
+        console.log(flavorToSave)
+
+		onSave(flavorToSave);
     };
 
     const isFlavorInvalid = hasAttemptedSave && !formData.flavor.trim();
 
+    if (!formData) return null;
+
     return (
-        <Modal isOpen={isOpen} onClose={handleClose} size="xl">
+        <Modal isOpen={isOpen} onClose={onClose} size="xl">
             <Modal.Content
                 maxWidth="400px"
                 bg={whiteColor}
@@ -242,19 +267,19 @@ export default function FlavorFormModal({
                                         const isInvalid =
                                             hasAttemptedSave &&
                                             (!priceItem ||
-                                                priceItem.sale_price <= 0);
+                                                priceItem.salePrice <= 0);
 
                                         return (
                                             <PriceInputRow
                                                 key={`${size}-sale`}
                                                 size={size}
                                                 value={
-                                                    inputItem?.sale_price || ""
+                                                    inputItem?.salePrice || ""
                                                 }
                                                 onChange={(text) =>
                                                     handlePriceChange(
                                                         size,
-                                                        "sale_price",
+                                                        "salePrice",
                                                         text,
                                                     )
                                                 }
@@ -297,19 +322,19 @@ export default function FlavorFormModal({
                                         const isInvalid =
                                             hasAttemptedSave &&
                                             (!priceItem ||
-                                                priceItem.cost_price <= 0);
+                                                priceItem.costPrice <= 0);
 
                                         return (
                                             <PriceInputRow
                                                 key={`${size}-cost`}
                                                 size={size}
                                                 value={
-                                                    inputItem?.cost_price || ""
+                                                    inputItem?.costPrice || ""
                                                 }
                                                 onChange={(text) =>
                                                     handlePriceChange(
                                                         size,
-                                                        "cost_price",
+                                                        "costPrice",
                                                         text,
                                                     )
                                                 }
@@ -334,16 +359,17 @@ export default function FlavorFormModal({
                         <Button
                             variant="ghost"
                             colorScheme="gray"
-                            onPress={handleClose}
+                            onPress={onClose}
                             rounded="xl"
                             flex={1}
                             py={3}
                             _text={{ fontSize: "md", fontWeight: "medium" }}
+                            isDisabled={isLoading}
                         >
                             Cancelar
                         </Button>
                         <Button
-                            onPress={handleSave}
+                            onPress={handleSubmit}
                             size="lg"
                             colorScheme="secondary"
                             rounded="xl"
@@ -353,6 +379,9 @@ export default function FlavorFormModal({
                             py={3}
                             shadow={2}
                             _text={{ fontSize: "md", fontWeight: "medium" }}
+                            isLoading={isLoading}
+                            isLoadingText="Salvando..."
+                            _loading={{ bg: tertiaryColor }}
                         >
                             Salvar
                         </Button>

@@ -16,8 +16,6 @@ export const createEmployee = async (employeeData: Omit<Employee, "id">): Promis
 };
 
 export const updateEmployee = async (id: string, employeeData: Employee): Promise<Employee> => {
-    console.log(id)
-    console.log(employeeData)
     const response = await api.patch(`/employees/${id}`, employeeData);
     return response.data;
 };

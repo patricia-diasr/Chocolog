@@ -24,7 +24,7 @@ const printBatchMock: PrintBatch = {
             due_date: "2025-03-12",
             order_detail: {
                 id: "2",
-                size: "1kg",
+                size: "1Kg",
                 flavor1: "Brigadeiro",
                 quantity: 1,
                 unit_price: 95,

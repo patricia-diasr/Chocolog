@@ -29,7 +29,7 @@ const printItemsMock: ItemPrintBatch[] = [
         is_printed: false,
         order_detail: {
             id: "2",
-            size: "1kg",
+            size: "1Kg",
             flavor1: "Brigadeiro",
             quantity: 1,
             unit_price: 95,
