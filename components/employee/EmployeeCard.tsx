@@ -113,7 +113,7 @@ export default function EmployeeCard({
                                     {employee.name}
                                 </Text>
                             </HStack>
-                            {employee.role === "admin" && (
+                            {employee.role === "ADMIN" && (
                                 <LabelBadge
                                     color="green"
                                     icon="key"

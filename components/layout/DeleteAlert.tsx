@@ -1,13 +1,14 @@
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AlertDialog, Button, VStack, Text } from "native-base";
 import { useAppColors } from "../../hooks/useAppColors";
 
 interface Props {
     isOpen: boolean;
     onClose: () => void;
-    onConfirm: () => void;
+    onConfirm: () => Promise<void>;
     prefixMessage: string;
     itemName?: string;
+    isLoading: boolean;
 }
 
 export default function DeleteAlert({
@@ -16,8 +17,8 @@ export default function DeleteAlert({
     onConfirm,
     prefixMessage,
     itemName,
+    isLoading
 }: Props) {
-    const cancelRef = useRef(null);
     const {
         whiteColor,
         lightGreyColor,
@@ -27,6 +28,8 @@ export default function DeleteAlert({
         tertiaryColor,
         borderColor,
     } = useAppColors();
+
+    const cancelRef = useRef(null);
 
     return (
         <AlertDialog
@@ -108,6 +111,7 @@ export default function DeleteAlert({
                                 fontSize: "md",
                                 fontWeight: "medium",
                             }}
+                            isDisabled={isLoading}
                         >
                             Cancelar
                         </Button>
@@ -125,6 +129,9 @@ export default function DeleteAlert({
                                 fontSize: "md",
                                 fontWeight: "medium",
                             }}
+                            isLoading={isLoading}
+                            isLoadingText="Carregando..."
+                            _loading={{ bg: tertiaryColor, opacity: 0.8 }}
                         >
                             Excluir
                         </Button>

@@ -3,5 +3,5 @@ export type Employee = {
     name: string;
     login: string;
     password?: string;
-    role: string;
+    role: "ADMIN" | "STAFF";
 };

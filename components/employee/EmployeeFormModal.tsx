@@ -15,6 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useAppColors } from "../../hooks/useAppColors";
 import { useCustomToast } from "../../contexts/ToastProvider";
 import { Employee } from "../../types/employee";
+import { isLoading } from "expo-font";
 
 interface Props {
     title: string;
@@ -22,6 +23,7 @@ interface Props {
     onClose: () => void;
     onSave: (data: Employee) => void;
     employeeData: Employee | null;
+    isLoading: boolean;
 }
 
 export default function EmployeeFormModal({
@@ -30,6 +32,7 @@ export default function EmployeeFormModal({
     onClose,
     onSave,
     employeeData,
+    isLoading
 }: Props) {
     const toast = useCustomToast();
     const {
@@ -61,7 +64,7 @@ export default function EmployeeFormModal({
         });
     };
 
-    const handleSave = () => {
+    const handleSubmit = () => {
         setHasAttemptedSave(true);
 
         const isNewEmployee = !formData?.id;
@@ -82,6 +85,7 @@ export default function EmployeeFormModal({
             });
             return;
         }
+
         onSave(formData);
     };
 
@@ -189,6 +193,7 @@ export default function EmployeeFormModal({
                                 </HStack>
                             </FormControl.Label>
                             <Input
+                                value={formData.password || ""}
                                 onChangeText={(text) =>
                                     handleInputChange("password", text)
                                 }
@@ -234,11 +239,11 @@ export default function EmployeeFormModal({
                             </HStack>
                             <Switch
                                 size="md"
-                                isChecked={formData.role === "admin"}
+                                isChecked={formData.role === "ADMIN"}
                                 onToggle={(isToggled) =>
                                     handleInputChange(
                                         "role",
-                                        isToggled ? "admin" : "staff",
+                                        isToggled ? "ADMIN" : "STAFF",
                                     )
                                 }
                                 colorScheme="primary"
@@ -256,11 +261,12 @@ export default function EmployeeFormModal({
                             flex={1}
                             py={3}
                             _text={{ fontSize: "md", fontWeight: "medium" }}
+                            isDisabled={isLoading}
                         >
                             Cancelar
                         </Button>
                         <Button
-                            onPress={handleSave}
+                            onPress={handleSubmit}
                             size="lg"
                             colorScheme="secondary"
                             rounded="xl"
@@ -270,6 +276,9 @@ export default function EmployeeFormModal({
                             py={3}
                             shadow={2}
                             _text={{ fontSize: "md", fontWeight: "medium" }}
+                            isLoading={isLoading}
+                            isLoadingText="Salvando..."
+                            _loading={{ bg: tertiaryColor }}
                         >
                             Salvar
                         </Button>

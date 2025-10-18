@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState } from "react";
+
+import React, { createContext, useContext, useState, useCallback, useMemo } from "react";
 import { Box } from "native-base";
 import ToastComponent, { ToastStatus } from "../components/layout/Toast";
 
@@ -22,22 +23,23 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
     const [toasts, setToasts] = useState<ToastItem[]>([]);
 
-    const showToast = ({
+    const showToast = useCallback(({
         title,
         description,
         status,
     }: Omit<ToastItem, "id">) => {
-        setToasts((prev) => [
-            ...prev,
-            { id: title + Date.now(), title, description, status },
-        ]);
+        const newToast = { id: title + Date.now(), title, description, status };
+        setToasts((prev) => [...prev, newToast]);
+
         setTimeout(() => {
-            setToasts((prev) => prev.filter((t) => t.title !== title));
+            setToasts((prev) => prev.filter((t) => t.id !== newToast.id));
         }, 2500);
-    };
+    }, []); 
+
+    const contextValue = useMemo(() => ({ showToast }), [showToast]);
 
     return (
-        <ToastContext.Provider value={{ showToast }}>
+        <ToastContext.Provider value={contextValue}>
             {children}
             <Box position="absolute" top={10} left={0} right={0} zIndex={999}>
                 {toasts.map((toast) => (

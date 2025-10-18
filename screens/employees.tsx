@@ -8,9 +8,10 @@ import {
     Text,
     Center,
     Pressable,
+    Spinner,
 } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 
 import StatsCard from "../components/layout/StatsCard";
 import SearchInput from "../components/layout/Searchbar";
@@ -24,38 +25,15 @@ import { Employee } from "../types/employee";
 import { StatItem } from "../types/stats";
 import DeleteAlert from "../components/layout/DeleteAlert";
 import { useCustomToast } from "../contexts/ToastProvider";
+import { getEmployees, createEmployee, updateEmployee, deleteEmployee } from "../services/employeeService";
 
 const employeesMock: Employee[] = [
     {
         id: "1",
         name: "Maria Silva",
         login: "maria.silva",
-        role: "admin",
-    },
-    {
-        id: "2",
-        name: "João Santos",
-        login: "joao.santos",
-        role: "staff",
-    },
-    {
-        id: "3",
-        name: "Ana Costa",
-        login: "ana.costa",
-        role: "staff",
-    },
-    {
-        id: "4",
-        name: "Pedro Oliveira",
-        login: "pedro.oliveira",
-        role: "admin",
-    },
-    {
-        id: "5",
-        name: "Lucia Ferreira",
-        login: "lucia.ferreira",
-        role: "staff",
-    },
+        role: "ADMIN",
+    }
 ];
 
 const newEmployeeTemplate: Employee = {
@@ -63,7 +41,7 @@ const newEmployeeTemplate: Employee = {
     name: "",
     login: "",
     password: "",
-    role: "staff",
+    role: "STAFF",
 };
 
 type ModalState = "closed" | "add" | "edit" | "delete";
@@ -73,62 +51,118 @@ export default function EmployeesScreen() {
         useAppColors();
     const toast = useCustomToast();
 
-    const [employees, setEmployees] = useState<Employee[]>(employeesMock);
-    const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
-        null,
-    );
+    const [employees, setEmployees] = useState<Employee[]>([]);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [isSavingLoading, setIsSavingLoading] = useState<boolean>(false);
+    const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
     const [modalState, setModalState] = useState<ModalState>("closed");
     const [formData, setFormData] = useState<Employee>(newEmployeeTemplate);
-
     const [searchTerm, setSearchTerm] = useState("");
     const [filterBy, setFilterBy] = useState<"all" | "admin">("all");
-
     const filterOptions: SortOption[] = [
         { value: "all", label: "Todos", icon: "people" },
         { value: "admin", label: "Admin", icon: "key" },
     ];
 
-    const closeModal = useCallback(() => {
+    const fetchEmployees = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            const data = await getEmployees();
+            setEmployees(data);
+        } catch (error) {
+            toast.showToast({
+                title: "Erro ao carregar!",
+                description: "Não foi possível buscar os funcionários. Tente novamente.",
+                status: "error",
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    }, [toast]);
+
+    useEffect(() => {
+        fetchEmployees();
+    }, [fetchEmployees]);
+
+        const closeModal = useCallback(() => {
         setModalState("closed");
     }, []);
 
-    const openAddModal = useCallback(() => {
+    const openAddModal = () => {
         setFormData(newEmployeeTemplate);
         setModalState("add");
-    }, []);
+    };
 
-    const openEditModal = useCallback((employee: Employee) => {
-        setFormData({ ...employee });
+    const openEditModal = (employee: Employee) => {
+        setFormData({ ...employee, password: "" }); 
         setModalState("edit");
-    }, []);
+    };
 
-    const openDeleteAlert = useCallback((employee: Employee) => {
+    const openDeleteAlert = (employee: Employee) => {
         setSelectedEmployee(employee);
         setModalState("delete");
-    }, []);
+    };
 
-    const handleSave = useCallback(() => {
-        toast.showToast({
-            title: "Sucesso!",
-            description: "O funcionário foi salvo.",
-            status: "success",
-        });
-        closeModal();
-    }, [formData, closeModal]);
+    const handleSave = async (employeeData: Employee) => {
+        setIsSavingLoading(true);
+        const isEditing = !!employeeData.id;
+        const dataToSend = { ...employeeData };
 
-    const confirmDelete = useCallback(() => {
-        toast.showToast({
-            title: "Sucesso!",
-            description: "O funcionário foi excluído.",
-            status: "success",
-        });
-        closeModal();
-    }, [formData.id, closeModal]);
+        if (isEditing && !dataToSend.password) {
+            delete dataToSend.password;
+        }
+        
+        try {
+            if (isEditing) {
+                const updated = await updateEmployee(employeeData.id, dataToSend);
+                setEmployees(prev => prev.map(emp => (emp.id === updated.id ? updated : emp)));
+                toast.showToast({ title: "Sucesso!", description: "Funcionário atualizado.", status: "success" });
+            } else {
+                const { id, ...newData } = dataToSend; 
+                const newEmployee = await createEmployee(newData);
+                setEmployees(prev => [...prev, newEmployee]);
+                toast.showToast({ title: "Sucesso!", description: "Funcionário criado.", status: "success" });
+            }
+            closeModal();
+        } catch (error) {
+            toast.showToast({ title: "Erro!", description: "Não foi possível salvar o funcionário.", status: "error" });
+        } finally {
+            setIsSavingLoading(false);
+        }
+    };
+
+    const confirmDelete = useCallback(async () => {
+        if (!selectedEmployee) return;
+        try {
+            await deleteEmployee(selectedEmployee.id);
+            setEmployees(prev => prev.filter(emp => emp.id !== selectedEmployee.id));
+            toast.showToast({ title: "Sucesso!", description: "O funcionário foi excluído.", status: "success" });
+            closeModal();
+        } catch (error) {
+            toast.showToast({ title: "Erro!", description: "Não foi possível excluir o funcionário.", status: "error" });
+        }
+    }, [selectedEmployee, toast, closeModal]);
+
+    const handleDelete = async () => {
+        setIsSavingLoading(true);
+        if (!selectedEmployee) return;
+
+        try {
+            await deleteEmployee(selectedEmployee.id);
+            setEmployees(prev => prev.filter(emp => emp.id !== selectedEmployee.id));
+            toast.showToast({ title: "Sucesso!", description: "O funcionário foi excluído.", status: "success" });
+            closeModal();
+        } catch (error) {
+            toast.showToast({ title: "Erro!", description: "Não foi possível excluir o funcionário.", status: "error" });
+        } finally {
+            setIsSavingLoading(false);
+        }
+    };
 
     const employeeStats = useMemo(() => {
         const totalEmployees = employees.length;
         const adminCount = employees.filter(
-            (employee) => employee.role === "admin",
+            (employee) => employee.role === "ADMIN",
         ).length;
         const regularCount = totalEmployees - adminCount;
 
@@ -166,7 +200,7 @@ export default function EmployeesScreen() {
         }
 
         if (filterBy === "admin") {
-            filtered = filtered.filter((employee) => employee.role === "admin");
+            filtered = filtered.filter((employee) => employee.role === "ADMIN");
         }
 
         return filtered;
@@ -175,6 +209,15 @@ export default function EmployeesScreen() {
     const isEmpty = processedEmployees.length === 0 && searchTerm !== "";
     const isEmptyInitial = employees.length === 0;
 
+    if (isLoading) {
+        return (
+            <Center flex={1} bg={backgroundColor}>
+                <Spinner size="lg" color={secondaryColor} />
+                <Text mt={4} color={mediumGreyColor}>Carregando funcionários...</Text>
+            </Center>
+        );
+    }
+    
     return (
         <>
             <ScrollView
@@ -347,26 +390,24 @@ export default function EmployeesScreen() {
                 </Center>
             </ScrollView>
 
-            <FabButton action={openAddModal} />
+            {!isEmptyInitial && <FabButton action={openAddModal} />}
 
             <EmployeeFormModal
                 isOpen={modalState === "add" || modalState === "edit"}
                 onClose={closeModal}
-                onSave={handleSave}
-                title={
-                    modalState === "add"
-                        ? "Adicionar Funcionário"
-                        : "Editar Funcionário"
-                }
+                onSave={handleSave} 
+                title={modalState === "add" ? "Adicionar Funcionário" : "Editar Funcionário"}
                 employeeData={formData}
+                isLoading={isSavingLoading}
             />
 
             <DeleteAlert
                 isOpen={modalState === "delete"}
                 onClose={closeModal}
-                onConfirm={confirmDelete}
+                onConfirm={handleDelete} 
                 prefixMessage="Tem certeza que deseja excluir o funcionário"
                 itemName={selectedEmployee?.name || ""}
+                isLoading={isSavingLoading}
             />
         </>
     );
