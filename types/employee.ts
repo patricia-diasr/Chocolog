@@ -1,5 +1,5 @@
 export type Employee = {
-    id: string;
+    id: number;
     name: string;
     login: string;
     password?: string;

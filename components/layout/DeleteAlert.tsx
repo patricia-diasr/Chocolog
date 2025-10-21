@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import { AlertDialog, Button, VStack, Text } from "native-base";
 import { useAppColors } from "../../hooks/useAppColors";
 
@@ -17,7 +17,7 @@ export default function DeleteAlert({
     onConfirm,
     prefixMessage,
     itemName,
-    isLoading
+    isLoading,
 }: Props) {
     const {
         whiteColor,

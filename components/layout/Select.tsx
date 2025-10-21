@@ -13,12 +13,13 @@ import { useAppColors } from "../../hooks/useAppColors";
 
 interface Props<T> {
     data: T[];
-    selectedValue: string;
+    selectedValue: string | number;
     onValueChange: (value: string) => void;
     placeholder: string;
     modalTitle: string;
     isInvalid?: boolean;
-    itemValue?: (item: T) => string;
+    isDisabled?: boolean;
+    itemValue?: (item: T) => string | number;
     itemLabel?: (item: T) => string;
 }
 
@@ -29,6 +30,7 @@ export default function Select<T>({
     placeholder,
     modalTitle,
     isInvalid = false,
+    isDisabled = false,
     itemValue = (item: any) => item,
     itemLabel = (item: any) => item,
 }: Props<T>) {
@@ -53,7 +55,7 @@ export default function Select<T>({
 
     return (
         <>
-            <Pressable onPress={() => setIsModalVisible(true)}>
+            <Pressable onPress={() => !isDisabled && setIsModalVisible(true)}>
                 <HStack
                     bg={backgroundColor}
                     py={3}
@@ -63,6 +65,7 @@ export default function Select<T>({
                     borderColor={isInvalid ? invalidColor : backgroundColor}
                     alignItems="center"
                     justifyContent="space-between"
+                    opacity={isDisabled ? 0.6 : 1}
                 >
                     <Text
                         fontSize="md"

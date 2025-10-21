@@ -14,7 +14,7 @@ import { useAppColors } from "../../hooks/useAppColors";
 import LabelBadge from "./LabelBadge";
 
 interface ListItem {
-    id: string;
+    id: number;
     title: string;
     info: string;
     aditionalInfo?: string;
@@ -29,7 +29,7 @@ interface Props {
     items: ListItem[];
     addText?: string;
     emptyStateText: string;
-    onItemPress: (id: string) => void;
+    onItemPress: (id: number) => void;
     onAddItem?: () => void;
 }
 
@@ -42,8 +42,16 @@ export default function InfoList({
     onItemPress,
     onAddItem,
 }: Props) {
-    const { whiteColor, lightGreyColor, mediumGreyColor, darkGreyColor, blackColor, secondaryColor, tertiaryColor, borderColor } =
-        useAppColors();
+    const {
+        whiteColor,
+        lightGreyColor,
+        mediumGreyColor,
+        darkGreyColor,
+        blackColor,
+        secondaryColor,
+        tertiaryColor,
+        borderColor,
+    } = useAppColors();
 
     return (
         <Box
@@ -157,7 +165,10 @@ export default function InfoList({
                                         justifyContent="space-between"
                                         alignItems="flex-end"
                                     >
-                                        <Text fontSize="md" color={darkGreyColor}>
+                                        <Text
+                                            fontSize="md"
+                                            color={darkGreyColor}
+                                        >
                                             {item.info}
                                         </Text>
                                         <Text

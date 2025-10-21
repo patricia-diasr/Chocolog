@@ -32,7 +32,7 @@ export default function EmployeeFormModal({
     onClose,
     onSave,
     employeeData,
-    isLoading
+    isLoading,
 }: Props) {
     const toast = useCustomToast();
     const {

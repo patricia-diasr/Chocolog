@@ -6,20 +6,26 @@ export const getFlavors = async (): Promise<Flavor[]> => {
     return response.data;
 };
 
-export const getFlavor = async (id: string): Promise<void> => {
-    await api.get(`/flavors/${id}`);
+export const getFlavor = async (id: number): Promise<Flavor> => {
+    const response = await api.get(`/flavors/${id}`);
+    return response.data;
 };
 
-export const createFlavor = async (flavorData: Omit<Flavor, "id">): Promise<Flavor> => {
+export const createFlavor = async (
+    flavorData: Omit<Flavor, "id">,
+): Promise<Flavor> => {
     const response = await api.post("/flavors", flavorData);
     return response.data;
 };
 
-export const updateFlavor = async (id: string, flavorData: Flavor): Promise<Flavor> => {
+export const updateFlavor = async (
+    id: number,
+    flavorData: Flavor,
+): Promise<Flavor> => {
     const response = await api.patch(`/flavors/${id}`, flavorData);
     return response.data;
 };
 
-export const deleteFlavor = async (id: string): Promise<void> => {
+export const deleteFlavor = async (id: number): Promise<void> => {
     await api.delete(`/flavors/${id}`);
 };

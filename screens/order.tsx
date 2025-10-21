@@ -1,6 +1,6 @@
-import { Box, Center, ScrollView, VStack } from "native-base";
+import { Box, Center, ScrollView, Spinner, VStack, Text } from "native-base";
 import { useAppColors } from "../hooks/useAppColors";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import FabButton from "../components/layout/FabButton";
 import OrderInfoCard from "../components/order/OrderInfoCard";
@@ -11,7 +11,13 @@ import OrderFormModal from "../components/order/OrderFormModal";
 import OrderDetailFormModal from "../components/order/OrderDetailFormModal";
 import PaymentFormModal from "../components/order/PaymentFormModal";
 
-import { Order, OrderDetail, Payment } from "../types/order";
+import {
+    OrderItemRequest,
+    OrderItemResponse,
+    OrderRequest,
+    OrderResponse,
+    Payment,
+} from "../types/order";
 import { getStatusDetails } from "../utils/statusConfig";
 import {
     formatDate,
@@ -19,61 +25,9 @@ import {
     formatPrice,
 } from "../utils/formatters";
 import { useCustomToast } from "../contexts/ToastProvider";
-
-const orderDataMock: Order = {
-    id: "1",
-    created_date: "2025-02-15",
-    due_date: "2025-03-11",
-    pickup_date: "2025-03-12",
-    status: "completed",
-    notes: "Observação que pode ser relevante sobre o pedido.",
-    details: [
-        {
-            id: "1",
-            size: "500g",
-            flavor1: "Sensação",
-            flavor2: "Prestígio",
-            quantity: 2,
-            unit_price: 60,
-            total_price: 120,
-            notes: "Embalagem rosa",
-            status: "pending",
-            custom_made: true,
-        },
-        {
-            id: "2",
-            size: "500g",
-            flavor1: "Maracujá",
-            quantity: 1,
-            unit_price: 60,
-            total_price: 60,
-            status: "completed",
-            custom_made: false,
-        },
-        {
-            id: "3",
-            size: "350g",
-            flavor1: "Brigadeiro",
-            quantity: 4,
-            unit_price: 40,
-            total_price: 160,
-            status: "completed",
-            custom_made: false,
-        },
-    ],
-    charge: {
-        id: "1",
-        date: "2025-02-15",
-        status: "paid",
-        subtotal: 180,
-        discount: 10,
-        total: 170,
-        payments: [
-            { id: "1", value: 85, date: "2025-02-15", method: "Dinheiro" },
-            { id: "2", value: 85, date: "2025-03-12", method: "Pix" },
-        ],
-    },
-};
+import { RootStackParamList } from "../types/navigation";
+import { RouteProp } from "@react-navigation/native";
+import { createItem, deleteItem, getOrder, updateItem, updateOrder } from "../services/orderService";
 
 type ModalType =
     | "editOrder"
@@ -86,48 +40,173 @@ type ModalType =
 type ModalState = {
     type: ModalType | null;
     data?:
-        | Order
-        | OrderDetail
+        | OrderRequest
+        | OrderResponse
+        | OrderItemRequest
+        | OrderItemResponse
         | Payment
-        | { id: string; name: string; type: "payment" | "orderDetail" };
+        | { id: number; name: string; type: "payment" | "orderDetail" };
 };
 
-export default function OrderScreen() {
-    const { backgroundColor } = useAppColors();
+type OrderScreenRouteProp = RouteProp<RootStackParamList, "Order">;
+
+type Props = {
+    route: OrderScreenRouteProp;
+};
+
+export default function OrderScreen({ route }: Props) {
+    const { backgroundColor, secondaryColor, mediumGreyColor } = useAppColors();
+    const { customerId, orderId } = route.params;
     const toast = useCustomToast();
 
-    const [orderData, setOrderData] = useState<Order>(orderDataMock);
+    const [orderData, setOrderData] = useState<OrderResponse>();
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [isSavingLoading, setIsSavingLoading] = useState<boolean>(false);
+    const [isOrderFinalized, setIsOrderFinalized] = useState<boolean>(false);
     const [modalState, setModalState] = useState<ModalState>({ type: null });
+
+    const fetchOrder = useCallback(async () => {
+        setIsLoading(true);
+
+        try {
+            const orderData = await getOrder(customerId, orderId);
+            setOrderData(orderData);
+
+            const isOrderFinalized =
+                orderData.status === "COMPLETED" ||
+                orderData.status === "CANCELLED";
+
+            setIsOrderFinalized(isOrderFinalized);
+        } catch (error) {
+            toast.showToast({
+                title: "Erro ao carregar!",
+                description:
+                    "Não foi possível buscar o pedido. Tente novamente.",
+                status: "error",
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    }, [toast, customerId, orderId]);
+
+    useEffect(() => {
+        fetchOrder();
+    }, [fetchOrder]);
 
     const handleCloseModals = useCallback(
         () => setModalState({ type: null }),
         [],
     );
 
-    const handleSaveOrder = useCallback(
-        (order: Order) => {
-            setOrderData(order);
-            toast.showToast({
-                title: "Sucesso!",
-                description: "O pedido foi salvo.",
-                status: "success",
-            });
-            handleCloseModals();
-        },
-        [handleCloseModals],
-    );
+    const handleSaveOrder = async (updatedData: OrderRequest) => {
+        setIsSavingLoading(true);
 
-    const handleSaveOrderDetail = useCallback(
-        (detail: OrderDetail) => {
+        try {
+            const updated = await updateOrder(
+                customerId,
+                orderId,
+                updatedData,
+            );
+            fetchOrder();
+
             toast.showToast({
                 title: "Sucesso!",
-                description: "O item foi salvo.",
+                description: "Pedido atualizado.",
                 status: "success",
             });
+
             handleCloseModals();
-        },
-        [handleCloseModals],
-    );
+        } catch (error) {
+            toast.showToast({
+                title: "Erro!",
+                description: "Não foi possível atualizar o pedido.",
+                status: "error",
+            });
+        } finally {
+            setIsSavingLoading(false);
+        }
+    };
+
+    const handleSaveOrderDetail = async (itemData: OrderItemRequest) => {
+        setIsSavingLoading(true);
+        
+        const isEditing = modalState.type === "editOrderDetail";
+        const itemId = isEditing ? (modalState.data as OrderItemResponse)?.id : null;
+        
+        if (!orderData) {
+            toast.showToast({
+                title: "Erro!",
+                description: "Dados do pedido não encontrados.",
+                status: "error",
+            });
+            setIsSavingLoading(false);
+            return;
+        }
+
+        if (isEditing && !itemId) {
+            toast.showToast({
+                title: "Erro!",
+                description: "ID do item não encontrado para editar.",
+                status: "error",
+            });
+            setIsSavingLoading(false);
+            return;
+        }
+
+        try {
+            if (isEditing) {
+                const updatedItem = await updateItem(
+                    customerId,
+                    orderId,
+                    itemId!,
+                    itemData,
+                );
+                
+                setOrderData((prevData) => {
+                    if (!prevData) return prevData;
+                    const updatedItems = prevData.orderItems.map((item) =>
+                        item.id === updatedItem.id ? updatedItem : item,
+                    );
+
+                    return { ...prevData, orderItems: updatedItems };
+                });
+
+                toast.showToast({
+                    title: "Sucesso!",
+                    description: "Item atualizado.",
+                    status: "success",
+                });
+            } else {
+                const newItem = await createItem(customerId, orderId, itemData);
+
+                setOrderData((prevData) => {
+                    if (!prevData) return prevData;
+
+                    return {
+                        ...prevData,
+                        orderItems: [...prevData.orderItems, newItem],
+                    };
+                });
+
+                toast.showToast({
+                    title: "Sucesso!",
+                    description: "Item criado.",
+                    status: "success",
+                });
+            }
+
+            fetchOrder();
+            handleCloseModals();
+        } catch (error) {
+            toast.showToast({
+                title: "Erro!",
+                description: "Não foi possível salvar o item.",
+                status: "error",
+            });
+        } finally {
+            setIsSavingLoading(false);
+        }
+    };
 
     const handleSavePayment = useCallback(
         (payment: Payment) => {
@@ -138,48 +217,93 @@ export default function OrderScreen() {
             });
             handleCloseModals();
         },
-        [handleCloseModals],
+        [handleCloseModals, toast],
     );
 
-    const handleConfirmDelete = useCallback(() => {
+    const handleConfirmDelete = useCallback(async () => {
         if (modalState.type !== "deleteItem" || !modalState.data) return;
-        const { id, type } = modalState.data as { id: string; type: string };
-        toast.showToast({
-            title: "Sucesso!",
-            description: `O ${
-                type === "orderDetail" ? "item" : "pagamento"
-            } foi excluído.`,
-            status: "success",
-        });
-        handleCloseModals();
-    }, [modalState, handleCloseModals]);
+
+        const { id, type } = modalState.data as {
+            id: number;
+            name: string;
+            type: "payment" | "orderDetail";
+        };
+
+        setIsSavingLoading(true); 
+
+        try {
+            if (type === "orderDetail") {
+                await deleteItem(customerId, orderId, id);
+
+                setOrderData((prevData) => {
+                    if (!prevData) return prevData;
+                    const updatedItems = prevData.orderItems.filter(
+                        (item) => item.id !== id,
+                    );
+                    return { ...prevData, orderItems: updatedItems };
+                });
+            } 
+            toast.showToast({
+                title: "Sucesso!",
+                description: `O ${
+                    type === "orderDetail" ? "item" : "pagamento"
+                } foi excluído.`,
+                status: "success",
+            });
+
+            fetchOrder();
+            handleCloseModals();
+        } catch (error) {
+            toast.showToast({
+                title: "Erro!",
+                description: `Não foi possível excluir o ${
+                    type === "orderDetail" ? "item" : "pagamento"
+                }.`,
+                status: "error",
+            });
+        } finally {
+            setIsSavingLoading(false);
+        }
+    }, [modalState, handleCloseModals, toast, customerId, orderId]);
 
     const orderDetailItems = useMemo(
         () =>
-            orderData.details.map((detail) => {
-                const status = getStatusDetails(detail.status);
+            orderData?.orderItems.map((item) => {
+                const status = getStatusDetails(item.status);
                 return {
-                    id: detail.id,
-                    title: formatOrderDetailTitle(detail),
-                    info: detail.notes,
-                    aditionalInfo: formatPrice(detail.total_price),
+                    id: item.id,
+                    title: formatOrderDetailTitle(item),
+                    info: item.notes,
+                    aditionalInfo: formatPrice(item.totalPrice),
                     badgeColor: status.colorScheme,
                     badgeIcon: status.icon,
                     badgeLabel: status.label,
+                    itemActionsDisabled: item.status === "COMPLETED" || item.status === "CANCELLED",
                 };
             }),
-        [orderData.details, formatOrderDetailTitle],
+        [orderData?.orderItems],
     );
 
     const paymentItems = useMemo(
         () =>
-            orderData.charge.payments.map((payment) => ({
+            orderData?.charges.payments.map((payment) => ({
                 id: payment.id,
                 title: `${formatDate(payment.date)} - ${payment.method}`,
                 info: formatPrice(payment.value),
             })),
-        [orderData.charge.payments],
+        [orderData?.charges.payments],
     );
+
+    if (isLoading || orderData === undefined) {
+        return (
+            <Center flex={1} bg={backgroundColor}>
+                <Spinner size="lg" color={secondaryColor} />
+                <Text mt={4} color={mediumGreyColor}>
+                    Carregando pedido...
+                </Text>
+            </Center>
+        );
+    }
 
     return (
         <>
@@ -210,13 +334,13 @@ export default function OrderScreen() {
                                 onEditItem={(id) =>
                                     setModalState({
                                         type: "editOrderDetail",
-                                        data: orderData.details.find(
+                                        data: orderData.orderItems.find(
                                             (d) => d.id === id,
                                         ),
                                     })
                                 }
                                 onDeleteItem={(id) => {
-                                    const item = orderDetailItems.find(
+                                    const item = orderDetailItems?.find(
                                         (i) => i.id === id,
                                     );
                                     if (item) {
@@ -230,9 +354,11 @@ export default function OrderScreen() {
                                         });
                                     }
                                 }}
+                                actionsDisabled={isOrderFinalized}
+                                disableDeleteOnSingleItem={true}
                             />
 
-                            <ChargeInfoCard charge={orderData.charge} />
+                            <ChargeInfoCard charge={orderData.charges} />
 
                             <InfoSwipeList
                                 title="Pagamentos"
@@ -246,13 +372,13 @@ export default function OrderScreen() {
                                 onEditItem={(id) =>
                                     setModalState({
                                         type: "editPayment",
-                                        data: orderData.charge.payments.find(
+                                        data: orderData.charges.payments.find(
                                             (p) => p.id === id,
                                         ),
                                     })
                                 }
                                 onDeleteItem={(id) => {
-                                    const item = paymentItems.find(
+                                    const item = paymentItems?.find(
                                         (p) => p.id === id,
                                     );
                                     if (item) {
@@ -286,9 +412,10 @@ export default function OrderScreen() {
                 onSave={handleSaveOrder}
                 orderData={
                     modalState.type === "editOrder"
-                        ? (modalState.data as Order)
+                        ? (modalState.data as OrderRequest)
                         : null
                 }
+                isLoading={isSavingLoading}
             />
 
             <OrderDetailFormModal
@@ -305,9 +432,10 @@ export default function OrderScreen() {
                 onSave={handleSaveOrderDetail}
                 orderDetailData={
                     modalState.type === "editOrderDetail"
-                        ? (modalState.data as OrderDetail)
+                        ? (modalState.data as OrderItemRequest)
                         : null
                 }
+                isLoading={isSavingLoading}
             />
 
             <PaymentFormModal
@@ -339,6 +467,7 @@ export default function OrderScreen() {
                         : "o item"
                 }`}
                 itemName={(modalState.data as any)?.name ?? ""}
+                isLoading={isSavingLoading}
             />
         </>
     );

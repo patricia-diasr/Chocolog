@@ -2,12 +2,12 @@ import { VStack, HStack, Box, Text } from "native-base";
 import { useAppColors } from "../../hooks/useAppColors";
 import { formatDate } from "../../utils/formatters";
 import { getStatusDetails } from "../../utils/statusConfig";
-import { Order } from "../../types/order";
+import { OrderResponse } from "../../types/order";
 import LabelBadge from "../layout/LabelBadge";
 import InfoRow from "../layout/InfoRow";
 
 interface Props {
-    order: Order;
+    order: OrderResponse;
 }
 
 export default function OrderInfoCard({ order }: Props) {
@@ -53,18 +53,18 @@ export default function OrderInfoCard({ order }: Props) {
                         <InfoRow
                             iconName="calendar"
                             label="Criado em"
-                            value={formatDate(order.created_date)}
+                            value={formatDate(order.creationDate)}
                         />
                         <InfoRow
                             iconName="hourglass"
                             label="Prazo"
-                            value={formatDate(order.due_date)}
+                            value={formatDate(order.expectedPickupDate)}
                         />
-                        {order.pickup_date && (
+                        {order.pickupDate && (
                             <InfoRow
                                 iconName="checkmark-done"
                                 label="Retirado em"
-                                value={formatDate(order.pickup_date)}
+                                value={formatDate(order.pickupDate)}
                             />
                         )}
                     </VStack>

@@ -17,13 +17,14 @@ import LabelBadge from "./LabelBadge";
 import { useAppColors } from "../../hooks/useAppColors";
 
 interface ListItem {
-    id: string;
+    id: number;
     title: string;
     info: string;
     aditionalInfo?: string;
     badgeColor: string;
     badgeIcon: string;
     badgeLabel: string;
+    itemActionsDisabled?: boolean;
 }
 
 interface Props {
@@ -33,8 +34,10 @@ interface Props {
     addText?: string;
     emptyStateText: string;
     onAddItem?: () => void;
-    onEditItem: (id: string) => void;
-    onDeleteItem: (id: string) => void;
+    onEditItem: (id: number) => void;
+    onDeleteItem: (id: number) => void;
+    actionsDisabled?: boolean;
+    disableDeleteOnSingleItem?: boolean;
 }
 
 export default function InfoSwipeList({
@@ -46,57 +49,95 @@ export default function InfoSwipeList({
     onAddItem,
     onEditItem,
     onDeleteItem,
+    actionsDisabled,
+    disableDeleteOnSingleItem,
 }: Props) {
-    const { whiteColor, lightGreyColor, mediumGreyColor, darkGreyColor, blackColor, secondaryColor, tertiaryColor, borderColor } =
-        useAppColors();
+    const {
+        whiteColor,
+        lightGreyColor,
+        mediumGreyColor,
+        darkGreyColor,
+        blackColor,
+        secondaryColor,
+        tertiaryColor,
+        borderColor,
+    } = useAppColors();
 
-    const renderHiddenItem = (data: any, rowMap: any) => (
-        <HStack flex={1} justifyContent="flex-end">
-            <Pressable
-                w={75}
-                bg="blue.200"
-                justifyContent="center"
-                alignItems="center"
-                onPress={() => {
-                    rowMap[data.item.id]?.closeRow();
-                    onEditItem(data.item.id);
-                }}
-                _hover={{
-                    bg: "blue.300",
-                }}
-                _pressed={{
-                    bg: "blue.400",
-                }}
-            >
-                <Icon as={Ionicons} name="create-outline" color="blue.600" />
-                <Text color="blue.600" fontSize="xs" fontWeight="medium">
-                    Editar
-                </Text>
-            </Pressable>
+    const renderHiddenItem = (data: any, rowMap: any) => {
+        const isItemDisabled = data.item.itemActionsDisabled; 
+        const isSingleItemDeleteDisabled =
+            disableDeleteOnSingleItem && items.length === 1; 
+        const isEditDisabled = !!isItemDisabled;
+        const isDeleteDisabled = !!isItemDisabled || isSingleItemDeleteDisabled;
 
-            <Pressable
-                w={75}
-                bg="red.100"
-                justifyContent="center"
-                alignItems="center"
-                onPress={() => {
-                    rowMap[data.item.id]?.closeRow();
-                    onDeleteItem(data.item.id);
-                }}
-                _hover={{
-                    bg: "red.200",
-                }}
-                _pressed={{
-                    bg: "red.300",
-                }}
-            >
-                <Icon as={Ionicons} name="trash-outline" color="red.600" />
-                <Text color="red.600" fontSize="xs" fontWeight="medium">
-                    Deletar
-                </Text>
-            </Pressable>
-        </HStack>
-    );
+        return (
+            <HStack flex={1} justifyContent="flex-end">
+                <Pressable
+                    w={75}
+                    bg="blue.200"
+                    justifyContent="center"
+                    alignItems="center"
+                    onPress={() => {
+                        rowMap[data.item.id]?.closeRow();
+                        onEditItem(data.item.id);
+                    }}
+                    _hover={{
+                        bg:
+                            isEditDisabled || actionsDisabled
+                                ? "blue.200"
+                                : "blue.300",
+                    }}
+                    _pressed={{
+                        bg:
+                            isEditDisabled || actionsDisabled
+                                ? "blue.200"
+                                : "blue.3400",
+                    }}
+                    disabled={isEditDisabled || actionsDisabled}
+                    opacity={isEditDisabled || actionsDisabled ? 0.5 : 1}
+                >
+                    <Icon
+                        as={Ionicons}
+                        name="create-outline"
+                        color="blue.600"
+                    />
+                    <Text color="blue.600" fontSize="xs" fontWeight="medium">
+                        Editar
+                    </Text>
+                </Pressable>
+
+                <Pressable
+                    w={75}
+                    bg="red.100"
+                    justifyContent="center"
+                    alignItems="center"
+                    onPress={() => {
+                        rowMap[data.item.id]?.closeRow();
+                        onDeleteItem(data.item.id);
+                    }}
+                    _hover={{
+                        bg:
+                            isDeleteDisabled || actionsDisabled
+                                ? "red.100"
+                                : "red.200",
+                    }}
+                    _pressed={{
+                        bg:
+                            isDeleteDisabled || actionsDisabled
+                                ? "red.100"
+                                : "red.300",
+                    }}
+                    disabled={isDeleteDisabled || actionsDisabled}
+                    opacity={isDeleteDisabled || actionsDisabled ? 0.5 : 1}
+                >
+                    <Icon as={Ionicons} name="trash-outline" color="red.600" />
+                    <Text color="red.600" fontSize="xs" fontWeight="medium">
+                        Deletar
+                    </Text>
+                </Pressable>
+            </HStack>
+        );
+    };
 
     const renderItem = (data: any, rowMap: any) => {
         const swipeAnimatedValue = rowMap[data.item.id]?.swipeAnimatedValue;
@@ -209,6 +250,7 @@ export default function InfoSwipeList({
                                     size="xs"
                                 />
                             }
+                            isDisabled={actionsDisabled}
                         >
                             {addText}
                         </Button>

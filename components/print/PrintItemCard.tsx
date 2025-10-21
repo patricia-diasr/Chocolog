@@ -9,7 +9,7 @@ import { useAppColors } from "../../hooks/useAppColors";
 
 interface Props extends ItemPrintBatch {
     isSelected: boolean;
-    onSelect: (id: string) => void;
+    onSelect: (id: number) => void;
 }
 
 export default function PrintItemCard({

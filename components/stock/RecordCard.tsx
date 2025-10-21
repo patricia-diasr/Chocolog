@@ -11,7 +11,13 @@ type Props = {
 };
 
 export default function RecordCard({ date, records }: Props) {
-    const { whiteColor, lightGreyColor, mediumGreyColor, secondaryColor, borderColor } = useAppColors();
+    const {
+        whiteColor,
+        lightGreyColor,
+        mediumGreyColor,
+        secondaryColor,
+        borderColor,
+    } = useAppColors();
 
     const dayOfWeek = new Date(date).toLocaleDateString("pt-BR", {
         weekday: "long",

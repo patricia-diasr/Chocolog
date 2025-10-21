@@ -18,9 +18,9 @@ export interface ScreenConfig {
     component: ComponentType<any>;
     title: string;
     icon?: IconName;
-    subtitle?: string; 
+    subtitle?: string;
     isTab?: boolean;
-    isMenuItem?: boolean; 
+    isMenuItem?: boolean;
 }
 
 export const SCREEN_CONFIG: Record<string, ScreenConfig> = {
@@ -104,5 +104,5 @@ export const MENU_ITEMS = Object.entries(SCREEN_CONFIG)
         name: config.title,
         subtitle: config.subtitle,
         icon: config.icon,
-        route: name as AppScreenName, 
+        route: name as AppScreenName,
     }));

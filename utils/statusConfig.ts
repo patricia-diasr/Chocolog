@@ -7,32 +7,42 @@ type StatusConfig = {
 };
 
 export const statusConfig: StatusConfig = {
-    completed: {
+    COMPLETED: {
         label: "Concluído",
         colorScheme: "success",
         icon: "checkmark-done",
     },
-    paid: {
+    PAID: {
         label: "Pago",
         colorScheme: "success",
         icon: "card",
     },
-    pending: {
+    PENDING: {
         label: "Pendente",
         colorScheme: "warning",
         icon: "time",
     },
-    cancelled: {
+    UNPAID: {
+        label: "Pendente",
+        colorScheme: "warning",
+        icon: "time",
+    },
+    READY_FOR_PICKUP: {
+        label: "Pronto",
+        colorScheme: "info",
+        icon: "checkmark-circle",
+    },
+    CANCELLED: {
         label: "Cancelado",
         colorScheme: "error",
         icon: "close-circle",
     },
-    overdue: {
+    OVERDUE: {
         label: "Vencido",
         colorScheme: "error",
         icon: "alert-circle",
     },
-    default: {
+    DEFAULT: {
         label: "Info",
         colorScheme: "info",
         icon: "information-circle",
@@ -40,5 +50,5 @@ export const statusConfig: StatusConfig = {
 };
 
 export const getStatusDetails = (status: string) => {
-    return statusConfig[status] || statusConfig.default;
+    return statusConfig[status] || statusConfig.DEFAULT;
 };

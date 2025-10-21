@@ -2,8 +2,8 @@ import { Customer } from "./customer";
 import { OrderDetail } from "./order";
 
 export type ItemPrintBatch = {
-    id: string;
-    order_id: string;
+    id: number;
+    order_id: number;
     status: "pending" | "completed" | "cancelled";
     due_date: string;
     order_detail: OrderDetail;
@@ -12,7 +12,7 @@ export type ItemPrintBatch = {
 };
 
 export type PrintBatch = {
-    id: string;
+    id: number;
     printed_by_employee: string;
     created_at: string;
     items: ItemPrintBatch[];

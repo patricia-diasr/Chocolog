@@ -6,7 +6,7 @@ import { useAppColors } from "../../hooks/useAppColors";
 import { useCustomToast } from "../../contexts/ToastProvider";
 
 interface Props {
-    id: string;
+    id: number;
     printed_by_employee: string;
     created_at: string;
 }

@@ -23,6 +23,7 @@ interface Props {
     onClose: () => void;
     onSave: (data: Customer) => void;
     customerData: Customer | null;
+    isLoading: boolean;
 }
 
 export default function CustomerFormModal({
@@ -31,6 +32,7 @@ export default function CustomerFormModal({
     onClose,
     onSave,
     customerData,
+    isLoading,
 }: Props) {
     const toast = useCustomToast();
     const {
@@ -79,7 +81,7 @@ export default function CustomerFormModal({
             });
             return;
         }
-        
+
         onSave(formData);
     };
 
@@ -202,9 +204,9 @@ export default function CustomerFormModal({
                             </HStack>
                             <Switch
                                 size="md"
-                                isChecked={formData.is_reseller}
+                                isChecked={formData.isReseller}
                                 onToggle={(value) =>
-                                    handleInputChange("is_reseller", value)
+                                    handleInputChange("isReseller", value)
                                 }
                                 colorScheme="primary"
                             />
@@ -221,6 +223,7 @@ export default function CustomerFormModal({
                             flex={1}
                             py={3}
                             _text={{ fontSize: "md", fontWeight: "medium" }}
+                            isDisabled={isLoading}
                         >
                             Cancelar
                         </Button>
@@ -235,6 +238,9 @@ export default function CustomerFormModal({
                             py={3}
                             shadow={2}
                             _text={{ fontSize: "md", fontWeight: "medium" }}
+                            isLoading={isLoading}
+                            isLoadingText="Salvando..."
+                            _loading={{ bg: tertiaryColor }}
                         >
                             Salvar
                         </Button>

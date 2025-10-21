@@ -9,47 +9,55 @@ import {
     Icon,
     Modal,
     TextArea,
+    Center,
+    Spinner,
 } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
 import { useAppColors } from "../../hooks/useAppColors";
 import { useCustomToast } from "../../contexts/ToastProvider";
-import { OrderDetail } from "../../types/order";
-import { flavors, sizes } from "../../configs/order";
+import {
+    ORDER_STATUS_MAP,
+    OrderItemRequest,
+    OrderStatus,
+} from "../../types/order";
 import Select from "../layout/Select";
+import { Flavor } from "../../types/flavor";
+import { SIZES } from "../../configs/order";
+import { getFlavors } from "../../services/flavorService";
+
+function createDefaultOrderItemRequest(): OrderItemRequest {
+    return {
+        quantity: 1,
+        sizeId: 0,
+        flavor1Id: 0,
+        flavor2Id: null,
+        notes: null,
+    };
+}
 
 interface Props {
     title: string;
     isOpen: boolean;
     onClose: () => void;
-    onSave: (data: OrderDetail) => void;
-    orderDetailData: OrderDetail | null;
+    onSave: (data: OrderItemRequest) => void;
+    orderDetailData: OrderItemRequest | null;
+    isLoading: boolean;
 }
 
-const createDefaultOrderDetail = (): OrderDetail => ({
-    id: "",
-    quantity: 0,
-    size: "",
-    flavor1: "",
-    flavor2: "",
-    notes: "",
-    unit_price: 0,
-    total_price: 0,
-    status: "pending",
-    custom_made: false,
-});
-
-export default function OrderDetailFormModal({
+export default function OrderItemRequestFormModal({
     title,
     isOpen,
     onClose,
     onSave,
     orderDetailData,
+    isLoading,
 }: Props) {
     const toast = useCustomToast();
     const {
         backgroundColor,
         whiteColor,
         lightGreyColor,
+        mediumGreyColor,
         primaryColor,
         secondaryColor,
         tertiaryColor,
@@ -57,22 +65,87 @@ export default function OrderDetailFormModal({
         invalidColor,
     } = useAppColors();
 
-    const [formData, setFormData] = useState<OrderDetail>(
-        createDefaultOrderDetail,
+    const [formData, setFormData] = useState<OrderItemRequest>(
+        createDefaultOrderItemRequest(),
     );
+    const [flavors, setFlavors] = useState<Flavor[]>([]);
     const [hasAttemptedSave, setHasAttemptedSave] = useState(false);
+    const [isSearchLoading, setIsSearchingLoading] = useState<boolean>(false);
+
+    const isEditing = !!orderDetailData;
+    const initialStatus = orderDetailData?.status;
+
+    const fetchFlavors = useCallback(async () => {
+        setIsSearchingLoading(true);
+
+        try {
+            const flavorsData = await getFlavors();
+            setFlavors(flavorsData);
+        } catch (error) {
+            toast.showToast({
+                title: "Erro ao carregar!",
+                description:
+                    "Não foi possível buscar os sabores. Tente novamente.",
+                status: "error",
+            });
+        } finally {
+            setIsSearchingLoading(false);
+        }
+    }, [toast]);
+
+    useEffect(() => {
+        fetchFlavors();
+    }, [fetchFlavors]);
 
     useEffect(() => {
         if (isOpen) {
             const initialData = orderDetailData
-                ? orderDetailData
-                : createDefaultOrderDetail();
+                ? { ...orderDetailData }
+                : createDefaultOrderItemRequest();
             setFormData(initialData);
         } else {
             setHasAttemptedSave(false);
-            setFormData(createDefaultOrderDetail());
+            setFormData(createDefaultOrderItemRequest());
         }
     }, [isOpen, orderDetailData]);
+
+    const isFormDisabled = useMemo(
+        () =>
+            isEditing &&
+            (initialStatus === "COMPLETED" || initialStatus === "CANCELLED"),
+        [isEditing, initialStatus],
+    );
+
+    const statusOptions = useMemo(() => {
+        if (!isEditing) return [];
+
+        const options: { id: OrderStatus; name: string }[] = [];
+
+        if (initialStatus === "PENDING") {
+            options.push(
+                { id: "PENDING", name: ORDER_STATUS_MAP.PENDING },
+                {
+                    id: "READY_FOR_PICKUP",
+                    name: ORDER_STATUS_MAP.READY_FOR_PICKUP,
+                },
+            );
+        } else if (initialStatus === "READY_FOR_PICKUP") {
+            options.push(
+                {
+                    id: "READY_FOR_PICKUP",
+                    name: ORDER_STATUS_MAP.READY_FOR_PICKUP,
+                },
+                { id: "COMPLETED", name: ORDER_STATUS_MAP.COMPLETED },
+            );
+        } else if (initialStatus) {
+            options.push({
+                id: initialStatus,
+                name: ORDER_STATUS_MAP[initialStatus],
+            });
+        }
+
+        return options;
+    }, [isEditing, initialStatus]);
 
     const isQuantityInvalid = useMemo(
         () =>
@@ -81,17 +154,17 @@ export default function OrderDetailFormModal({
     );
 
     const isFlavor1Invalid = useMemo(
-        () => hasAttemptedSave && !formData.flavor1,
-        [hasAttemptedSave, formData.flavor1],
+        () => hasAttemptedSave && !formData.flavor1Id,
+        [hasAttemptedSave, formData.flavor1Id],
     );
 
     const isSizeInvalid = useMemo(
-        () => hasAttemptedSave && !formData.size,
-        [hasAttemptedSave, formData.size],
+        () => hasAttemptedSave && !formData.sizeId,
+        [hasAttemptedSave, formData.sizeId],
     );
 
     const handleInputChange = useCallback(
-        (field: keyof OrderDetail, value: any) => {
+        (field: keyof OrderItemRequest, value: any) => {
             setFormData((prevData) => ({ ...prevData, [field]: value }));
         },
         [],
@@ -101,7 +174,7 @@ export default function OrderDetailFormModal({
         setHasAttemptedSave(true);
 
         const isFormValid =
-            formData.quantity > 0 && formData.flavor1 && formData.size;
+            formData.quantity > 0 && !!formData.flavor1Id && !!formData.sizeId;
 
         if (!isFormValid) {
             toast.showToast({
@@ -109,12 +182,27 @@ export default function OrderDetailFormModal({
                 description: "Por favor, preencha todos os campos obrigatórios",
                 status: "warning",
             });
-
             return;
         }
 
-        onSave(formData as unknown as OrderDetail);
-    }, [formData, onSave, toast]);
+        const dataToSave: OrderItemRequest = {
+            ...formData,
+            status: isEditing ? formData.status : undefined,
+        };
+
+        onSave(dataToSave);
+    }, [formData, onSave, toast, isEditing]);
+
+    if (isSearchLoading) {
+        return (
+            <Center flex={1} bg={backgroundColor}>
+                <Spinner size="lg" color={secondaryColor} />
+                <Text mt={4} color={mediumGreyColor}>
+                    Carregando sabores...
+                </Text>
+            </Center>
+        );
+    }
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} size="xl">
@@ -144,6 +232,33 @@ export default function OrderDetailFormModal({
                     borderColor={lightGreyColor}
                 >
                     <VStack space={5}>
+                        {isEditing && statusOptions.length > 0 && (
+                            <FormControl>
+                                <FormControl.Label>
+                                    <HStack alignItems="center" space={2}>
+                                        <Icon
+                                            as={Ionicons}
+                                            name="checkmark-done"
+                                            size="sm"
+                                        />
+                                        <Text fontWeight="medium">Status </Text>
+                                    </HStack>
+                                </FormControl.Label>
+                                <Select
+                                    modalTitle="Selecione um Status"
+                                    placeholder="Escolha o status"
+                                    data={statusOptions}
+                                    selectedValue={formData.status || ""}
+                                    onValueChange={(value) =>
+                                        handleInputChange("status", value)
+                                    }
+                                    isDisabled={isFormDisabled}
+                                    itemValue={(item) => item.id}
+                                    itemLabel={(item) => item.name}
+                                />
+                            </FormControl>
+                        )}
+
                         <FormControl isRequired isInvalid={isQuantityInvalid}>
                             <FormControl.Label>
                                 <HStack alignItems="center" space={2}>
@@ -156,6 +271,7 @@ export default function OrderDetailFormModal({
                                 </HStack>
                             </FormControl.Label>
                             <Input
+                                isDisabled={isFormDisabled}
                                 keyboardType="numeric"
                                 value={formData.quantity.toString()}
                                 onChangeText={(text) => {
@@ -163,7 +279,10 @@ export default function OrderDetailFormModal({
                                         /[^0-9]/g,
                                         "",
                                     );
-                                    handleInputChange("quantity", onlyNumbers);
+                                    handleInputChange(
+                                        "quantity",
+                                        Number(onlyNumbers) || 0,
+                                    );
                                 }}
                                 placeholder="Ex: 10"
                                 bg={backgroundColor}
@@ -197,14 +316,17 @@ export default function OrderDetailFormModal({
                                 </HStack>
                             </FormControl.Label>
                             <Select
+                                isDisabled={isFormDisabled}
                                 modalTitle="Selecione um Tamanho"
                                 placeholder="Escolha o tamanho"
-                                data={sizes}
-                                selectedValue={formData.size}
+                                data={SIZES}
+                                selectedValue={formData.sizeId || 0}
                                 onValueChange={(value) =>
-                                    handleInputChange("size", value)
+                                    handleInputChange("sizeId", value)
                                 }
                                 isInvalid={isSizeInvalid}
+                                itemValue={(item) => item.id}
+                                itemLabel={(item) => item.name}
                             />
                         </FormControl>
 
@@ -220,14 +342,22 @@ export default function OrderDetailFormModal({
                                 </HStack>
                             </FormControl.Label>
                             <Select
+                                isDisabled={isFormDisabled}
                                 modalTitle="Selecione um Sabor"
                                 placeholder="Escolha o primeiro sabor"
-                                data={flavors}
-                                selectedValue={formData.flavor1}
+                                data={flavors.filter(
+                                    (f) => f.id !== formData.flavor2Id,
+                                )}
+                                selectedValue={formData.flavor1Id}
                                 onValueChange={(value) =>
-                                    handleInputChange("flavor1", value)
+                                    handleInputChange(
+                                        "flavor1Id",
+                                        Number(value),
+                                    )
                                 }
                                 isInvalid={isFlavor1Invalid}
+                                itemValue={(item) => item.id}
+                                itemLabel={(item) => item.name}
                             />
                         </FormControl>
 
@@ -243,16 +373,22 @@ export default function OrderDetailFormModal({
                                 </HStack>
                             </FormControl.Label>
                             <Select
+                                isDisabled={isFormDisabled}
                                 modalTitle="Selecione um Sabor"
-                                placeholder="Escolha o segundo sabor"
-                                data={flavors}
-                                selectedValue={formData.flavor2 || ""}
+                                placeholder="Escolha o segundo sabor (opcional)"
+                                data={flavors.filter(
+                                    (f) => f.id !== formData.flavor1Id,
+                                )}
+                                selectedValue={formData.flavor2Id || ""}
                                 onValueChange={(value) =>
-                                    handleInputChange("flavor2", value)
+                                    handleInputChange(
+                                        "flavor2Id",
+                                        value ? Number(value) : null,
+                                    )
                                 }
-                                isInvalid={false}
+                                itemValue={(item) => item.id}
+                                itemLabel={(item) => item.name}
                             />
-
                         </FormControl>
 
                         <FormControl>
@@ -267,7 +403,8 @@ export default function OrderDetailFormModal({
                                 </HStack>
                             </FormControl.Label>
                             <TextArea
-                                value={formData.notes}
+                                isDisabled={isFormDisabled}
+                                value={formData.notes || ""}
                                 onChangeText={(value) =>
                                     handleInputChange("notes", value)
                                 }
@@ -289,6 +426,7 @@ export default function OrderDetailFormModal({
                             flex={1}
                             py={3}
                             _text={{ fontSize: "md", fontWeight: "medium" }}
+                            isDisabled={isLoading}
                         >
                             Cancelar
                         </Button>
@@ -303,6 +441,10 @@ export default function OrderDetailFormModal({
                             py={3}
                             shadow={2}
                             _text={{ fontSize: "md", fontWeight: "medium" }}
+                            isDisabled={isFormDisabled}
+                            isLoading={isLoading}
+                            isLoadingText="Salvando..."
+                            _loading={{ bg: tertiaryColor }}
                         >
                             Salvar
                         </Button>

@@ -3,7 +3,7 @@ import { TAB_CONFIG } from "../configs/navigation";
 
 export type CustomerStackParamList = {
     CustomersList: undefined;
-    Customer: { customerId: string }; 
+    Customer: { customerId: number };
 };
 
 export type MobileTabParamList = {
@@ -17,7 +17,7 @@ export type RootDrawerParamList = {
 } & {
     FlavorList: undefined;
     Employees: undefined;
-    Order: { orderId: string }; 
+    Order: { customerId: number; orderId: number };
 };
 
 export type RootStackParamList = {
@@ -25,8 +25,8 @@ export type RootStackParamList = {
     Menu: { onLogout: () => void };
     FlavorList: undefined;
     Employees: undefined;
-    Customer: { customerId: string };
-    Order: { orderId: string };
+    Customer: { customerId: number };
+    Order: { customerId: number; orderId: number };
 };
 
 export type AuthStackParamList = {

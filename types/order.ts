@@ -1,39 +1,69 @@
 import { Customer } from "./customer";
 
-export type OrderDetail = {
-    id: string;
-    size: string;
-    flavor1: string;
-    flavor2?: string;
+export type OrderStatus =
+    | "PENDING"
+    | "READY_FOR_PICKUP"
+    | "COMPLETED"
+    | "CANCELLED";
+export type ChargeStatus = "PAID" | "UNPAID" | "PARTIAL" | "OVERDUE";
+
+export type OrderItemResponse = {
+    id: number;
+    orderId: number;
+    sizeId: number;
+    sizeName: string;
+    flavor1Id: number;
+    flavor1Name: string;
+    flavor2Id: number | null;
+    flavor2Name: string | null;
     quantity: number;
-    unit_price: number;
-    total_price: number;
-    notes?: string;
-    status: "pending" | "completed" | "cancelled";
-    custom_made: boolean;
+    unitPrice: number;
+    totalPrice: number;
+    onDemand: boolean;
+    status: OrderStatus;
+    notes: string | null;
 };
 
-export type Order = {
-    id: string;
-    created_date: string;
-    due_date: string;
-    pickup_date?: string;
-    notes?: string;
-    status: "pending" | "completed" | "cancelled";
-    details: OrderDetail[];
-    charge: Charge;
-    customer?: Customer;
+export type OrderItemRequest = {
+    sizeId: number;
+    flavor1Id: number;
+    flavor2Id: number | null;
+    quantity: number;
+    status?: OrderStatus;
+    notes: string | null;
+};
+
+export type OrderResponse = {
+    id: number;
+    customerId: number;
+    employeeId: number;
+    creationDate: string;
+    expectedPickupDate: string;
+    pickupDate: string | null;
+    status: OrderStatus;
+    notes: string | null;
+    orderItems: OrderItemResponse[];
+    charges: ChargeResponse;
+};
+
+export type OrderRequest = {
+    employeeId?: number;
+    expectedPickupDate?: string;
+    status?: OrderStatus;
+    notes: string | null;
+    orderItems?: OrderItemRequest[];
+    discount: number;
 };
 
 export type Payment = {
-    id: string;
+    id: number;
     value: number;
     date: string;
     method: string;
 };
 
 export type Charge = {
-    id: string;
+    id: number;
     date: string;
     status: "pending" | "paid" | "overdue";
     subtotal: number;
@@ -42,10 +72,27 @@ export type Charge = {
     payments: Payment[];
 };
 
-export type OrderStatus = "pending" | "completed" | "cancelled";
+export type ChargeResponse = {
+    id: number;
+    orderId: number;
+    subtotalAmount: number;
+    discount: number;
+    totalAmount: number;
+    status: ChargeStatus;
+    date: string;
+    payments: Payment[];
+};
 
 export const ORDER_STATUS: { value: OrderStatus; label: string }[] = [
-    { value: "pending", label: "Pendente" },
-    { value: "completed", label: "Concluído" },
-    { value: "cancelled", label: "Cancelado" },
+    { value: "PENDING", label: "Pendente" },
+    { value: "READY_FOR_PICKUP", label: "Pronto" },
+    { value: "COMPLETED", label: "Concluído" },
+    { value: "CANCELLED", label: "Cancelado" },
 ];
+
+export const ORDER_STATUS_MAP: Record<OrderStatus, string> = {
+    PENDING: "Pendente",
+    READY_FOR_PICKUP: "Pronto para Retirada",
+    COMPLETED: "Concluído",
+    CANCELLED: "Cancelado",
+};

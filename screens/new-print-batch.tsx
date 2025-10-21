@@ -41,7 +41,7 @@ const printItemsMock: ItemPrintBatch[] = [
             id: "5",
             name: "Ana Costa",
             phone: "19888888888",
-            is_reseller: true,
+            isReseller: true,
         },
     },
     {
@@ -65,7 +65,7 @@ const printItemsMock: ItemPrintBatch[] = [
             id: "6",
             name: "Carlos Souza",
             phone: "21777777777",
-            is_reseller: false,
+            isReseller: false,
         },
     },
     {
@@ -89,7 +89,7 @@ const printItemsMock: ItemPrintBatch[] = [
             id: "5",
             name: "Ana Costa",
             phone: "19888888888",
-            is_reseller: true,
+            isReseller: true,
         },
     },
 ];
@@ -112,7 +112,7 @@ export default function NewPrintBatchScreen() {
         { value: "not-printed", label: "Não impressos", icon: "warning" },
     ];
 
-    const handleSelect = (id: string) => {
+    const handleSelect = (id: number) => {
         if (selectedIds.includes(id)) {
             setSelectedIds(selectedIds.filter((itemId) => itemId !== id));
         } else {

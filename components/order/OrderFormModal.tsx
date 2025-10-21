@@ -13,35 +13,35 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useAppColors } from "../../hooks/useAppColors";
 import { useCustomToast } from "../../contexts/ToastProvider";
-import { Order, ORDER_STATUS } from "../../types/order";
-import { formatDate } from "../../utils/formatters";
+import {
+    ORDER_STATUS,
+    ORDER_STATUS_MAP,
+    OrderRequest,
+    OrderStatus,
+} from "../../types/order";
+import {
+    applyDateMask,
+    formatDate,
+    parseInputDate,
+} from "../../utils/formatters";
 import Select from "../layout/Select";
 
 interface Props {
     title: string;
     isOpen: boolean;
     onClose: () => void;
-    onSave: (data: Order) => void;
-    orderData: Order | null;
+    onSave: (data: OrderRequest) => void;
+    orderData: OrderRequest | null;
+    isLoading: boolean;
 }
 
-const createDefaultOrder = (): Order => ({
-    id: "",
-    created_date: new Date().toString(),
-    due_date: "",
-    notes: "",
-    status: "pending",
-    pickup_date: undefined,
-    details: [],
-    charge: {
-        id: "",
-        date: new Date().toString(),
-        status: "pending",
-        discount: 0,
-        subtotal: 0,
-        total: 0,
-        payments: [],
-    },
+const createDefaultOrder = (): OrderRequest => ({
+    employeeId: 1,
+    expectedPickupDate: "",
+    status: undefined,
+    notes: null,
+    orderItems: [],
+    discount: 0,
 });
 
 export default function OrderFormModal({
@@ -50,43 +50,45 @@ export default function OrderFormModal({
     onClose,
     onSave,
     orderData,
+    isLoading,
 }: Props) {
     const toast = useCustomToast();
     const {
         borderColor,
         backgroundColor,
         whiteColor,
-        primaryColor,
         secondaryColor,
         tertiaryColor,
         lightGreyColor,
         invalidColor,
     } = useAppColors();
 
-    const [formData, setFormData] = useState<Order>(createDefaultOrder());
+    const [formData, setFormData] = useState<OrderRequest>(
+        createDefaultOrder(),
+    );
+
     const [discountText, setDiscountText] = useState<string>("");
+    const [dateText, setDateText] = useState<string>("");
     const [hasAttemptedSave, setHasAttemptedSave] = useState(false);
+
+    const isEditing = !!orderData;
+    const initialStatus = orderData?.status;
 
     useEffect(() => {
         if (isOpen) {
             const initialData = orderData
-                ? {
-                      ...createDefaultOrder(),
-                      ...orderData,
-                      due_date: orderData.due_date
-                          ? new Date(orderData.due_date).toString()
-                          : "",
-                      pickup_date: orderData.pickup_date
-                          ? new Date(orderData.pickup_date).toString()
-                          : undefined,
-                  }
+                ? { ...orderData }
                 : createDefaultOrder();
+
+            if (initialData.expectedPickupDate) {
+                setDateText(formatDate(initialData.expectedPickupDate));
+            } else {
+                setDateText("");
+            }
 
             setFormData(initialData);
             setDiscountText(
-                initialData.charge.discount > 0
-                    ? String(initialData.charge.discount)
-                    : "",
+                initialData.discount > 0 ? String(initialData.discount) : "",
             );
         } else {
             setHasAttemptedSave(false);
@@ -95,26 +97,99 @@ export default function OrderFormModal({
         }
     }, [isOpen, orderData]);
 
-    const isDueDateInvalid = useMemo(
-        () => hasAttemptedSave && !formData.due_date,
-        [hasAttemptedSave, formData.due_date],
+    const isFormDisabled = useMemo(
+        () =>
+            isEditing &&
+            (initialStatus === "COMPLETED" || initialStatus === "CANCELLED"),
+        [isEditing, initialStatus],
+    );
+
+    const statusOptions = useMemo(() => {
+        const options: { value: OrderStatus; label: string }[] = [];
+        if (!isEditing) {
+            return options;
+        }
+
+        const items = formData.orderItems || [];
+
+        if (initialStatus === "PENDING") {
+            options.push({ value: "PENDING", label: ORDER_STATUS_MAP.PENDING });
+            const canCancel = !items.some(
+                (item) => item.status === "COMPLETED",
+            );
+
+            if (canCancel) {
+                options.push({
+                    value: "CANCELLED",
+                    label: ORDER_STATUS_MAP.CANCELLED,
+                });
+            }
+        } else if (initialStatus === "READY_FOR_PICKUP") {
+            options.push({
+                value: "READY_FOR_PICKUP",
+                label: ORDER_STATUS_MAP.READY_FOR_PICKUP,
+            });
+
+            const canComplete = !items.some(
+                (item) => item.status === "PENDING",
+            );
+            if (canComplete) {
+                options.push({
+                    value: "COMPLETED",
+                    label: ORDER_STATUS_MAP.COMPLETED,
+                });
+            }
+
+            const canCancel = !items.some(
+                (item) => item.status === "COMPLETED",
+            );
+            if (canCancel) {
+                options.push({
+                    value: "CANCELLED",
+                    label: ORDER_STATUS_MAP.CANCELLED,
+                });
+            }
+        } else if (initialStatus) {
+            options.push({
+                value: initialStatus,
+                label: ORDER_STATUS_MAP[initialStatus],
+            });
+        }
+
+        return options;
+    }, [isEditing, initialStatus, formData.orderItems]);
+
+    const isExpectedPickupDateInvalid = useMemo(
+        () =>
+            hasAttemptedSave && !formData.expectedPickupDate && !isFormDisabled,
+        [hasAttemptedSave, formData.expectedPickupDate, isFormDisabled],
     );
 
     const isStatusInvalid = useMemo(
-        () => hasAttemptedSave && !formData.status,
-        [hasAttemptedSave, formData.status],
-    );
-
-    const isPickupDateInvalid = useMemo(
         () =>
             hasAttemptedSave &&
-            formData.status === "completed" &&
-            !formData.pickup_date,
-        [hasAttemptedSave, formData.status, formData.pickup_date],
+            isEditing &&
+            !formData.status &&
+            !isFormDisabled,
+        [hasAttemptedSave, isEditing, formData.status, isFormDisabled],
     );
 
-    const handleInputChange = useCallback((field: keyof Order, value: any) => {
-        setFormData((prevData) => ({ ...prevData, [field]: value }));
+    const handleInputChange = useCallback(
+        (field: keyof OrderRequest, value: any) => {
+            setFormData((prevData) => ({ ...prevData, [field]: value }));
+        },
+        [],
+    );
+
+    const handleDateChange = useCallback((text: string) => {
+        const maskedText = applyDateMask(text);
+        setDateText(maskedText);
+
+        const isoDateString = parseInputDate(maskedText);
+        setFormData((prevData) => ({
+            ...prevData,
+            expectedPickupDate: isoDateString,
+        }));
     }, []);
 
     const handleDiscountChange = useCallback((text: string) => {
@@ -125,20 +200,17 @@ export default function OrderFormModal({
         setDiscountText(cleanedText);
         setFormData((prevData) => ({
             ...prevData,
-            charge: {
-                ...prevData.charge,
-                discount: parseFloat(cleanedText) || 0,
-            },
+            discount: parseFloat(cleanedText) || 0,
         }));
     }, []);
 
     const handleSave = useCallback(() => {
         setHasAttemptedSave(true);
 
-        const isFormValid =
-            formData.due_date &&
-            formData.status &&
-            (formData.status !== "completed" || formData.pickup_date);
+        const isDueDateValid = !!formData.expectedPickupDate || isFormDisabled;
+        const isStatusValid =
+            (isEditing ? !!formData.status : true) || isFormDisabled;
+        const isFormValid = isDueDateValid && isStatusValid;
 
         if (!isFormValid) {
             toast.showToast({
@@ -150,16 +222,26 @@ export default function OrderFormModal({
             return;
         }
 
-        const dataToSave = {
+        if (isEditing && isFormDisabled) {
+            const partialData = {
+                discount: formData.discount,
+                notes: formData.notes,
+            };
+            onSave(partialData);
+            return; 
+        }
+
+        const dataToSave: OrderRequest = {
             ...formData,
-            due_date: new Date(formData.due_date).toISOString(),
-            pickup_date: formData.pickup_date
-                ? new Date(formData.pickup_date).toISOString()
-                : null,
+            expectedPickupDate: new Date(
+                formData.expectedPickupDate!,
+            ).toISOString(),
+            status: isEditing ? formData.status : undefined,
+            orderItems: isEditing ? formData.orderItems : [],
         };
 
-        onSave(dataToSave as any);
-    }, [formData, onSave, toast]);
+        onSave(dataToSave);
+    }, [formData, onSave, toast, isEditing, isFormDisabled]);
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} size="xl">
@@ -189,32 +271,38 @@ export default function OrderFormModal({
                     borderColor={lightGreyColor}
                 >
                     <VStack space={5}>
-                        <FormControl isRequired isInvalid={isStatusInvalid}>
-                            <FormControl.Label>
-                                <HStack alignItems="center" space={2}>
-                                    <Icon
-                                        as={Ionicons}
-                                        name="checkmark-done"
-                                        size="sm"
-                                    />
-                                    <Text fontWeight="medium">Status </Text>
-                                </HStack>
-                            </FormControl.Label>
-                            <Select
-                                modalTitle="Selecione o Status"
-                                placeholder="Selecione um status"
-                                data={ORDER_STATUS}
-                                itemValue={(item) => item.value}
-                                itemLabel={(item) => item.label}
-                                selectedValue={formData.status}
-                                onValueChange={(value) =>
-                                    handleInputChange("status", value)
-                                }
-                                isInvalid={isStatusInvalid}
-                            />
-                        </FormControl>
+                        {isEditing && (
+                            <FormControl isRequired isInvalid={isStatusInvalid}>
+                                <FormControl.Label>
+                                    <HStack alignItems="center" space={2}>
+                                        <Icon
+                                            as={Ionicons}
+                                            name="checkmark-done"
+                                            size="sm"
+                                        />
+                                        <Text fontWeight="medium">Status </Text>
+                                    </HStack>
+                                </FormControl.Label>
+                                <Select
+                                    modalTitle="Selecione o Status"
+                                    placeholder="Selecione um status"
+                                    data={statusOptions}
+                                    itemValue={(item) => item.value}
+                                    itemLabel={(item) => item.label}
+                                    selectedValue={formData.status || ""}
+                                    onValueChange={(value) =>
+                                        handleInputChange("status", value)
+                                    }
+                                    isInvalid={isStatusInvalid}
+                                    isDisabled={isFormDisabled}
+                                />
+                            </FormControl>
+                        )}
 
-                        <FormControl isRequired isInvalid={isDueDateInvalid}>
+                        <FormControl
+                            isRequired
+                            isInvalid={isExpectedPickupDateInvalid}
+                        >
                             <FormControl.Label>
                                 <HStack alignItems="center" space={2}>
                                     <Icon
@@ -225,68 +313,23 @@ export default function OrderFormModal({
                                     <Text fontWeight="medium">Prazo </Text>
                                 </HStack>
                             </FormControl.Label>
-
                             <Input
-                                value={formatDate(formData.due_date)}
-                                placeholder="Selecione uma data"
-                                onChangeText={(text) =>
-                                    handleInputChange(
-                                        "due_date",
-                                        formatDate(text),
-                                    )
-                                }
+                                value={dateText}
+                                placeholder="DD/MM/AAAA"
+                                onChangeText={handleDateChange}
+                                keyboardType="numeric"
+                                maxLength={10}
                                 bg={backgroundColor}
                                 variant="filled"
                                 size="lg"
                                 borderColor={
-                                    isDueDateInvalid
+                                    isExpectedPickupDateInvalid
                                         ? invalidColor
                                         : backgroundColor
                                 }
+                                isDisabled={isFormDisabled}
                             />
                         </FormControl>
-
-                        {formData.status === "completed" && (
-                            <FormControl
-                                isRequired
-                                isInvalid={isPickupDateInvalid}
-                            >
-                                <FormControl.Label>
-                                    <HStack alignItems="center" space={2}>
-                                        <Icon
-                                            as={Ionicons}
-                                            name="calendar"
-                                            size="sm"
-                                        />
-                                        <Text fontWeight="medium">
-                                            Retirada{" "}
-                                        </Text>
-                                    </HStack>
-                                </FormControl.Label>
-
-                                <Input
-                                    value={
-                                        formData.pickup_date &&
-                                        formatDate(formData.pickup_date)
-                                    }
-                                    placeholder="Selecione uma data"
-                                    onChangeText={(text) =>
-                                        handleInputChange(
-                                            "pickup_date",
-                                            formatDate(text),
-                                        )
-                                    }
-                                    bg={backgroundColor}
-                                    variant="filled"
-                                    size="lg"
-                                    borderColor={
-                                        isPickupDateInvalid
-                                            ? invalidColor
-                                            : backgroundColor
-                                    }
-                                />
-                            </FormControl>
-                        )}
 
                         <FormControl>
                             <FormControl.Label>
@@ -305,6 +348,7 @@ export default function OrderFormModal({
                                 size="lg"
                             />
                         </FormControl>
+
                         <FormControl>
                             <FormControl.Label>
                                 <HStack alignItems="center" space={2}>
@@ -317,7 +361,7 @@ export default function OrderFormModal({
                                 </HStack>
                             </FormControl.Label>
                             <TextArea
-                                value={formData.notes}
+                                value={formData.notes || ""}
                                 onChangeText={(text) =>
                                     handleInputChange("notes", text)
                                 }
@@ -338,6 +382,7 @@ export default function OrderFormModal({
                             rounded="xl"
                             flex={1}
                             py={3}
+                            isDisabled={isLoading}
                         >
                             Cancelar
                         </Button>
@@ -352,6 +397,9 @@ export default function OrderFormModal({
                             py={3}
                             shadow={2}
                             _text={{ fontSize: "md", fontWeight: "medium" }}
+                            isLoading={isLoading}
+                            isLoadingText="Salvando..."
+                            _loading={{ bg: tertiaryColor }}
                         >
                             Salvar
                         </Button>

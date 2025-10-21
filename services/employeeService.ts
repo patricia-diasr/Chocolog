@@ -6,20 +6,26 @@ export const getEmployees = async (): Promise<Employee[]> => {
     return response.data;
 };
 
-export const getEmployee = async (id: string): Promise<void> => {
-    await api.get(`/employees/${id}`);
+export const getEmployee = async (id: number): Promise<Employee> => {
+    const response = await api.get(`/employees/${id}`);
+    return response.data;
 };
 
-export const createEmployee = async (employeeData: Omit<Employee, "id">): Promise<Employee> => {
+export const createEmployee = async (
+    employeeData: Omit<Employee, "id">,
+): Promise<Employee> => {
     const response = await api.post("/employees", employeeData);
     return response.data;
 };
 
-export const updateEmployee = async (id: string, employeeData: Employee): Promise<Employee> => {
+export const updateEmployee = async (
+    id: number,
+    employeeData: Employee,
+): Promise<Employee> => {
     const response = await api.patch(`/employees/${id}`, employeeData);
     return response.data;
 };
 
-export const deleteEmployee = async (id: string): Promise<void> => {
+export const deleteEmployee = async (id: number): Promise<void> => {
     await api.delete(`/employees/${id}`);
 };

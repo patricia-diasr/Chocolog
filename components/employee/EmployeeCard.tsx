@@ -10,14 +10,10 @@ import { Animated } from "react-native";
 interface Props {
     employee: Employee;
     onEdit?: (employee: Employee) => void;
-    onDelete?: (id: string) => void;
+    onDelete?: (id: number) => void;
 }
 
-export default function EmployeeCard({
-    employee,
-    onEdit,
-    onDelete,
-}: Props) {
+export default function EmployeeCard({ employee, onEdit, onDelete }: Props) {
     const { borderColor, whiteColor, secondaryColor, darkGreyColor } =
         useAppColors();
 

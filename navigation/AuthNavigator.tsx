@@ -7,7 +7,7 @@ const Stack = createNativeStackNavigator<AuthStackParamList>();
 
 interface Props {
     onLogin: () => void;
-};
+}
 
 export default function AuthNavigator({ onLogin }: Props) {
     return (

@@ -22,7 +22,7 @@ export default function MenuScreen() {
 
     const handleNavigation = (routeTarget: AppScreenName) => {
         const screenConfig = SCREEN_CONFIG[routeTarget];
-        if (!screenConfig) return; 
+        if (!screenConfig) return;
 
         if (screenConfig.isTab) {
             navigation.navigate("MainTabs", { screen: routeTarget });

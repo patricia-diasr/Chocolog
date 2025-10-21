@@ -2,18 +2,18 @@ import { VStack, HStack, Box, Text } from "native-base";
 import { useAppColors } from "../../hooks/useAppColors";
 import { formatPrice } from "../../utils/formatters";
 import { getStatusDetails } from "../../utils/statusConfig";
-import { Charge } from "../../types/order";
+import { ChargeResponse } from "../../types/order";
 import LabelBadge from "../layout/LabelBadge";
 import InfoRow from "../layout/InfoRow";
 
 interface Props {
-    charge: Charge;
+    charge: ChargeResponse;
 }
 
 export default function ChargeInfoCard({ charge }: Props) {
     const { whiteColor, blackColor, borderColor } = useAppColors();
 
-    const statusInfo = getStatusDetails("paid");
+    const statusInfo = getStatusDetails(charge.status);
 
     return (
         <Box
@@ -30,7 +30,11 @@ export default function ChargeInfoCard({ charge }: Props) {
                         justifyContent="space-between"
                         alignItems="flex-start"
                     >
-                        <Text fontSize="xl" fontWeight="bold" color={blackColor}>
+                        <Text
+                            fontSize="xl"
+                            fontWeight="bold"
+                            color={blackColor}
+                        >
                             Cobrança
                         </Text>
                         <LabelBadge
@@ -43,7 +47,7 @@ export default function ChargeInfoCard({ charge }: Props) {
                         <InfoRow
                             iconName="pricetag"
                             label="Subtotal"
-                            value={formatPrice(charge.subtotal)}
+                            value={formatPrice(charge.subtotalAmount)}
                         />
                         <InfoRow
                             iconName="gift"
@@ -53,7 +57,7 @@ export default function ChargeInfoCard({ charge }: Props) {
                         <InfoRow
                             iconName="cash"
                             label="Total"
-                            value={formatPrice(charge.total)}
+                            value={formatPrice(charge.totalAmount)}
                         />
                     </VStack>
                 </VStack>

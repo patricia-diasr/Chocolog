@@ -90,7 +90,7 @@ export default function RecordFormModal({
             description: `Registro de ${
                 type === "+" ? "entrada" : "saída"
             } adicionado`,
-            status: "success"
+            status: "success",
         });
 
         onSave(newRecord);

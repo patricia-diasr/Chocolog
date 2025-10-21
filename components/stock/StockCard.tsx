@@ -18,10 +18,7 @@ export default function StockCard({ flavor, sizes, status }: StockItem) {
 
     return (
         <Box bg={whiteColor} p={5} rounded="2xl" shadow={4}>
-            <VStack
-                space={3}
-                mb={4}
-            >
+            <VStack space={3} mb={4}>
                 <HStack justifyContent="space-between" alignItems="flex-start">
                     <VStack flex={1}>
                         <HStack alignItems="center" space={2}>

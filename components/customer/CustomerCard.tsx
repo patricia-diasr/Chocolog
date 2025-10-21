@@ -6,15 +6,26 @@ import { Customer } from "../../types/customer";
 import LabelBadge from "../layout/LabelBadge";
 import { useAppColors } from "../../hooks/useAppColors";
 import { maskPhone } from "../../utils/formatters";
+import { CustomerStackParamList } from "../../types/navigation";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
-export default function CustomerCard({ name, phone, is_reseller }: Customer) {
+type CustomersScreenNavigationProp = NativeStackNavigationProp<
+    CustomerStackParamList,
+    "CustomersList"
+>;
+
+export default function CustomerCard({
+    id,
+    name,
+    phone,
+    isReseller,
+}: Customer) {
     const { borderColor, whiteColor, secondaryColor, darkGreyColor } =
         useAppColors();
-
-    const navigation = useNavigation();
+    const navigation = useNavigation<CustomersScreenNavigationProp>();
 
     const handleNavigate = () => {
-        navigation.navigate("Customer" as never);
+        navigation.navigate("Customer", { customerId: id });
     };
 
     return (
@@ -41,7 +52,7 @@ export default function CustomerCard({ name, phone, is_reseller }: Customer) {
                             {name}
                         </Text>
                     </HStack>
-                    {is_reseller && (
+                    {isReseller && (
                         <LabelBadge
                             color="green"
                             icon="business"

@@ -8,9 +8,10 @@ import {
     Text,
     Center,
     Pressable,
+    Spinner,
 } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 
 import StatsCard from "../components/layout/StatsCard";
 import SearchInput from "../components/layout/Searchbar";
@@ -23,46 +24,14 @@ import { useAppColors } from "../hooks/useAppColors";
 import { Customer } from "../types/customer";
 import { StatItem } from "../types/stats";
 import { useCustomToast } from "../contexts/ToastProvider";
-
-const customersMock: Customer[] = [
-    {
-        id: "1",
-        name: "Maria Silva",
-        phone: "11999999999",
-        is_reseller: true,
-    },
-    {
-        id: "2",
-        name: "João Santos",
-        phone: "11888888888",
-        is_reseller: false,
-    },
-    {
-        id: "3",
-        name: "Ana Costa",
-        phone: "11777777777",
-        is_reseller: false,
-    },
-    {
-        id: "4",
-        name: "Pedro Oliveira",
-        phone: "11666666666",
-        is_reseller: false,
-    },
-    {
-        id: "5",
-        name: "Lucia Ferreira",
-        phone: "11555555555",
-        is_reseller: true,
-    },
-];
+import { createCustomer, getCustomers } from "../services/customerService";
 
 const newCustomerTemplate: Customer = {
-    id: "",
+    id: 0,
     name: "",
     phone: "",
     notes: "",
-    is_reseller: false,
+    isReseller: false,
 };
 
 export default function CustomersScreen() {
@@ -70,7 +39,9 @@ export default function CustomersScreen() {
         useAppColors();
     const toast = useCustomToast();
 
-    const [customers, setCustomers] = useState<Customer[]>(customersMock);
+    const [customers, setCustomers] = useState<Customer[]>([]);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [isSavingLoading, setIsSavingLoading] = useState<boolean>(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [filterBy, setFilterBy] = useState<"all" | "reseller">("all");
@@ -80,23 +51,62 @@ export default function CustomersScreen() {
         { value: "reseller", label: "Revendedor", icon: "business" },
     ];
 
+    const fetchCustomers = useCallback(async () => {
+        setIsLoading(true);
+
+        try {
+            const data = await getCustomers();
+            setCustomers(data);
+        } catch (error) {
+            toast.showToast({
+                title: "Erro ao carregar!",
+                description:
+                    "Não foi possível buscar os clientes. Tente novamente.",
+                status: "error",
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    }, [toast]);
+
+    useEffect(() => {
+        fetchCustomers();
+    }, [fetchCustomers]);
+
     const handleOpenAddModal = () => {
         setIsModalOpen(true);
     };
 
-    const handleSaveNewCustomer = (newCustomer: Customer) => {
-        toast.showToast({
-            title: "Sucesso!",
-            description: "O cliente foi adicionado.",
-            status: "success",
-        });
-        setIsModalOpen(false);
+    const handleSaveNewCustomer = async (newCustomer: Customer) => {
+        setIsSavingLoading(true);
+
+        try {
+            const { id, ...newData } = newCustomer;
+            const newEmployee = await createCustomer(newData);
+            setCustomers((prev) => [...prev, newEmployee]);
+
+            toast.showToast({
+                title: "Sucesso!",
+                description: "Cliente criado.",
+                status: "success",
+            });
+            
+            setIsModalOpen(false);
+        } catch (error) {
+            toast.showToast({
+                title: "Erro!",
+                description: "Não foi possível criar o cliente.",
+                status: "error",
+            });
+        } finally {
+            setIsSavingLoading(false);
+        }
     };
 
     const customerStats = useMemo(() => {
         const totalCustomers = customers.length;
         const resellerCount = customers.filter(
-            (customer) => customer.is_reseller,
+            (customer) => customer.isReseller,
         ).length;
         const regularCount = totalCustomers - resellerCount;
 
@@ -132,7 +142,7 @@ export default function CustomersScreen() {
         }
 
         if (filterBy === "reseller") {
-            filtered = filtered.filter((customer) => customer.is_reseller);
+            filtered = filtered.filter((customer) => customer.isReseller);
         }
 
         return filtered;
@@ -140,6 +150,17 @@ export default function CustomersScreen() {
 
     const isEmpty = processedCustomers.length === 0 && searchTerm !== "";
     const isEmptyInitial = customers.length === 0;
+
+    if (isLoading) {
+        return (
+            <Center flex={1} bg={backgroundColor}>
+                <Spinner size="lg" color={secondaryColor} />
+                <Text mt={4} color={mediumGreyColor}>
+                    Carregando clientes...
+                </Text>
+            </Center>
+        );
+    }
 
     return (
         <>
@@ -298,8 +319,8 @@ export default function CustomersScreen() {
                                                     id={customer.id}
                                                     name={customer.name}
                                                     phone={customer.phone}
-                                                    is_reseller={
-                                                        customer.is_reseller
+                                                    isReseller={
+                                                        customer.isReseller
                                                     }
                                                 />
                                             </Box>
@@ -320,6 +341,7 @@ export default function CustomersScreen() {
                 onSave={handleSaveNewCustomer}
                 customerData={newCustomerTemplate}
                 title="Adicionar Cliente"
+                isLoading={isSavingLoading}
             />
         </>
     );

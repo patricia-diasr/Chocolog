@@ -1,6 +1,6 @@
-import { useCallback, useMemo, useState } from "react";
-import { useNavigation } from "@react-navigation/native";
-import { Box, Center, ScrollView, VStack } from "native-base";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { RouteProp, useNavigation } from "@react-navigation/native";
+import { Box, Center, Text, ScrollView, Spinner, VStack } from "native-base";
 
 import InfoList from "../components/layout/InfoList";
 import FabButton from "../components/layout/FabButton";
@@ -11,145 +11,139 @@ import OrderDetailFormModal from "../components/order/OrderDetailFormModal";
 
 import { useAppColors } from "../hooks/useAppColors";
 import { Customer } from "../types/customer";
-import { Charge, Order, OrderDetail } from "../types/order";
+import {
+    ChargeResponse,
+    OrderItemRequest,
+    OrderRequest,
+    OrderResponse,
+} from "../types/order";
 import { getStatusDetails } from "../utils/statusConfig";
 import { formatDate, formatPrice } from "../utils/formatters";
 import { useCustomToast } from "../contexts/ToastProvider";
-
-const customerDataMock: Customer = {
-    id: "1",
-    name: "Maria Silva",
-    phone: "11999999999",
-    notes: "Observação adicional sobre o cliente. Pode conter informações relevantes para o atendimento.",
-    is_reseller: true,
-};
-
-const ordersDataMock: Order[] = [
-    {
-        id: "1",
-        created_date: "2025-02-25",
-        due_date: "2025-03-10",
-        status: "completed",
-        details: [],
-        charge: {
-            id: "1",
-            date: "2025-03-02",
-            status: "paid",
-            subtotal: 260.0,
-            discount: 10,
-            total: 250.0,
-            payments: [],
-        },
-    },
-    {
-        id: "2",
-        created_date: "2025-03-01",
-        due_date: "2025-03-09",
-        status: "pending",
-        details: [],
-        charge: {
-            id: "2",
-            date: "2025-02-10",
-            status: "pending",
-            subtotal: 180,
-            discount: 0,
-            total: 180.0,
-            payments: [],
-        },
-    },
-    {
-        id: "3",
-        created_date: "2025-02-28",
-        due_date: "2025-03-12",
-        status: "cancelled",
-        details: [],
-        charge: {
-            id: "3",
-            date: "2025-02-20",
-            status: "overdue",
-            subtotal: 120,
-            discount: 0,
-            total: 120.0,
-            payments: [],
-        },
-    },
-];
-
-const chargesDataMock: Charge[] = [
-    {
-        id: "1",
-        date: "2025-03-02",
-        status: "paid",
-        subtotal: 260.0,
-        discount: 10,
-        total: 250.0,
-        payments: [],
-    },
-    {
-        id: "2",
-        date: "2025-02-10",
-        status: "pending",
-        subtotal: 180,
-        discount: 0,
-        total: 180.0,
-        payments: [],
-    },
-    {
-        id: "3",
-        date: "2025-02-20",
-        status: "overdue",
-        subtotal: 120,
-        discount: 0,
-        total: 120.0,
-        payments: [],
-    },
-];
+import { CustomerStackParamList } from "../types/navigation";
+import { getCustomer, updateCustomer } from "../services/customerService";
+import { createOrder, getOrders } from "../services/orderService";
 
 type VisibleModal = "editCustomer" | "addOrder" | "addOrderDetail";
+type CustomerScreenRouteProp = RouteProp<CustomerStackParamList, "Customer">;
 
-export default function CustomerScreen() {
-    const { backgroundColor } = useAppColors();
-    const navigation = useNavigation();
+interface Props {
+    route: CustomerScreenRouteProp;
+}
+
+export default function CustomerScreen({ route }: Props) {
+    const { backgroundColor, secondaryColor, mediumGreyColor } = useAppColors();
     const toast = useCustomToast();
 
-    const [customerData, setCustomerData] =
-        useState<Customer>(customerDataMock);
-    const [ordersData, setOrdersData] = useState<Order[]>(ordersDataMock);
-    const [chargesData, setChargesData] = useState<Charge[]>(chargesDataMock);
+    const navigation = useNavigation();
+    const { customerId } = route.params;
 
+    const [customerData, setCustomerData] = useState<Customer>();
+    const [ordersData, setOrdersData] = useState<OrderResponse[]>([]);
+    const [chargesData, setChargesData] = useState<ChargeResponse[]>([]);
+    const [pendingOrder, setPendingOrder] = useState<OrderRequest | null>(null);
+
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [isSavingLoading, setIsSavingLoading] = useState<boolean>(false);
     const [visibleModal, setVisibleModal] = useState<VisibleModal | null>(null);
 
-    const handleUpdateCustomer = useCallback((updatedCustomer: Customer) => {
-        setCustomerData(updatedCustomer);
+    const fetchCustomer = useCallback(async () => {
+        setIsLoading(true);
 
-        toast.showToast({
-            title: "Sucesso!",
-            description: "O cliente foi atualizado.",
-            status: "success",
-        });
+        try {
+            const customerData = await getCustomer(customerId);
+            setCustomerData(customerData);
 
-        setVisibleModal(null);
-    }, []);
+            const ordersData = await getOrders(customerId);
+            setOrdersData(ordersData);
 
-    const handleSaveOrder = useCallback((newOrder: Order) => {
+            const allCharges = ordersData.flatMap((order) => order.charges);
+            setChargesData(allCharges);
+        } catch (error) {
+            toast.showToast({
+                title: "Erro ao carregar!",
+                description:
+                    "Não foi possível buscar o cliente. Tente novamente.",
+                status: "error",
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    }, [toast, customerId]);
+
+    useEffect(() => {
+        fetchCustomer();
+    }, [fetchCustomer]);
+
+    const handleUpdateCustomer = async (updatedData: Customer) => {
+        setIsSavingLoading(true);
+
+        try {
+            const updated = await updateCustomer(updatedData.id, updatedData);
+            setCustomerData(updated);
+
+            toast.showToast({
+                title: "Sucesso!",
+                description: "Cliente atualizado.",
+                status: "success",
+            });
+            setVisibleModal(null);
+        } catch (error) {
+            toast.showToast({
+                title: "Erro!",
+                description: "Não foi possível atualizar o cliente.",
+                status: "error",
+            });
+        } finally {
+            setIsSavingLoading(false);
+        }
+    };
+
+    const handleSaveOrder = useCallback((newOrder: OrderRequest) => {
+        setPendingOrder(newOrder);
         setVisibleModal("addOrderDetail");
     }, []);
 
-    const handleSaveOrderDetail = useCallback((newOrderDetail: OrderDetail) => {
-        toast.showToast({
-            title: "Sucesso!",
-            description: "O pedido foi criado.",
-            status: "success",
-        });
-        setVisibleModal(null);
-    }, []);
+    const handleSaveOrderDetail = async (newOrderDetail: OrderItemRequest) => {
+        setIsSavingLoading(true);
+        if (!pendingOrder) {
+            toast.showToast({
+                title: "Erro!",
+                description: "Os dados do pedido principal não foram encontrados.",
+                status: "error",
+            });
+            setVisibleModal(null);
+            return;
+        }
 
-    const handleNavigateToOrder = () => {
-        navigation.navigate("Order" as never);
+        try {
+            pendingOrder?.orderItems?.push(newOrderDetail);
+            const newOrder = await createOrder(customerId, pendingOrder);
+            setOrdersData((prev) => [...prev, newOrder]);
+
+            toast.showToast({
+                title: "Sucesso!",
+                description: "O pedido foi criado.",
+                status: "success",
+            });
+
+            setVisibleModal(null);
+        } catch (error) {
+            toast.showToast({
+                title: "Erro!",
+                description: "Não foi possível criar o pedido.",
+                status: "error",
+            });
+        } finally {
+            setIsSavingLoading(false);
+        }
     };
 
-    const handleNavigateToCharge = () => {
-        navigation.navigate("Customer" as never);
+    const handleNavigateToOrder = (orderId: number) => {
+        navigation.navigate("Order", {
+            customerId: customerId,
+            orderId: orderId,
+        });
     };
 
     const orderItems = useMemo(() => {
@@ -158,7 +152,7 @@ export default function CustomerScreen() {
             return {
                 id: order.id,
                 title: `Pedido #${order.id}`,
-                info: formatDate(order.due_date),
+                info: formatDate(order.expectedPickupDate),
                 badgeColor: status.colorScheme,
                 badgeIcon: status.icon,
                 badgeLabel: status.label,
@@ -170,16 +164,27 @@ export default function CustomerScreen() {
         return chargesData.map((charge) => {
             const status = getStatusDetails(charge.status);
             return {
-                id: charge.id,
+                id: charge.orderId,
                 title: `Cobrança #${charge.id}`,
                 info: formatDate(charge.date),
-                aditionalInfo: formatPrice(charge.total),
+                aditionalInfo: formatPrice(charge.totalAmount),
                 badgeColor: status.colorScheme,
                 badgeIcon: status.icon,
                 badgeLabel: status.label,
             };
         });
     }, [chargesData]);
+
+    if (isLoading || customerData === undefined) {
+        return (
+            <Center flex={1} bg={backgroundColor}>
+                <Spinner size="lg" color={secondaryColor} />
+                <Text mt={4} color={mediumGreyColor}>
+                    Carregando cliente...
+                </Text>
+            </Center>
+        );
+    }
 
     return (
         <>
@@ -213,7 +218,7 @@ export default function CustomerScreen() {
                                 icon="card"
                                 items={chargeItems}
                                 emptyStateText="Nenhuma cobrança encontrada"
-                                onItemPress={handleNavigateToCharge}
+                                onItemPress={handleNavigateToOrder}
                             />
                         </VStack>
                     </Box>
@@ -231,6 +236,7 @@ export default function CustomerScreen() {
                 onClose={() => setVisibleModal(null)}
                 onSave={handleUpdateCustomer}
                 customerData={customerData}
+                isLoading={isSavingLoading}
             />
 
             <OrderFormModal
@@ -239,6 +245,7 @@ export default function CustomerScreen() {
                 onClose={() => setVisibleModal(null)}
                 onSave={handleSaveOrder}
                 orderData={null}
+                isLoading={isSavingLoading}
             />
 
             <OrderDetailFormModal
@@ -246,7 +253,8 @@ export default function CustomerScreen() {
                 isOpen={visibleModal === "addOrderDetail"}
                 onClose={() => setVisibleModal(null)}
                 onSave={handleSaveOrderDetail}
-                orderDetailData={null}
+                orderItemRequestData={null}
+                isLoading={isSavingLoading}
             />
         </>
     );

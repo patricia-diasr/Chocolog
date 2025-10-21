@@ -1,7 +1,7 @@
 export type Customer = {
-    id: string;
+    id: number;
     name: string;
     phone: string;
     notes?: string;
-    is_reseller: boolean;
+    isReseller: boolean;
 };

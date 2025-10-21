@@ -71,7 +71,7 @@ const ordersMock: Order[] = [
             id: "1",
             name: "Maria Silva",
             phone: "11999999999",
-            is_reseller: true,
+            isReseller: true,
         },
     },
     {
@@ -106,7 +106,7 @@ const ordersMock: Order[] = [
             id: "2",
             name: "João Santos",
             phone: "11888888888",
-            is_reseller: false,
+            isReseller: false,
         },
     },
     {
@@ -139,7 +139,7 @@ const ordersMock: Order[] = [
             id: "3",
             name: "Ana Costa",
             phone: "11777777777",
-            is_reseller: true,
+            isReseller: true,
         },
     },
     {
@@ -172,7 +172,7 @@ const ordersMock: Order[] = [
             id: "4",
             name: "Carlos Oliveira",
             phone: "11666666666",
-            is_reseller: false,
+            isReseller: false,
         },
     },
 ];
@@ -281,7 +281,7 @@ export default function ScheduleScreen() {
     const isEmpty = processedOrders.length === 0 && searchTerm !== "";
     const isEmptyInitial = orders.length === 0;
 
-    const handleNavigateToOrder = (id: string) => {
+    const handleNavigateToOrder = (id: number) => {
         navigation.navigate("Order" as never);
     };
 

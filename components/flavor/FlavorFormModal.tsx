@@ -13,7 +13,12 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useAppColors } from "../../hooks/useAppColors";
 import { useCustomToast } from "../../contexts/ToastProvider";
-import { Flavor, FlavorFormData, FlavorSize, InputData } from "../../types/flavor";
+import {
+    Flavor,
+    FlavorFormData,
+    FlavorSize,
+    InputData,
+} from "../../types/flavor";
 import { PriceInputRow } from "./PriceInputRow";
 
 interface FlavorFormModalProps {
@@ -147,31 +152,31 @@ export default function FlavorFormModal({
             });
             return;
         }
-        
+
         const newSizes: FlavorSize[] = formData.prices.map((price, index) => {
-			const originalSize = editingFlavor?.sizes.find(
-				(s) => s.name === price.size,
-			);
+            const originalSize = editingFlavor?.sizes.find(
+                (s) => s.name === price.size,
+            );
 
-			return {
-				sizeId: originalSize?.sizeId ?? index + 1,
-				name: price.size,
-				salePrice: price.salePrice,
-				costPrice: price.costPrice,
-				totalQuantity: originalSize?.totalQuantity ?? 0,
-				remainingQuantity: originalSize?.remainingQuantity ?? 0,
-			};
-		});
+            return {
+                sizeId: originalSize?.sizeId ?? index + 1,
+                name: price.size,
+                salePrice: price.salePrice,
+                costPrice: price.costPrice,
+                totalQuantity: originalSize?.totalQuantity ?? 0,
+                remainingQuantity: originalSize?.remainingQuantity ?? 0,
+            };
+        });
 
-		const flavorToSave: Flavor = {
-			id: editingFlavor?.id ?? "",
-			name: formData.flavor.trim(),
-			sizes: newSizes,
-		};
+        const flavorToSave: Flavor = {
+            id: editingFlavor?.id ?? "",
+            name: formData.flavor.trim(),
+            sizes: newSizes,
+        };
 
-        console.log(flavorToSave)
+        console.log(flavorToSave);
 
-		onSave(flavorToSave);
+        onSave(flavorToSave);
     };
 
     const isFlavorInvalid = hasAttemptedSave && !formData.flavor.trim();

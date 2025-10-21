@@ -1,10 +1,5 @@
 import React, { useState } from "react";
-import {
-    Center,
-    HStack,
-    Pressable,
-    Text,
-} from "native-base";
+import { Center, HStack, Pressable, Text } from "native-base";
 import { useAppColors } from "../hooks/useAppColors";
 import StockOverviewScreen from "./stock-overview";
 import StockRecordsScreen from "./stock-records";

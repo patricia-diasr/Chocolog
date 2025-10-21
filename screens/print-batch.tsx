@@ -36,7 +36,7 @@ const printBatchMock: PrintBatch = {
                 id: "5",
                 name: "Ana Costa",
                 phone: "19888888888",
-                is_reseller: true,
+                isReseller: true,
             },
         },
         {
@@ -59,7 +59,7 @@ const printBatchMock: PrintBatch = {
                 id: "6",
                 name: "Carlos Souza",
                 phone: "21777777777",
-                is_reseller: false,
+                isReseller: false,
             },
         },
         {
@@ -82,7 +82,7 @@ const printBatchMock: PrintBatch = {
                 id: "5",
                 name: "Ana Costa",
                 phone: "19888888888",
-                is_reseller: true,
+                isReseller: true,
             },
         },
     ],
@@ -117,10 +117,10 @@ export default function PrintBatchScreen() {
                 .map((item) =>
                     formatOrderDetailTitleWithNotes(item.order_detail),
                 )
-                .join("\n"); 
+                .join("\n");
 
             return {
-                id: firstItem.order_id, 
+                id: firstItem.order_id,
                 title: firstItem.customer.name,
                 info: combinedInfo,
                 aditionalInfo: formatDate(firstItem.due_date),
@@ -146,7 +146,13 @@ export default function PrintBatchScreen() {
                         pt={6}
                     >
                         <VStack space={4}>
-                            <PrintInfoCard id={printBatchData.id} printed_by_employee={printBatchData.printed_by_employee} created_at={printBatchData.created_at}/>
+                            <PrintInfoCard
+                                id={printBatchData.id}
+                                printed_by_employee={
+                                    printBatchData.printed_by_employee
+                                }
+                                created_at={printBatchData.created_at}
+                            />
                             <InfoList
                                 title={`Itens do Lote`}
                                 icon="cube"

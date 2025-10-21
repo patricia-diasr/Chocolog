@@ -25,10 +25,15 @@ import { Employee } from "../types/employee";
 import { StatItem } from "../types/stats";
 import DeleteAlert from "../components/layout/DeleteAlert";
 import { useCustomToast } from "../contexts/ToastProvider";
-import { getEmployees, createEmployee, updateEmployee, deleteEmployee } from "../services/employeeService";
+import {
+    getEmployees,
+    createEmployee,
+    updateEmployee,
+    deleteEmployee,
+} from "../services/employeeService";
 
 const newEmployeeTemplate: Employee = {
-    id: "",
+    id: 0,
     name: "",
     login: "",
     password: "",
@@ -45,8 +50,10 @@ export default function EmployeesScreen() {
     const [employees, setEmployees] = useState<Employee[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [isSavingLoading, setIsSavingLoading] = useState<boolean>(false);
-    const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
-    
+    const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
+        null,
+    );
+
     const [modalState, setModalState] = useState<ModalState>("closed");
     const [formData, setFormData] = useState<Employee>(newEmployeeTemplate);
     const [searchTerm, setSearchTerm] = useState("");
@@ -58,13 +65,15 @@ export default function EmployeesScreen() {
 
     const fetchEmployees = useCallback(async () => {
         setIsLoading(true);
+
         try {
             const data = await getEmployees();
             setEmployees(data);
         } catch (error) {
             toast.showToast({
                 title: "Erro ao carregar!",
-                description: "Não foi possível buscar os funcionários. Tente novamente.",
+                description:
+                    "Não foi possível buscar os funcionários. Tente novamente.",
                 status: "error",
             });
         } finally {
@@ -86,7 +95,7 @@ export default function EmployeesScreen() {
     };
 
     const openEditModal = (employee: Employee) => {
-        setFormData({ ...employee, password: "" }); 
+        setFormData({ ...employee, password: "" });
         setModalState("edit");
     };
 
@@ -103,21 +112,38 @@ export default function EmployeesScreen() {
         if (isEditing && !dataToSend.password) {
             delete dataToSend.password;
         }
-        
+
         try {
             if (isEditing) {
-                const updated = await updateEmployee(employeeData.id, dataToSend);
-                setEmployees(prev => prev.map(emp => (emp.id === updated.id ? updated : emp)));
-                toast.showToast({ title: "Sucesso!", description: "Funcionário atualizado.", status: "success" });
+                const updated = await updateEmployee(
+                    employeeData.id,
+                    dataToSend,
+                );
+                setEmployees((prev) =>
+                    prev.map((emp) => (emp.id === updated.id ? updated : emp)),
+                );
+                toast.showToast({
+                    title: "Sucesso!",
+                    description: "Funcionário atualizado.",
+                    status: "success",
+                });
             } else {
-                const { id, ...newData } = dataToSend; 
+                const { id, ...newData } = dataToSend;
                 const newEmployee = await createEmployee(newData);
-                setEmployees(prev => [...prev, newEmployee]);
-                toast.showToast({ title: "Sucesso!", description: "Funcionário criado.", status: "success" });
+                setEmployees((prev) => [...prev, newEmployee]);
+                toast.showToast({
+                    title: "Sucesso!",
+                    description: "Funcionário criado.",
+                    status: "success",
+                });
             }
             closeModal();
         } catch (error) {
-            toast.showToast({ title: "Erro!", description: "Não foi possível salvar o funcionário.", status: "error" });
+            toast.showToast({
+                title: "Erro!",
+                description: "Não foi possível salvar o funcionário.",
+                status: "error",
+            });
         } finally {
             setIsSavingLoading(false);
         }
@@ -129,11 +155,21 @@ export default function EmployeesScreen() {
 
         try {
             await deleteEmployee(selectedEmployee.id);
-            setEmployees(prev => prev.filter(emp => emp.id !== selectedEmployee.id));
-            toast.showToast({ title: "Sucesso!", description: "O funcionário foi excluído.", status: "success" });
+            setEmployees((prev) =>
+                prev.filter((emp) => emp.id !== selectedEmployee.id),
+            );
+            toast.showToast({
+                title: "Sucesso!",
+                description: "O funcionário foi excluído.",
+                status: "success",
+            });
             closeModal();
         } catch (error) {
-            toast.showToast({ title: "Erro!", description: "Não foi possível excluir o funcionário.", status: "error" });
+            toast.showToast({
+                title: "Erro!",
+                description: "Não foi possível excluir o funcionário.",
+                status: "error",
+            });
         } finally {
             setIsSavingLoading(false);
         }
@@ -193,11 +229,13 @@ export default function EmployeesScreen() {
         return (
             <Center flex={1} bg={backgroundColor}>
                 <Spinner size="lg" color={secondaryColor} />
-                <Text mt={4} color={mediumGreyColor}>Carregando funcionários...</Text>
+                <Text mt={4} color={mediumGreyColor}>
+                    Carregando funcionários...
+                </Text>
             </Center>
         );
     }
-    
+
     return (
         <>
             <ScrollView
@@ -375,8 +413,12 @@ export default function EmployeesScreen() {
             <EmployeeFormModal
                 isOpen={modalState === "add" || modalState === "edit"}
                 onClose={closeModal}
-                onSave={handleSave} 
-                title={modalState === "add" ? "Adicionar Funcionário" : "Editar Funcionário"}
+                onSave={handleSave}
+                title={
+                    modalState === "add"
+                        ? "Adicionar Funcionário"
+                        : "Editar Funcionário"
+                }
                 employeeData={formData}
                 isLoading={isSavingLoading}
             />
@@ -384,7 +426,7 @@ export default function EmployeesScreen() {
             <DeleteAlert
                 isOpen={modalState === "delete"}
                 onClose={closeModal}
-                onConfirm={handleDelete} 
+                onConfirm={handleDelete}
                 prefixMessage="Tem certeza que deseja excluir o funcionário"
                 itemName={selectedEmployee?.name || ""}
                 isLoading={isSavingLoading}
