@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
     Box,
     Button,
@@ -10,19 +10,24 @@ import {
     Pressable,
     Icon,
     Modal,
+    Center,
+    Spinner,
 } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
-import { StockRecord, RecordItem } from "../../types/stock";
+import { RecordItem } from "../../types/stock";
 import { useAppColors } from "../../hooks/useAppColors";
-import { flavors, sizes } from "../../configs/order";
+import { SIZES } from "../../configs/order";
 import { useCustomToast } from "../../contexts/ToastProvider";
 import Select from "../layout/Select";
+import { Flavor } from "../../types/flavor";
+import { getFlavors } from "../../services/flavorService";
 
 interface Props {
     isOpen: boolean;
     onClose: () => void;
     onSave: (item: RecordItem) => void;
     title: string;
+    isLoading: boolean;
 }
 
 export default function RecordFormModal({
@@ -30,6 +35,7 @@ export default function RecordFormModal({
     onClose,
     onSave,
     title,
+    isLoading,
 }: Props) {
     const {
         borderColor,
@@ -39,21 +45,46 @@ export default function RecordFormModal({
         secondaryColor,
         tertiaryColor,
         lightGreyColor,
+        mediumGreyColor,
         darkGreyColor,
         invalidColor,
     } = useAppColors();
-
-    const [type, setType] = useState<"+" | "-" | "">("");
-    const [quantity, setQuantity] = useState("");
-    const [flavor, setFlavor] = useState("");
-    const [size, setSize] = useState("");
-    const [hasAttemptedSave, setHasAttemptedSave] = useState(false);
     const toast = useCustomToast();
+
+    const [type, setType] = useState<"INBOUND" | "OUTBOUND" | "">("");
+    const [quantity, setQuantity] = useState<string>("");
+    const [flavorId, setFlavorId] = useState<number | undefined>();
+    const [sizeId, setSizeId] = useState<number | undefined>();
+    const [hasAttemptedSave, setHasAttemptedSave] = useState(false);
+    const [flavors, setFlavors] = useState<Flavor[]>([]);
+    const [isSearchLoading, setIsSearchingLoading] = useState<boolean>(false);
 
     const isQuantityInvalid =
         hasAttemptedSave && (!quantity || parseInt(quantity) <= 0);
-    const isFlavorInvalid = hasAttemptedSave && !flavor;
-    const isSizeInvalid = hasAttemptedSave && !size;
+    const isFlavorInvalid = hasAttemptedSave && flavorId === undefined;
+    const isSizeInvalid = hasAttemptedSave && sizeId === undefined;
+
+    const fetchFlavors = useCallback(async () => {
+        setIsSearchingLoading(true);
+
+        try {
+            const flavorsData = await getFlavors();
+            setFlavors(flavorsData);
+        } catch (error) {
+            toast.showToast({
+                title: "Erro ao carregar!",
+                description:
+                    "Não foi possível buscar os sabores. Tente novamente.",
+                status: "error",
+            });
+        } finally {
+            setIsSearchingLoading(false);
+        }
+    }, [toast]);
+
+    useEffect(() => {
+        fetchFlavors();
+    }, [fetchFlavors]);
 
     useEffect(() => {
         setHasAttemptedSave(false);
@@ -71,30 +102,56 @@ export default function RecordFormModal({
             return;
         }
 
-        const newRecord: StockRecord = {
-            date: new Date().toISOString(),
-            type: type,
-            quantity: Number(quantity),
-            flavor: flavor,
-            size: size,
+        const quantityToMove = parseInt(quantity!);
+
+        if (type === "OUTBOUND") {
+            const selectedFlavor = flavors.find((f) => f.id === flavorId);
+            const selectedSize = selectedFlavor?.sizes.find(
+                (s) => s.sizeId === sizeId,
+            );
+
+            const stockAvailable = selectedSize?.totalQuantity;
+
+            if (
+                stockAvailable !== undefined &&
+                quantityToMove > stockAvailable
+            ) {
+                toast.showToast({
+                    title: "Estoque insuficiente",
+                    description: `A saída (${quantityToMove}) é maior que o estoque disponível (${stockAvailable}).`,
+                    status: "error",
+                });
+
+                return;
+            }
+        }
+
+        const newRecord: RecordItem = {
+            sizeId: sizeId!,
+            flavorId: flavorId!,
+            quantity: parseInt(quantity!),
+            movementType: type,
         };
 
         setType("");
         setQuantity("");
-        setFlavor("");
-        setSize("");
+        setFlavorId(undefined);
+        setSizeId(undefined);
         setHasAttemptedSave(false);
-
-        toast.showToast({
-            title: "Sucesso!",
-            description: `Registro de ${
-                type === "+" ? "entrada" : "saída"
-            } adicionado`,
-            status: "success",
-        });
 
         onSave(newRecord);
     };
+
+    if (isSearchLoading) {
+        return (
+            <Center flex={1} bg={backgroundColor}>
+                <Spinner size="lg" color={secondaryColor} />
+                <Text mt={4} color={mediumGreyColor}>
+                    Carregando sabores...
+                </Text>
+            </Center>
+        );
+    }
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} size="xl">
@@ -140,11 +197,11 @@ export default function RecordFormModal({
                             <HStack space={3} mt={2}>
                                 <Pressable
                                     flex={1}
-                                    onPress={() => setType("+")}
+                                    onPress={() => setType("INBOUND")}
                                 >
                                     <Box
                                         bg={
-                                            type === "+"
+                                            type === "INBOUND"
                                                 ? "green.100"
                                                 : "gray.100"
                                         }
@@ -152,7 +209,7 @@ export default function RecordFormModal({
                                         rounded="lg"
                                         borderWidth={2}
                                         borderColor={
-                                            type === "+"
+                                            type === "INBOUND"
                                                 ? "green.600"
                                                 : "gray.200"
                                         }
@@ -163,14 +220,14 @@ export default function RecordFormModal({
                                                 name="add-circle"
                                                 size="lg"
                                                 color={
-                                                    type === "+"
+                                                    type === "INBOUND"
                                                         ? "green.600"
                                                         : "gray.400"
                                                 }
                                             />
                                             <Text
                                                 color={
-                                                    type === "+"
+                                                    type === "INBOUND"
                                                         ? "green.600"
                                                         : darkGreyColor
                                                 }
@@ -184,11 +241,11 @@ export default function RecordFormModal({
 
                                 <Pressable
                                     flex={1}
-                                    onPress={() => setType("-")}
+                                    onPress={() => setType("OUTBOUND")}
                                 >
                                     <Box
                                         bg={
-                                            type === "-"
+                                            type === "OUTBOUND"
                                                 ? "red.100"
                                                 : "gray.100"
                                         }
@@ -196,7 +253,7 @@ export default function RecordFormModal({
                                         rounded="lg"
                                         borderWidth={2}
                                         borderColor={
-                                            type === "-"
+                                            type === "OUTBOUND"
                                                 ? "red.600"
                                                 : "gray.200"
                                         }
@@ -207,14 +264,14 @@ export default function RecordFormModal({
                                                 name="remove-circle"
                                                 size="lg"
                                                 color={
-                                                    type === "-"
+                                                    type === "OUTBOUND"
                                                         ? "red.600"
                                                         : "gray.400"
                                                 }
                                             />
                                             <Text
                                                 color={
-                                                    type === "-"
+                                                    type === "OUTBOUND"
                                                         ? "red.600"
                                                         : darkGreyColor
                                                 }
@@ -269,6 +326,29 @@ export default function RecordFormModal({
                             />
                         </FormControl>
 
+                        <FormControl isRequired isInvalid={isSizeInvalid}>
+                            <FormControl.Label>
+                                <HStack alignItems="center" space={2}>
+                                    <Icon
+                                        as={Ionicons}
+                                        name="resize"
+                                        size="sm"
+                                    />
+                                    <Text fontWeight="medium">Tamanho </Text>
+                                </HStack>
+                            </FormControl.Label>
+                            <Select
+                                modalTitle="Selecione um Tamanho"
+                                placeholder="Escolha o tamanho"
+                                data={SIZES}
+                                selectedValue={sizeId}
+                                onValueChange={setSizeId}
+                                isInvalid={isSizeInvalid}
+                                itemValue={(item) => item.id}
+                                itemLabel={(item) => item.name}
+                            />
+                        </FormControl>
+
                         <FormControl isRequired isInvalid={isFlavorInvalid}>
                             <FormControl.Label>
                                 <HStack alignItems="center" space={2}>
@@ -284,30 +364,11 @@ export default function RecordFormModal({
                                 modalTitle="Selecione um Sabor"
                                 placeholder="Escolha o sabor"
                                 data={flavors}
-                                selectedValue={flavor}
-                                onValueChange={setFlavor}
+                                selectedValue={flavorId}
+                                onValueChange={setFlavorId}
                                 isInvalid={isFlavorInvalid}
-                            />
-                        </FormControl>
-
-                        <FormControl isRequired isInvalid={isSizeInvalid}>
-                            <FormControl.Label>
-                                <HStack alignItems="center" space={2}>
-                                    <Icon
-                                        as={Ionicons}
-                                        name="resize"
-                                        size="sm"
-                                    />
-                                    <Text fontWeight="medium">Tamanho </Text>
-                                </HStack>
-                            </FormControl.Label>
-                            <Select
-                                modalTitle="Selecione um Tamanho"
-                                placeholder="Escolha o tamanho"
-                                data={sizes}
-                                selectedValue={size}
-                                onValueChange={setSize}
-                                isInvalid={isSizeInvalid}
+                                itemValue={(item) => item.id}
+                                itemLabel={(item) => item.name}
                             />
                         </FormControl>
                     </VStack>
@@ -322,6 +383,7 @@ export default function RecordFormModal({
                             flex={1}
                             py={3}
                             _text={{ fontSize: "md", fontWeight: "medium" }}
+                            isDisabled={isLoading}
                         >
                             Cancelar
                         </Button>
@@ -336,6 +398,9 @@ export default function RecordFormModal({
                             py={3}
                             shadow={2}
                             _text={{ fontSize: "md", fontWeight: "medium" }}
+                            isLoading={isLoading}
+                            isLoadingText="Salvando..."
+                            _loading={{ bg: tertiaryColor }}
                         >
                             Salvar
                         </Button>

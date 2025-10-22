@@ -13,8 +13,8 @@ import { useAppColors } from "../../hooks/useAppColors";
 
 interface Props<T> {
     data: T[];
-    selectedValue: string | number;
-    onValueChange: (value: string) => void;
+    selectedValue: string | number | undefined;
+    onValueChange: (value: string | number) => void;
     placeholder: string;
     modalTitle: string;
     isInvalid?: boolean;
@@ -45,7 +45,7 @@ export default function Select<T>({
         invalidColor,
     } = useAppColors();
 
-    const handleSelect = (value: string) => {
+    const handleSelect = (value: string | number) => {
         onValueChange(value);
         setIsModalVisible(false);
     };
@@ -100,7 +100,7 @@ export default function Select<T>({
                     <Modal.Body>
                         <FlatList
                             data={data}
-                            keyExtractor={(item) => itemValue(item)}
+                            keyExtractor={(item) => String(itemValue(item))}
                             renderItem={({ item }) => {
                                 const value = itemValue(item);
                                 const label = itemLabel(item);

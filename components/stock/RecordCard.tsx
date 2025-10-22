@@ -1,13 +1,13 @@
 import { Box, Divider, HStack, Icon, Text, VStack } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
 import LabelBadge from "../layout/LabelBadge";
-import { RecordItem } from "../../types/stock";
+import { StockRecord } from "../../types/stock";
 import { useAppColors } from "../../hooks/useAppColors";
 import { formatDate } from "../../utils/formatters";
 
 type Props = {
     date: string;
-    records: RecordItem[];
+    records: StockRecord[];
 };
 
 export default function RecordCard({ date, records }: Props) {
@@ -24,10 +24,10 @@ export default function RecordCard({ date, records }: Props) {
     });
 
     const totalEntries = records
-        .filter((r) => r.type === "+")
+        .filter((r) => r.movementType === "INBOUND")
         .reduce((sum, r) => sum + r.quantity, 0);
     const totalExits = records
-        .filter((r) => r.type === "-")
+        .filter((r) => r.movementType === "OUTBOUND")
         .reduce((sum, r) => sum + r.quantity, 0);
 
     return (
@@ -100,7 +100,7 @@ export default function RecordCard({ date, records }: Props) {
                             <HStack space={2} alignItems="center">
                                 <Box
                                     bg={
-                                        record.type === "+"
+                                        record.movementType === "INBOUND"
                                             ? "green.100"
                                             : "red.100"
                                     }
@@ -110,12 +110,12 @@ export default function RecordCard({ date, records }: Props) {
                                     <Icon
                                         as={Ionicons}
                                         name={
-                                            record.type === "+"
+                                            record.movementType === "INBOUND"
                                                 ? "add"
                                                 : "remove"
                                         }
                                         color={
-                                            record.type === "+"
+                                            record.type === "INBOUND"
                                                 ? "green.600"
                                                 : "red.600"
                                         }
@@ -124,7 +124,7 @@ export default function RecordCard({ date, records }: Props) {
                                 </Box>
                                 <Text fontSize="sm" color="gray.700">
                                     <Text bold>{record.quantity}x</Text>{" "}
-                                    {record.flavor} ({record.size})
+                                    {record.flavorName} ({record.sizeName})
                                 </Text>
                             </HStack>
                         </HStack>

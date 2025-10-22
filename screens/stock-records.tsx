@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
     Icon,
     ScrollView,
@@ -9,6 +9,7 @@ import {
     Center,
     Pressable,
     Flex,
+    Spinner,
 } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
 import FabButton from "../components/layout/FabButton";
@@ -16,69 +17,33 @@ import RecordCard from "../components/stock/RecordCard";
 import RecordFormModal from "../components/stock/RecordFormModal";
 import { useAppColors } from "../hooks/useAppColors";
 import { RecordItem, StockRecord } from "../types/stock";
+import { useCustomToast } from "../contexts/ToastProvider";
+import { createRecord, getRecords } from "../services/stockService";
 
-const records: StockRecord[] = [
-    {
-        date: "2025-07-27",
-        type: "+",
-        quantity: 8,
-        flavor: "Doce de Leite",
-        size: "500g",
-    },
-    {
-        date: "2025-07-27",
-        type: "-",
-        quantity: 1,
-        flavor: "Doce de Leite",
-        size: "500g",
-    },
-    {
-        date: "2025-07-27",
-        type: "+",
-        quantity: 19,
-        flavor: "Brigadeiro",
-        size: "500g",
-    },
-    {
-        date: "2025-07-28",
-        type: "+",
-        quantity: 10,
-        flavor: "Brigadeiro",
-        size: "500g",
-    },
-    {
-        date: "2025-07-28",
-        type: "-",
-        quantity: 2,
-        flavor: "Brigadeiro",
-        size: "350g",
-    },
-    {
-        date: "2025-07-28",
-        type: "+",
-        quantity: 5,
-        flavor: "Prestígio",
-        size: "500g",
-    },
-];
-
-const groupRecordsByDate = (records: StockRecord[]) => {
+const groupRecordsByDate = (
+    records: StockRecord[],
+): Record<string, StockRecord[]> => {
     const grouped = records.reduce((acc, record) => {
-        if (!acc[record.date]) {
-            acc[record.date] = [];
+        const dateKey = record.productionDate.split("T")[0];
+
+        if (!acc[dateKey]) {
+            acc[dateKey] = [];
         }
-        acc[record.date].push(record);
+        acc[dateKey].push(record);
         return acc;
     }, {} as Record<string, StockRecord[]>);
 
     const ordered: Record<string, StockRecord[]> = {};
+
     Object.keys(grouped)
-        .sort((a, b) => new Date(b).getDate() - new Date(a).getDate())
+        .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
         .forEach((date) => {
-            ordered[date] = grouped[date].sort(
+            const sortedRecords = grouped[date].sort(
                 (a, b) =>
-                    new Date(b.date).getDate() - new Date(a.date).getDate(),
+                    new Date(b.productionDate).getTime() -
+                    new Date(a.productionDate).getTime(),
             );
+            ordered[date] = sortedRecords;
         });
 
     return ordered;
@@ -87,13 +52,87 @@ const groupRecordsByDate = (records: StockRecord[]) => {
 export default function StockRecordsScreen() {
     const { backgroundColor, whiteColor, mediumGreyColor, secondaryColor } =
         useAppColors();
+    const toast = useCustomToast();
+
+    const [records, setRecords] = useState<StockRecord[]>([]);
+    const [groupedRecords, setGroupedRecords] = useState<
+        Record<string, StockRecord[]>
+    >({});
+    const [isEmpty, setIsEmpty] = useState<boolean>(true);
 
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    const groupedRecords = useMemo(() => groupRecordsByDate(records), []);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [isSavingLoading, setIsSavingLoading] = useState<boolean>(false);
 
-    const isEmpty = Object.keys(groupedRecords).length === 0;
+    const fetchRecords = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            const data = await getRecords();
+            setRecords(data);
 
-    const handleSaveChanges = (item: RecordItem) => {};
+            const groupedRecordsData = groupRecordsByDate(data);
+            setGroupedRecords(groupedRecordsData);
+            setIsEmpty(Object.keys(groupedRecordsData).length === 0);
+        } catch (error) {
+            toast.showToast({
+                title: "Erro ao carregar!",
+                description:
+                    "Não foi possível buscar os registros. Tente novamente.",
+                status: "error",
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    }, [toast]);
+
+    useEffect(() => {
+        fetchRecords();
+    }, [fetchRecords]);
+
+    const handleSaveChanges = async (newRecordData: RecordItem) => {
+        setIsSavingLoading(true);
+
+        try {
+            const newRecord = await createRecord(newRecordData);
+            setRecords((prevRecords) => {
+                const updatedRecords = [...prevRecords, newRecord];
+                const updatedGroupedRecords =
+                    groupRecordsByDate(updatedRecords);
+
+                setGroupedRecords(updatedGroupedRecords);
+                setIsEmpty(Object.keys(updatedGroupedRecords).length === 0);
+
+                return updatedRecords;
+            });
+
+            toast.showToast({
+                title: "Sucesso!",
+                description: "Registro criado.",
+                status: "success",
+            });
+
+            setIsAddModalOpen(false);
+        } catch (error) {
+            toast.showToast({
+                title: "Erro!",
+                description: "Não foi possível criar o registro.",
+                status: "error",
+            });
+        } finally {
+            setIsSavingLoading(false);
+        }
+    };
+
+    if (isLoading) {
+        return (
+            <Center flex={1} bg={backgroundColor}>
+                <Spinner size="lg" color={secondaryColor} />
+                <Text mt={4} color={mediumGreyColor}>
+                    Carregando registros...
+                </Text>
+            </Center>
+        );
+    }
 
     return (
         <>
@@ -217,6 +256,7 @@ export default function StockRecordsScreen() {
                 isOpen={isAddModalOpen}
                 onClose={() => setIsAddModalOpen(false)}
                 onSave={handleSaveChanges}
+                isLoading={isSavingLoading}
             />
         </>
     );

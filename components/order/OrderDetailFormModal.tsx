@@ -69,8 +69,8 @@ export default function OrderItemRequestFormModal({
         createDefaultOrderItemRequest(),
     );
     const [flavors, setFlavors] = useState<Flavor[]>([]);
-    const [hasAttemptedSave, setHasAttemptedSave] = useState(false);
     const [isSearchLoading, setIsSearchingLoading] = useState<boolean>(false);
+    const [hasAttemptedSave, setHasAttemptedSave] = useState(false);
 
     const isEditing = !!orderDetailData;
     const initialStatus = orderDetailData?.status;

@@ -16,16 +16,18 @@ export type StockItem = {
 };
 
 export type StockRecord = {
-    date: string;
-    type: "+" | "-";
+    id?: number;
+    flavorName: string;
+    sizeName: string;
     quantity: number;
-    flavor: string;
-    size: string;
+    productionDate: string;
+    expirationDate?: string;
+    movementType: "INBOUND" | "OUTBOUND";
 };
 
 export type RecordItem = {
-    type: "+" | "-";
+    sizeId: number;
+    flavorId: number;
     quantity: number;
-    flavor: string;
-    size: string;
+    movementType: "INBOUND" | "OUTBOUND";
 };
