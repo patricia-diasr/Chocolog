@@ -8,14 +8,18 @@ import "../../configs/calendar.ts";
 
 type Props = {
     selectedDate: string;
+    currentDisplayMonth: string;
     handleDayPress: (day: DateData) => void;
     markedDates: MarkedDates;
+    onMonthChange: (monthString: string) => void;
 };
 
 export default function MonthlyCalendar({
     selectedDate,
+    currentDisplayMonth,
     handleDayPress,
     markedDates,
+    onMonthChange,
 }: Props) {
     const {
         whiteColor,
@@ -69,8 +73,10 @@ export default function MonthlyCalendar({
 
     const renderCustomHeader = useCallback(
         (date: Date) => {
-            const currentYear = new Date().getFullYear();
             const headerDate = new Date(date);
+            headerDate.setMonth(headerDate.getMonth() + 1);
+
+            const currentYear = new Date().getFullYear();
             const options: Intl.DateTimeFormatOptions = { month: "long" };
 
             if (headerDate.getFullYear() !== currentYear) {
@@ -95,6 +101,14 @@ export default function MonthlyCalendar({
         [resolvedBlackColor],
     );
 
+    const handleMonthChange = useCallback(
+        (month: DateData) => {
+            const monthString = month.dateString.slice(0, 7); 
+            onMonthChange(monthString);
+        },
+        [onMonthChange],
+    );
+
     return (
         <Box
             bg={resolvedWhiteColor}
@@ -110,8 +124,9 @@ export default function MonthlyCalendar({
             maxWidth="100%"
         >
             <Calendar
-                current={selectedDate}
+                current={currentDisplayMonth}
                 onDayPress={handleDayPress}
+                onMonthChange={handleMonthChange}
                 markedDates={markedDates}
                 theme={calendarTheme}
                 renderHeader={renderCustomHeader}

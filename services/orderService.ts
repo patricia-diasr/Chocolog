@@ -25,6 +25,13 @@ export const getOrder = async (
     return response.data;
 };
 
+export const getOrdersByDate = async (
+    date: string,
+): Promise<OrderResponse[]> => {
+    const response = await api.get(`/orders?date=${date}`);
+    return response.data;
+};
+
 export const createOrder = async (
     customerId: number,
     orderData: OrderRequest,

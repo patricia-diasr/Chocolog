@@ -1,4 +1,5 @@
 import { Customer } from "./customer";
+import { Employee } from "./employee";
 
 export type OrderStatus =
     | "PENDING"
@@ -35,8 +36,8 @@ export type OrderItemRequest = {
 
 export type OrderResponse = {
     id: number;
-    customerId: number;
-    employeeId: number;
+    customer: Customer;
+    employee: Employee;
     creationDate: string;
     expectedPickupDate: string;
     pickupDate: string | null;

@@ -291,9 +291,7 @@ export default function NewPrintBatchScreen() {
                                                     />
                                                     <Text
                                                         color={whiteColor}
-                                                        fontWeight={
-                                                            mediumGreyColor
-                                                        }
+                                                        fontWeight="medium"
                                                     >
                                                         Limpar Busca
                                                     </Text>

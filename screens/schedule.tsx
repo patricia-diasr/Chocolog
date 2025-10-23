@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
 import {
     ScrollView,
@@ -11,6 +11,7 @@ import {
     Flex,
     Pressable,
     HStack,
+    Spinner,
 } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
 import { DateData } from "react-native-calendars";
@@ -20,162 +21,18 @@ import SearchInput from "../components/layout/Searchbar";
 import SortButtons, { SortOption } from "../components/layout/SortButtons";
 import MonthlyCalendar from "../components/schedule/MonthlyCalendar";
 import { StatItem } from "../types/stats";
-import { Order } from "../types/order";
+import { OrderResponse } from "../types/order";
 import { useAppColors } from "../hooks/useAppColors";
 import {
     formatDate,
     formatOrderDetailTitleWithNotes,
 } from "../utils/formatters";
 import { getStatusDetails } from "../utils/statusConfig";
+import { getOrdersByDate } from "../services/orderService";
+import { useCustomToast } from "../contexts/ToastProvider";
 
-const ordersMock: Order[] = [
-    {
-        id: "1",
-        created_date: "2025-02-25",
-        due_date: "2025-02-25",
-        status: "completed",
-        details: [
-            {
-                id: "1",
-                size: "500g",
-                flavor1: "Sensação",
-                flavor2: "Prestígio",
-                quantity: 2,
-                unit_price: 60,
-                total_price: 120,
-                notes: "Embalagem rosa",
-                status: "completed",
-                custom_made: true,
-            },
-            {
-                id: "2",
-                size: "500g",
-                flavor1: "Maracujá",
-                quantity: 1,
-                unit_price: 60,
-                total_price: 60,
-                status: "completed",
-                custom_made: false,
-            },
-        ],
-        charge: {
-            id: "1",
-            date: "2025-02-20",
-            status: "paid",
-            subtotal: 180.0,
-            discount: 10,
-            total: 170.0,
-            payments: [],
-        },
-        customer: {
-            id: "1",
-            name: "Maria Silva",
-            phone: "11999999999",
-            isReseller: true,
-        },
-    },
-    {
-        id: "2",
-        created_date: "2025-02-24",
-        due_date: "2025-02-26",
-        status: "pending",
-        details: [
-            {
-                id: "3",
-                size: "1Kg",
-                flavor1: "Chocolate",
-                flavor2: "Morango",
-                quantity: 1,
-                unit_price: 80,
-                total_price: 80,
-                notes: "Entrega às 14h",
-                status: "pending",
-                custom_made: true,
-            },
-        ],
-        charge: {
-            id: "2",
-            date: "2025-02-24",
-            status: "pending",
-            subtotal: 80,
-            discount: 0,
-            total: 80.0,
-            payments: [],
-        },
-        customer: {
-            id: "2",
-            name: "João Santos",
-            phone: "11888888888",
-            isReseller: false,
-        },
-    },
-    {
-        id: "3",
-        created_date: "2025-02-23",
-        due_date: "2025-02-25",
-        status: "pending",
-        details: [
-            {
-                id: "4",
-                size: "350g",
-                flavor1: "Brigadeiro",
-                quantity: 3,
-                unit_price: 40,
-                total_price: 120,
-                status: "pending",
-                custom_made: false,
-            },
-        ],
-        charge: {
-            id: "3",
-            date: "2025-02-23",
-            status: "pending",
-            subtotal: 120,
-            discount: 5,
-            total: 115.0,
-            payments: [],
-        },
-        customer: {
-            id: "3",
-            name: "Ana Costa",
-            phone: "11777777777",
-            isReseller: true,
-        },
-    },
-    {
-        id: "4",
-        created_date: "2025-02-22",
-        due_date: "2025-02-28",
-        status: "pending",
-        details: [
-            {
-                id: "5",
-                size: "500g",
-                flavor1: "Leite Ninho",
-                quantity: 2,
-                unit_price: 65,
-                total_price: 130,
-                status: "pending",
-                custom_made: false,
-            },
-        ],
-        charge: {
-            id: "4",
-            date: "2025-02-22",
-            status: "pending",
-            subtotal: 130,
-            discount: 0,
-            total: 130.0,
-            payments: [],
-        },
-        customer: {
-            id: "4",
-            name: "Carlos Oliveira",
-            phone: "11666666666",
-            isReseller: false,
-        },
-    },
-];
+const getMonthString = (dateString: string) => dateString.slice(0, 7);
+const getFirstDayOfMonth = (monthString: string) => `${monthString}-01`;
 
 export default function ScheduleScreen() {
     const navigation = useNavigation();
@@ -186,18 +43,27 @@ export default function ScheduleScreen() {
         secondaryColor,
         mediumGreyColor,
     } = useAppColors();
+    const toast = useCustomToast();
 
     const [resolvedPrimaryColor, resolvedSecondaryColor] = useToken("colors", [
         primaryColor,
         secondaryColor,
     ]);
 
-    const [orders, setOrders] = useState<Order[]>(ordersMock);
+    const initialDate = useMemo(() => {
+        const now = new Date();
+        const offset = now.getTimezoneOffset() * 60000;
+        const localTime = new Date(now.getTime() - offset);
+        return localTime.toISOString().slice(0, 10);
+    }, []);
+
+    const [orders, setOrders] = useState<OrderResponse[]>([]);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [filterBy, setFilterBy] = useState<"all" | "pending">("all");
-
-    const [selectedDate, setSelectedDate] = useState<string>(
-        new Date().toISOString().slice(0, 10),
+    const [selectedDate, setSelectedDate] = useState<string>(initialDate);
+    const [currentMonth, setCurrentMonth] = useState<string>(
+        getMonthString(initialDate),
     );
 
     const filterOptions: SortOption[] = [
@@ -205,16 +71,39 @@ export default function ScheduleScreen() {
         { value: "pending", label: "Pendentes", icon: "time" },
     ];
 
-    const ordersDate = useMemo(() => {
-        let filtered = orders;
+    const fetchOrders = useCallback(async () => {
+        setIsLoading(true);
 
-        if (selectedDate) {
-            filtered = filtered.filter(
-                (order) => order.due_date === selectedDate,
-            );
+        try {
+            const data = await getOrdersByDate(currentMonth);
+            setOrders(data);
+        } catch (error) {
+            toast.showToast({
+                title: "Erro ao carregar!",
+                description:
+                    "Não foi possível buscar os pedidos. Tente novamente.",
+                status: "error",
+            });
+            setOrders([]);
+        } finally {
+            setIsLoading(false);
         }
+    }, [currentMonth, toast]);
 
-        return filtered;
+    useEffect(() => {
+        fetchOrders();
+    }, [fetchOrders]);
+
+    useEffect(() => {
+        if (getMonthString(selectedDate) !== currentMonth) {
+            setSelectedDate(getFirstDayOfMonth(currentMonth));
+        }
+    }, [currentMonth, selectedDate]);
+
+    const ordersDate = useMemo(() => {
+        return orders.filter(
+            (order) => order.expectedPickupDate.slice(0, 10) === selectedDate,
+        );
     }, [orders, selectedDate]);
 
     const processedOrders = useMemo(() => {
@@ -223,13 +112,13 @@ export default function ScheduleScreen() {
         if (searchTerm) {
             filtered = filtered.filter((order) =>
                 order.customer?.name
-                    .toLowerCase()
+                    ?.toLowerCase()
                     .includes(searchTerm.toLowerCase()),
             );
         }
 
         if (filterBy === "pending") {
-            filtered = filtered.filter((order) => order.status === "pending");
+            filtered = filtered.filter((order) => order.status === "PENDING");
         }
 
         return filtered;
@@ -241,7 +130,7 @@ export default function ScheduleScreen() {
             return {
                 id: order.id,
                 title: order.customer?.name,
-                info: order.details
+                info: order.orderItems
                     .map((orderDetail) =>
                         formatOrderDetailTitleWithNotes(orderDetail),
                     )
@@ -254,10 +143,10 @@ export default function ScheduleScreen() {
     }, [processedOrders]);
 
     const ordersStats = useMemo(() => {
-        const total = ordersDate.length;
-        const pending = ordersDate.filter((o) => o.status === "pending").length;
+        const total = ordersDate.filter((o) => o.status !== "CANCELLED").length;
+        const pending = ordersDate.filter((o) => o.status === "PENDING").length;
         const completed = ordersDate.filter(
-            (o) => o.status === "completed",
+            (o) => o.status === "COMPLETED" || o.status === "READY_FOR_PICKUP",
         ).length;
 
         const stats: StatItem[] = [
@@ -271,7 +160,7 @@ export default function ScheduleScreen() {
             },
             {
                 value: completed,
-                label: "Concluídos",
+                label: "Prontos",
             },
         ];
 
@@ -281,28 +170,45 @@ export default function ScheduleScreen() {
     const isEmpty = processedOrders.length === 0 && searchTerm !== "";
     const isEmptyInitial = orders.length === 0;
 
-    const handleNavigateToOrder = (id: number) => {
-        navigation.navigate("Order" as never);
+    const handleNavigateToOrder = (orderId: number) => {
+        const customerId = orders.find((o) => o.id === orderId)?.customer?.id;
+
+        if (customerId) {
+            navigation.navigate("Order", {
+                customerId: customerId,
+                orderId: orderId,
+            });
+        }
     };
 
     const handleDayPress = useCallback((day: DateData) => {
         setSelectedDate(day.dateString);
+        setSearchTerm("");
+    }, []);
+
+    const handleMonthChange = useCallback((monthString: string) => {
+        setCurrentMonth(monthString);
     }, []);
 
     const markedDaysWithOrders = useMemo(() => {
         return orders.reduce((acc, order) => {
-            const date = order.due_date;
+            const date = order.expectedPickupDate.slice(0, 10);
             if (date) {
-                acc[date] = { marked: true, dotColor: resolvedPrimaryColor };
+                acc[date] = {
+                    ...(acc[date] || {}),
+                    marked: true,
+                    dotColor: resolvedPrimaryColor,
+                };
             }
             return acc;
-        }, {});
+        }, {} as Record<string, any>);
     }, [orders, resolvedPrimaryColor]);
 
     const markedDates = useMemo(() => {
         const newMarkedDates = { ...markedDaysWithOrders };
         if (selectedDate) {
             newMarkedDates[selectedDate] = {
+                ...(newMarkedDates[selectedDate] || {}),
                 selected: true,
                 disableTouchEvent: true,
                 selectedColor: resolvedSecondaryColor,
@@ -310,6 +216,19 @@ export default function ScheduleScreen() {
         }
         return newMarkedDates;
     }, [selectedDate, markedDaysWithOrders, resolvedSecondaryColor]);
+
+    const displayDateForCalendar = getFirstDayOfMonth(currentMonth);
+
+    if (isLoading) {
+        return (
+            <Center flex={1} bg={backgroundColor}>
+                <Spinner size="lg" color={secondaryColor} />
+                <Text mt={4} color={mediumGreyColor}>
+                    Carregando pedidos...
+                </Text>
+            </Center>
+        );
+    }
 
     return (
         <>
@@ -337,8 +256,10 @@ export default function ScheduleScreen() {
                             >
                                 <MonthlyCalendar
                                     selectedDate={selectedDate}
+                                    currentDisplayMonth={displayDateForCalendar}
                                     handleDayPress={handleDayPress}
                                     markedDates={markedDates}
+                                    onMonthChange={handleMonthChange}
                                 />
                                 {!isEmptyInitial && (
                                     <StatsCard
@@ -455,9 +376,7 @@ export default function ScheduleScreen() {
                                                         />
                                                         <Text
                                                             color={whiteColor}
-                                                            fontWeight={
-                                                                mediumGreyColor
-                                                            }
+                                                            fontWeight="medium"
                                                         >
                                                             Limpar Busca
                                                         </Text>

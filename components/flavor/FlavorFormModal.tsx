@@ -169,12 +169,10 @@ export default function FlavorFormModal({
         });
 
         const flavorToSave: Flavor = {
-            id: editingFlavor?.id ?? "",
+            id: editingFlavor?.id ?? 0,
             name: formData.flavor.trim(),
             sizes: newSizes,
         };
-
-        console.log(flavorToSave);
 
         onSave(flavorToSave);
     };

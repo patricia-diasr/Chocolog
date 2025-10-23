@@ -358,9 +358,7 @@ export default function EmployeesScreen() {
                                                     />
                                                     <Text
                                                         color={whiteColor}
-                                                        fontWeight={
-                                                            mediumGreyColor
-                                                        }
+                                                        fontWeight="medium"
                                                     >
                                                         Limpar Busca
                                                     </Text>

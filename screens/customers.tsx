@@ -284,9 +284,7 @@ export default function CustomersScreen() {
                                                     />
                                                     <Text
                                                         color={whiteColor}
-                                                        fontWeight={
-                                                            mediumGreyColor
-                                                        }
+                                                        fontWeight="medium"
                                                     >
                                                         Limpar Busca
                                                     </Text>
