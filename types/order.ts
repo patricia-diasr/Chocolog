@@ -55,21 +55,20 @@ export type OrderRequest = {
     discount: number;
 };
 
-export type Payment = {
+export type PaymentResponse = {
     id: number;
-    value: number;
-    date: string;
-    method: string;
+    chargeId: number;
+    employeeId: number;
+    paidAmount: number;
+    paymentDate: string;
+    paymentMethod: string;
 };
 
-export type Charge = {
-    id: number;
-    date: string;
-    status: "pending" | "paid" | "overdue";
-    subtotal: number;
-    discount: number;
-    total: number;
-    payments: Payment[];
+export type PaymentRequest = {
+    employeeId: number;
+    paidAmount: number;
+    paymentMethod: string;
+    paymentDate: string;
 };
 
 export type ChargeResponse = {
@@ -78,9 +77,10 @@ export type ChargeResponse = {
     subtotalAmount: number;
     discount: number;
     totalAmount: number;
+    dueAmount: number;
     status: ChargeStatus;
     date: string;
-    payments: Payment[];
+    payments: PaymentResponse[];
 };
 
 export const ORDER_STATUS: { value: OrderStatus; label: string }[] = [

@@ -27,6 +27,11 @@ export const statusConfig: StatusConfig = {
         colorScheme: "warning",
         icon: "time",
     },
+    PARTIAL: {
+        label: "Parcialmente Pago",
+        colorScheme: "warning",
+        icon: "pie-chart", 
+    },
     READY_FOR_PICKUP: {
         label: "Pronto",
         colorScheme: "info",

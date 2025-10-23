@@ -14,7 +14,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { useAppColors } from "../../hooks/useAppColors";
 import { useCustomToast } from "../../contexts/ToastProvider";
 import {
-    ORDER_STATUS,
     ORDER_STATUS_MAP,
     OrderRequest,
     OrderStatus,

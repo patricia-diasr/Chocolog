@@ -4,6 +4,8 @@ import {
     OrderItemResponse,
     OrderRequest,
     OrderResponse,
+    PaymentRequest,
+    PaymentResponse
 } from "../types/order";
 
 export const getOrders = async (
@@ -78,5 +80,41 @@ export const deleteItem = async (
 ): Promise<void> => {
     await api.delete(
         `/customers/${customerId}/orders/${orderId}/items/${itemId}`
+    );
+};
+
+
+export const createPayment = async (
+    customerId: number,
+    orderId: number,
+    paymentData: PaymentRequest,
+): Promise<PaymentResponse> => {
+    const response = await api.post(
+        `/customers/${customerId}/orders/${orderId}/payments`,
+        paymentData,
+    );
+    return response.data;
+};
+
+export const updatePayment = async (
+    customerId: number,
+    orderId: number,
+    paymentId: number,
+    paymentData: PaymentRequest,
+): Promise<PaymentResponse> => {
+    const response = await api.patch(
+        `/customers/${customerId}/orders/${orderId}/payments/${paymentId}`,
+        paymentData,
+    );
+    return response.data;
+};
+
+export const deletePayment = async (
+    customerId: number,
+    orderId: number,
+    paymentId: number,
+): Promise<void> => {
+    await api.delete(
+        `/customers/${customerId}/orders/${orderId}/payments/${paymentId}`,
     );
 };

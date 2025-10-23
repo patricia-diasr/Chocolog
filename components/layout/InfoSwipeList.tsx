@@ -36,7 +36,8 @@ interface Props {
     onAddItem?: () => void;
     onEditItem: (id: number) => void;
     onDeleteItem: (id: number) => void;
-    actionsDisabled?: boolean;
+    isActionsDisabled?: boolean;
+    isAddDisabled?: boolean;
     disableDeleteOnSingleItem?: boolean;
 }
 
@@ -49,7 +50,8 @@ export default function InfoSwipeList({
     onAddItem,
     onEditItem,
     onDeleteItem,
-    actionsDisabled,
+    isActionsDisabled,
+    isAddDisabled,
     disableDeleteOnSingleItem,
 }: Props) {
     const {
@@ -83,18 +85,18 @@ export default function InfoSwipeList({
                     }}
                     _hover={{
                         bg:
-                            isEditDisabled || actionsDisabled
+                            isEditDisabled || isActionsDisabled
                                 ? "blue.200"
                                 : "blue.300",
                     }}
                     _pressed={{
                         bg:
-                            isEditDisabled || actionsDisabled
+                            isEditDisabled || isActionsDisabled
                                 ? "blue.200"
                                 : "blue.3400",
                     }}
-                    disabled={isEditDisabled || actionsDisabled}
-                    opacity={isEditDisabled || actionsDisabled ? 0.5 : 1}
+                    disabled={isEditDisabled || isActionsDisabled}
+                    opacity={isEditDisabled || isActionsDisabled ? 0.5 : 1}
                 >
                     <Icon
                         as={Ionicons}
@@ -117,18 +119,18 @@ export default function InfoSwipeList({
                     }}
                     _hover={{
                         bg:
-                            isDeleteDisabled || actionsDisabled
+                            isDeleteDisabled || isActionsDisabled
                                 ? "red.100"
                                 : "red.200",
                     }}
                     _pressed={{
                         bg:
-                            isDeleteDisabled || actionsDisabled
+                            isDeleteDisabled || isActionsDisabled
                                 ? "red.100"
                                 : "red.300",
                     }}
-                    disabled={isDeleteDisabled || actionsDisabled}
-                    opacity={isDeleteDisabled || actionsDisabled ? 0.5 : 1}
+                    disabled={isDeleteDisabled || isActionsDisabled}
+                    opacity={isDeleteDisabled || isActionsDisabled ? 0.5 : 1}
                 >
                     <Icon as={Ionicons} name="trash-outline" color="red.600" />
                     <Text color="red.600" fontSize="xs" fontWeight="medium">
@@ -250,7 +252,7 @@ export default function InfoSwipeList({
                                     size="xs"
                                 />
                             }
-                            isDisabled={actionsDisabled}
+                            isDisabled={isActionsDisabled || isAddDisabled}
                         >
                             {addText}
                         </Button>

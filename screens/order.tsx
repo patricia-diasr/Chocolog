@@ -16,7 +16,8 @@ import {
     OrderItemResponse,
     OrderRequest,
     OrderResponse,
-    Payment,
+    PaymentRequest,
+    PaymentResponse
 } from "../types/order";
 import { getStatusDetails } from "../utils/statusConfig";
 import {
@@ -27,7 +28,7 @@ import {
 import { useCustomToast } from "../contexts/ToastProvider";
 import { RootStackParamList } from "../types/navigation";
 import { RouteProp } from "@react-navigation/native";
-import { createItem, deleteItem, getOrder, updateItem, updateOrder } from "../services/orderService";
+import { createItem, createPayment, deleteItem, deletePayment, getOrder, updateItem, updateOrder, updatePayment } from "../services/orderService";
 
 type ModalType =
     | "editOrder"
@@ -44,7 +45,8 @@ type ModalState = {
         | OrderResponse
         | OrderItemRequest
         | OrderItemResponse
-        | Payment
+        | PaymentRequest
+        | PaymentResponse
         | { id: number; name: string; type: "payment" | "orderDetail" };
 };
 
@@ -107,7 +109,6 @@ export default function OrderScreen({ route }: Props) {
                 orderId,
                 updatedData,
             );
-            fetchOrder();
 
             toast.showToast({
                 title: "Sucesso!",
@@ -115,6 +116,7 @@ export default function OrderScreen({ route }: Props) {
                 status: "success",
             });
 
+            fetchOrder();
             handleCloseModals();
         } catch (error) {
             toast.showToast({
@@ -179,15 +181,6 @@ export default function OrderScreen({ route }: Props) {
             } else {
                 const newItem = await createItem(customerId, orderId, itemData);
 
-                setOrderData((prevData) => {
-                    if (!prevData) return prevData;
-
-                    return {
-                        ...prevData,
-                        orderItems: [...prevData.orderItems, newItem],
-                    };
-                });
-
                 toast.showToast({
                     title: "Sucesso!",
                     description: "Item criado.",
@@ -208,17 +201,65 @@ export default function OrderScreen({ route }: Props) {
         }
     };
 
-    const handleSavePayment = useCallback(
-        (payment: Payment) => {
+    const handleSavePayment = async (paymentData: PaymentRequest) => {
+        setIsSavingLoading(true);
+
+        const isEditing = modalState.type === "editPayment"; 
+        const paymentId = isEditing ? (modalState.data as PaymentResponse)?.id : null;
+
+        if (!orderData) {
             toast.showToast({
-                title: "Sucesso!",
-                description: "O pagamento foi salvo.",
-                status: "success",
+                title: "Erro!",
+                description: "Dados do pedido não encontrados.",
+                status: "error",
             });
+            setIsSavingLoading(false);
+            return;
+        }
+
+        if (isEditing && !paymentId) {
+            toast.showToast({
+                title: "Erro!",
+                description: "ID do pagamento não encontrado para editar.",
+                status: "error",
+            });
+            setIsSavingLoading(false);
+            return;
+        }
+
+        try {
+            if (isEditing) {
+                await updatePayment(customerId, orderId, paymentId!, paymentData);
+
+                toast.showToast({
+                    title: "Sucesso!",
+                    description: "Pagamento atualizado.",
+                    status: "success",
+                });
+            } else {
+                await createPayment(customerId, orderId, paymentData);
+
+                toast.showToast({
+                    title: "Sucesso!",
+                    description: "Pagamento adicionado.",
+                    status: "success",
+                });
+            }
+
+            fetchOrder();
             handleCloseModals();
-        },
-        [handleCloseModals, toast],
-    );
+        } catch (error) {
+            toast.showToast({
+                title: "Erro!",
+                description: `Não foi possível ${
+                    isEditing ? "atualizar" : "adicionar"
+                } o pagamento.`,
+                status: "error",
+            });
+        } finally {
+            setIsSavingLoading(false);
+        }
+    };
 
     const handleConfirmDelete = useCallback(async () => {
         if (modalState.type !== "deleteItem" || !modalState.data) return;
@@ -234,15 +275,9 @@ export default function OrderScreen({ route }: Props) {
         try {
             if (type === "orderDetail") {
                 await deleteItem(customerId, orderId, id);
-
-                setOrderData((prevData) => {
-                    if (!prevData) return prevData;
-                    const updatedItems = prevData.orderItems.filter(
-                        (item) => item.id !== id,
-                    );
-                    return { ...prevData, orderItems: updatedItems };
-                });
-            } 
+            } else {
+                await deletePayment(customerId, orderId, id);
+            }
             toast.showToast({
                 title: "Sucesso!",
                 description: `O ${
@@ -288,8 +323,8 @@ export default function OrderScreen({ route }: Props) {
         () =>
             orderData?.charges.payments.map((payment) => ({
                 id: payment.id,
-                title: `${formatDate(payment.date)} - ${payment.method}`,
-                info: formatPrice(payment.value),
+                title: `${formatDate(payment.paymentDate)} - ${payment.paymentMethod}`,
+                info: formatPrice(payment.paidAmount),
             })),
         [orderData?.charges.payments],
     );
@@ -354,7 +389,7 @@ export default function OrderScreen({ route }: Props) {
                                         });
                                     }
                                 }}
-                                actionsDisabled={isOrderFinalized}
+                                isActionsDisabled={isOrderFinalized}
                                 disableDeleteOnSingleItem={true}
                             />
 
@@ -392,6 +427,7 @@ export default function OrderScreen({ route }: Props) {
                                         });
                                     }
                                 }}
+                                isAddDisabled={orderData.charges.status === "PAID"}
                             />
                         </VStack>
                     </Box>
@@ -452,9 +488,10 @@ export default function OrderScreen({ route }: Props) {
                 onSave={handleSavePayment}
                 paymentData={
                     modalState.type === "editPayment"
-                        ? (modalState.data as Payment)
+                        ? (modalState.data as PaymentResponse)
                         : null
                 }
+                isLoading={isSavingLoading}
             />
 
             <DeleteAlert

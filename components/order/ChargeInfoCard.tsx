@@ -59,6 +59,11 @@ export default function ChargeInfoCard({ charge }: Props) {
                             label="Total"
                             value={formatPrice(charge.totalAmount)}
                         />
+                        <InfoRow
+                            iconName="wallet" 
+                            label="Restante"
+                            value={formatPrice(charge.dueAmount)} 
+                        />
                     </VStack>
                 </VStack>
             </VStack>

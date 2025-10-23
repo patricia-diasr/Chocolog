@@ -12,8 +12,12 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useAppColors } from "../../hooks/useAppColors";
 import { useCustomToast } from "../../contexts/ToastProvider";
-import { Payment } from "../../types/order";
-import { formatDate } from "../../utils/formatters";
+import { PaymentRequest } from "../../types/order";
+import {
+    applyDateMask,
+    formatDate,
+    parseInputDate,
+} from "../../utils/formatters";
 import { PAYMENT_METHODS } from "../../configs/order";
 import Select from "../layout/Select";
 
@@ -21,15 +25,16 @@ interface Props {
     title: string;
     isOpen: boolean;
     onClose: () => void;
-    onSave: (data: Payment) => void;
-    paymentData: Payment | null;
+    onSave: (data: PaymentRequest) => void;
+    paymentData: PaymentRequest | null;
+    isLoading: boolean;
 }
 
-const createDefaultPayment = (): Payment => ({
-    id: "",
-    value: 0,
-    date: formatDate(`${new Date()}`),
-    method: "",
+const createDefaultPayment = (): PaymentRequest => ({
+    employeeId: 1,
+    paidAmount: 0,
+    paymentMethod: "",
+    paymentDate: "",
 });
 
 export default function PaymentFormModal({
@@ -38,6 +43,7 @@ export default function PaymentFormModal({
     onClose,
     onSave,
     paymentData,
+    isLoading
 }: Props) {
     const toast = useCustomToast();
     const {
@@ -51,19 +57,30 @@ export default function PaymentFormModal({
         invalidColor,
     } = useAppColors();
 
-    const [formData, setFormData] = useState<Payment>(createDefaultPayment());
+    const [formData, setFormData] = useState<PaymentRequest>(
+        createDefaultPayment(),
+    );
     const [valueText, setValueText] = useState<string>("");
+    const [dateText, setDateText] = useState<string>("");
     const [hasAttemptedSave, setHasAttemptedSave] = useState(false);
 
     useEffect(() => {
         if (isOpen) {
             const initialData = paymentData
-                ? { ...paymentData, date: new Date(paymentData.date) }
+                ? { ...paymentData }
                 : createDefaultPayment();
+
+            if (initialData.paymentDate) {
+                setDateText(formatDate(initialData.paymentDate));
+            } else {
+                setDateText("");
+            }
 
             setFormData(initialData);
             setValueText(
-                initialData.value > 0 ? String(initialData.value) : "",
+                initialData.paidAmount > 0
+                    ? String(initialData.paidAmount)
+                    : "",
             );
         } else {
             setHasAttemptedSave(false);
@@ -73,26 +90,39 @@ export default function PaymentFormModal({
     }, [isOpen, paymentData]);
 
     const isValueInvalid = useMemo(
-        () => hasAttemptedSave && (!formData.value || formData.value <= 0),
-        [hasAttemptedSave, formData.value],
+        () =>
+            hasAttemptedSave &&
+            (!formData.paidAmount || formData.paidAmount <= 0),
+        [hasAttemptedSave, formData.paidAmount],
     );
 
     const isDateInvalid = useMemo(
-        () => hasAttemptedSave && !formData.date,
-        [hasAttemptedSave, formData.date],
+        () => hasAttemptedSave && !formData.paymentDate,
+        [hasAttemptedSave, formData.paymentDate],
     );
 
     const isMethodInvalid = useMemo(
-        () => hasAttemptedSave && !formData.method,
-        [hasAttemptedSave, formData.method],
+        () => hasAttemptedSave && !formData.paymentMethod,
+        [hasAttemptedSave, formData.paymentMethod],
     );
 
     const handleInputChange = useCallback(
-        (field: keyof Payment, value: any) => {
+        (field: keyof PaymentRequest, value: any) => {
             setFormData((prevData) => ({ ...prevData, [field]: value }));
         },
         [],
     );
+
+    const handleDateChange = useCallback((text: string) => {
+        const maskedText = applyDateMask(text);
+        setDateText(maskedText);
+
+        const isoDateString = parseInputDate(maskedText);
+        setFormData((prevData) => ({
+            ...prevData,
+            paymentDate: isoDateString,
+        }));
+    }, []);
 
     const handleValueChange = useCallback(
         (text: string) => {
@@ -100,7 +130,7 @@ export default function PaymentFormModal({
                 .replace(/[^0-9.]/g, "")
                 .replace(/(\..*)\./g, "$1");
             setValueText(cleanedText);
-            handleInputChange("value", parseFloat(cleanedText) || 0);
+            handleInputChange("paidAmount", parseFloat(cleanedText) || 0);
         },
         [handleInputChange],
     );
@@ -109,7 +139,9 @@ export default function PaymentFormModal({
         setHasAttemptedSave(true);
 
         const isFormValid =
-            formData.value > 0 && formData.date && formData.method;
+            formData.paidAmount > 0 &&
+            !!formData.paymentDate &&
+            formData.paymentMethod;
 
         if (!isFormValid) {
             toast.showToast({
@@ -123,10 +155,10 @@ export default function PaymentFormModal({
 
         const dataToSave = {
             ...formData,
-            date: formatDate(formData.date),
+            paymentDate: new Date(formData.paymentDate!).toISOString(),
         };
 
-        onSave(dataToSave as unknown as Payment);
+        onSave(dataToSave as unknown as PaymentRequest);
     }, [formData, onSave, toast]);
 
     return (
@@ -198,11 +230,11 @@ export default function PaymentFormModal({
                                 </HStack>
                             </FormControl.Label>
                             <Input
-                                value={formatDate(formData.date)}
-                                placeholder="Selecione uma data"
-                                onChangeText={(text) =>
-                                    handleInputChange("date", formatDate(text))
-                                }
+                                value={dateText}
+                                placeholder="DD/MM/AAAA"
+                                onChangeText={handleDateChange}
+                                keyboardType="numeric"
+                                maxLength={10}
                                 bg={backgroundColor}
                                 variant="filled"
                                 size="lg"
@@ -229,9 +261,9 @@ export default function PaymentFormModal({
                                 modalTitle="Selecione o Método"
                                 placeholder="Selecione um método"
                                 data={PAYMENT_METHODS}
-                                selectedValue={formData.method}
+                                selectedValue={formData.paymentMethod}
                                 onValueChange={(value) =>
-                                    handleInputChange("method", value)
+                                    handleInputChange("paymentMethod", value)
                                 }
                                 isInvalid={isMethodInvalid}
                             />
@@ -248,6 +280,7 @@ export default function PaymentFormModal({
                             flex={1}
                             py={3}
                             _text={{ fontSize: "md", fontWeight: "medium" }}
+                            isDisabled={isLoading}
                         >
                             Cancelar
                         </Button>
@@ -262,6 +295,9 @@ export default function PaymentFormModal({
                             py={3}
                             shadow={2}
                             _text={{ fontSize: "md", fontWeight: "medium" }}
+                            isLoading={isLoading}
+                            isLoadingText="Salvando..."
+                            _loading={{ bg: tertiaryColor }}
                         >
                             Salvar
                         </Button>
