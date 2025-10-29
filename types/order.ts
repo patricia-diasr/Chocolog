@@ -21,8 +21,13 @@ export type OrderItemResponse = {
     unitPrice: number;
     totalPrice: number;
     onDemand: boolean;
+    isPrinted?: boolean;
     status: OrderStatus;
     notes: string | null;
+    customerId?: number;
+    customerName?: string;
+    customerPhone?: string;
+    expectedPickupDate?: string;
 };
 
 export type OrderItemRequest = {

@@ -1,19 +1,27 @@
-import { Customer } from "./customer";
-import { OrderDetail } from "./order";
-
-export type ItemPrintBatch = {
-    id: number;
-    order_id: number;
-    status: "pending" | "completed" | "cancelled";
-    due_date: string;
-    order_detail: OrderDetail;
-    customer: Customer;
-    is_printed?: boolean;
-};
+import { Employee } from "./employee";
+import { OrderItemResponse } from "./order";
 
 export type PrintBatch = {
     id: number;
-    printed_by_employee: string;
-    created_at: string;
-    items: ItemPrintBatch[];
+    createdAt: string;
+    printedBy: Employee;
+    itemsCount: number;
+};
+
+export type PrintBatchItem = {
+    id: number;
+    orderItem: OrderItemResponse;
+};
+
+export type PrintBatchDetail = {
+    id: number;
+    createdAt: string;
+    printedBy: Employee;
+    fileSystemPath: string;
+    items: PrintBatchItem[];
+}
+
+export type PrintBatchRequest = {
+    employeeId: number;
+    orderItemIds: number[];
 };

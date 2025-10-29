@@ -8,17 +8,18 @@ import { formatDate } from "../../utils/formatters";
 
 export default function PrintCard({
     id,
-    printed_by_employee,
-    created_at,
-    items,
+    printedBy,
+    createdAt,
+    itemsCount,
 }: PrintBatch) {
-    const { borderColor, whiteColor, secondaryColor } =
-        useAppColors();
+    const { borderColor, whiteColor, secondaryColor } = useAppColors();
 
     const navigation = useNavigation();
 
     const handleNavigate = () => {
-        navigation.navigate("PrintBatch" as never);
+        navigation.navigate("PrintBatch", {
+            printBatchId: id,
+        });
     };
 
     return (
@@ -52,22 +53,21 @@ export default function PrintCard({
                         <InfoRow
                             iconName="calendar"
                             label="Criado em"
-                            value={formatDate(created_at)}
+                            value={formatDate(createdAt)}
                         />
                         <InfoRow
                             iconName="people"
                             label="Criado por"
-                            value={printed_by_employee}
+                            value={printedBy.name}
                         />
                         <InfoRow
                             iconName="cube"
                             label="Quantidade de itens"
-                            value={items.length.toString()}
+                            value={itemsCount}
                         />
                     </VStack>
                 </VStack>
             </VStack>
         </Pressable>
-        
     );
 }

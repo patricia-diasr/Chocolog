@@ -27,6 +27,7 @@ export type RootStackParamList = {
     Employees: undefined;
     Customer: { customerId: number };
     Order: { customerId: number; orderId: number };
+    PrintBatch: { printBatchId : number }
 };
 
 export type AuthStackParamList = {

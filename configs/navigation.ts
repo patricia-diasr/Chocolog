@@ -3,7 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 import ScheduleScreen from "../screens/schedule";
 import CustomersScreen from "../screens/customers";
 import StockScreen from "../screens/stock";
-import PrintBatchesScreen from "../screens/print-batches";
+import PrintBatchsScreen from "../screens/print-batchs";
 import EmployeesScreen from "../screens/employees";
 import FlavorListScreen from "../screens/flavor-list";
 import OrderScreen from "../screens/order";
@@ -49,7 +49,7 @@ export const SCREEN_CONFIG: Record<string, ScreenConfig> = {
         isMenuItem: true,
     },
     Prints: {
-        component: PrintBatchesScreen,
+        component: PrintBatchsScreen,
         title: "Impressões",
         icon: "print",
         subtitle: "Gerencie a impressão de pedidos",

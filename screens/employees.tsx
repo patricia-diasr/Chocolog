@@ -73,7 +73,7 @@ export default function EmployeesScreen() {
             toast.showToast({
                 title: "Erro ao carregar!",
                 description:
-                    "Não foi possível buscar os funcionários. Tente novamente.",
+                    "Não foi possível buscar os lot. Tente novamente.",
                 status: "error",
             });
         } finally {

@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
-import { useNavigation } from "@react-navigation/native";
-import { Box, Center, ScrollView, VStack } from "native-base";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { RouteProp, useNavigation } from "@react-navigation/native";
+import { Box, Center, ScrollView, Spinner, VStack, Text } from "native-base";
 
 import InfoList from "../components/layout/InfoList";
 import { useAppColors } from "../hooks/useAppColors";
@@ -9,99 +9,57 @@ import {
     formatDate,
     formatOrderDetailTitleWithNotes,
 } from "../utils/formatters";
-import { PrintBatch } from "../types/prints";
+import { PrintBatchDetail } from "../types/prints";
 import PrintInfoCard from "../components/print/PrintInfoCard";
+import { RootStackParamList } from "../types/navigation";
+import { getPrintBatch } from "../services/printBatchService";
+import { useCustomToast } from "../contexts/ToastProvider";
 
-const printBatchMock: PrintBatch = {
-    id: "2",
-    printed_by_employee: "João Pereira",
-    created_at: "2025-02-04",
-    items: [
-        {
-            id: "2",
-            order_id: "2",
-            status: "pending",
-            due_date: "2025-03-12",
-            order_detail: {
-                id: "2",
-                size: "1Kg",
-                flavor1: "Brigadeiro",
-                quantity: 1,
-                unit_price: 95,
-                total_price: 95,
-                status: "pending",
-                custom_made: false,
-            },
-            customer: {
-                id: "5",
-                name: "Ana Costa",
-                phone: "19888888888",
-                isReseller: true,
-            },
-        },
-        {
-            id: "3",
-            order_id: "3",
-            status: "pending",
-            due_date: "2025-03-15",
-            order_detail: {
-                id: "3",
-                size: "Coração",
-                flavor1: "Ninho",
-                flavor2: "Maracujá",
-                quantity: 5,
-                unit_price: 35,
-                total_price: 175,
-                status: "completed",
-                custom_made: false,
-            },
-            customer: {
-                id: "6",
-                name: "Carlos Souza",
-                phone: "21777777777",
-                isReseller: false,
-            },
-        },
-        {
-            id: "3",
-            order_id: "2",
-            status: "completed",
-            due_date: "2025-03-12",
-            order_detail: {
-                id: "3",
-                size: "500g",
-                flavor1: "Prestígio",
-                quantity: 1,
-                unit_price: 95,
-                total_price: 95,
-                notes: "Embalagem rosa",
-                status: "pending",
-                custom_made: false,
-            },
-            customer: {
-                id: "5",
-                name: "Ana Costa",
-                phone: "19888888888",
-                isReseller: true,
-            },
-        },
-    ],
+type PrintBatchScreenRouteProp = RouteProp<RootStackParamList, "PrintBatch">;
+
+type Props = {
+    route: PrintBatchScreenRouteProp;
 };
 
-export default function PrintBatchScreen() {
-    const { backgroundColor } = useAppColors();
+export default function PrintBatchScreen({ route }: Props) {
+    const { backgroundColor, secondaryColor, mediumGreyColor } = useAppColors();
+    const { printBatchId } = route.params;
+
     const navigation = useNavigation();
+    const toast = useCustomToast();
 
-    const [printBatchData, setPrintBatchData] =
-        useState<PrintBatch>(printBatchMock);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [printBatchData, setPrintBatchData] = useState<PrintBatchDetail>();
 
-    const handleNavigateToOrder = () => {
-        navigation.navigate("Order" as never);
-    };
+    const fetchPrintBatch = useCallback(async () => {
+        setIsLoading(true);
+
+        try {
+            const data = await getPrintBatch(printBatchId);
+            setPrintBatchData(data);
+        } catch (error) {
+            toast.showToast({
+                title: "Erro ao carregar!",
+                description:
+                    "Não foi possível buscar o lote de impressão. Tente novamente.",
+                status: "error",
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    }, [toast, printBatchId]); 
+
+    useEffect(() => {
+        fetchPrintBatch();
+    }, [fetchPrintBatch]);
 
     const printItems = useMemo(() => {
+        if (!printBatchData) {
+            return [];
+        }
+
         const groupedByOrderId = printBatchData.items.reduce((acc, item) => {
-            const key = item.order_id;
+            const key = item.orderItem.orderId;
             if (!acc[key]) {
                 acc[key] = [];
             }
@@ -111,25 +69,51 @@ export default function PrintBatchScreen() {
 
         return Object.values(groupedByOrderId).map((group) => {
             const firstItem = group[0];
-            const status = getStatusDetails(firstItem.order_detail.status);
+            const status = getStatusDetails(firstItem.orderItem.status);
 
             const combinedInfo = group
-                .map((item) =>
-                    formatOrderDetailTitleWithNotes(item.order_detail),
-                )
+                .map((item) => formatOrderDetailTitleWithNotes(item.orderItem))
                 .join("\n");
 
             return {
-                id: firstItem.order_id,
-                title: firstItem.customer.name,
+                id: firstItem.id,
+                title: firstItem.orderItem.customerName,
                 info: combinedInfo,
-                aditionalInfo: formatDate(firstItem.due_date),
+                aditionalInfo: formatDate(
+                    firstItem.orderItem.expectedPickupDate || "",
+                ),
                 badgeColor: status.colorScheme,
                 badgeIcon: status.icon,
                 badgeLabel: status.label,
             };
         });
     }, [printBatchData]);
+
+    const handleNavigateToOrder = (orderItemId: number) => {
+        const item = printBatchData!.items.find(
+            (oi) => oi.id === orderItemId,
+        );
+        const customerId = item?.orderItem.customerId;
+        const orderId = item?.orderItem.orderId;
+
+        if (customerId) {
+            navigation.navigate("Order", {
+                customerId: customerId,
+                orderId: orderId,
+            });
+        }
+    };
+
+    if (isLoading || !printBatchData) {
+        return (
+            <Center flex={1} bg={backgroundColor}>
+                <Spinner size="lg" color={secondaryColor} />
+                <Text mt={4} color={mediumGreyColor}>
+                    Carregando lote de impressão...
+                </Text>
+            </Center>
+        );
+    }
 
     return (
         <>
@@ -148,10 +132,8 @@ export default function PrintBatchScreen() {
                         <VStack space={4}>
                             <PrintInfoCard
                                 id={printBatchData.id}
-                                printed_by_employee={
-                                    printBatchData.printed_by_employee
-                                }
-                                created_at={printBatchData.created_at}
+                                printedBy={printBatchData.printedBy.name}
+                                createdAt={printBatchData.createdAt}
                             />
                             <InfoList
                                 title={`Itens do Lote`}

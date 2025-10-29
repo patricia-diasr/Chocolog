@@ -7,6 +7,7 @@ interface Props {
     onClose: () => void;
     onConfirm: () => void;
     selectedCount: number;
+    isLoading: boolean;
 }
 
 export default function PrintAlert({
@@ -14,6 +15,7 @@ export default function PrintAlert({
     onClose,
     onConfirm,
     selectedCount,
+    isLoading,
 }: Props) {
     const cancelRef = useRef(null);
     const {
@@ -27,9 +29,7 @@ export default function PrintAlert({
     } = useAppColors();
 
     const message =
-        selectedCount === 1
-            ? "Deseja imprimir o"
-            : "Deseja imprimir os";
+        selectedCount === 1 ? "Deseja imprimir o" : "Deseja imprimir os";
 
     const itemName =
         selectedCount === 1
@@ -117,6 +117,7 @@ export default function PrintAlert({
                                 fontSize: "md",
                                 fontWeight: "medium",
                             }}
+                            isDisabled={isLoading}
                         >
                             Cancelar
                         </Button>
@@ -134,6 +135,9 @@ export default function PrintAlert({
                                 fontSize: "md",
                                 fontWeight: "medium",
                             }}
+                            isLoading={isLoading}
+                            isLoadingText="Carregando..."
+                            _loading={{ bg: tertiaryColor, opacity: 0.8 }}
                         >
                             Imprimir
                         </Button>

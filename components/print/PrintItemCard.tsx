@@ -4,29 +4,24 @@ import LabelBadge from "../layout/LabelBadge";
 import InfoRow from "../layout/InfoRow";
 import { getStatusDetails } from "../../utils/statusConfig";
 import { formatDate, formatOrderDetailTitle } from "../../utils/formatters";
-import { ItemPrintBatch } from "../../types/prints";
+import { OrderItemResponse } from "../../types/order";
 import { useAppColors } from "../../hooks/useAppColors";
 
-interface Props extends ItemPrintBatch {
+interface Props {
+    item: OrderItemResponse;
     isSelected: boolean;
     onSelect: (id: number) => void;
 }
 
 export default function PrintItemCard({
-    id,
-    order_id,
-    status,
-    due_date,
-    is_printed,
-    order_detail,
-    customer,
+    item,
     isSelected,
     onSelect,
 }: Props) {
     const { borderColor, whiteColor, secondaryColor, blackColor } =
         useAppColors();
 
-    const statusDetails = getStatusDetails(status);
+    const statusDetails = getStatusDetails(item.status);
 
     return (
         <Pressable
@@ -39,15 +34,15 @@ export default function PrintItemCard({
             borderColor={isSelected ? secondaryColor : borderColor}
             _hover={{ bg: borderColor }}
             _pressed={{ bg: borderColor }}
-            onPress={() => onSelect(id)}
+            onPress={() => onSelect(item.id)}
         >
             <VStack mb={1} space={2}>
                 <HStack justifyContent="space-between" alignItems="flex-start">
                     <HStack alignItems="center" space={2}>
                         <Checkbox
-                            value={id}
+                            value={item.id.toString()}
                             isChecked={isSelected}
-                            onChange={() => onSelect(id)}
+                            onChange={() => onSelect(item.id)}
                             colorScheme="secondary"
                         />
                         <Text
@@ -55,7 +50,7 @@ export default function PrintItemCard({
                             fontWeight="bold"
                             color={secondaryColor}
                         >
-                            {customer.name}
+                            {item.customerName}
                         </Text>
                     </HStack>
                     <LabelBadge
@@ -66,27 +61,27 @@ export default function PrintItemCard({
                 </HStack>
                 <VStack space={1.5}>
                     <Text fontWeight="bold" fontSize="md" color={blackColor}>
-                        {formatOrderDetailTitle(order_detail)}
+                        {formatOrderDetailTitle(item)}
                     </Text>
                     <InfoRow
                         iconName="document-text"
                         label="Obs."
-                        value={order_detail.notes || "..."}
+                        value={item.notes || "..."}
                     />
                     <InfoRow
                         iconName="calendar"
                         label="Data"
-                        value={formatDate(due_date)}
+                        value={formatDate(item.expectedPickupDate || "")}
                     />
                     <InfoRow
                         iconName="call"
                         label="Telefone"
-                        value={customer.phone}
+                        value={item.customerPhone || ""}
                     />
                     <InfoRow
                         iconName="print"
                         label="Impresso"
-                        value={is_printed ? "Sim" : "Não"}
+                        value={item.isPrinted ? "Sim" : "Não"}
                     />
                 </VStack>
             </VStack>

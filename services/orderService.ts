@@ -125,3 +125,9 @@ export const deletePayment = async (
         `/customers/${customerId}/orders/${orderId}/payments/${paymentId}`,
     );
 };
+
+export const getItems = async (
+): Promise<OrderItemResponse[]> => {
+    const response = await api.get(`/orders/items?onDemand=true`);
+    return response.data;
+};

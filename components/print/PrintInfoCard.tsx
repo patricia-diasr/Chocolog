@@ -4,28 +4,34 @@ import { Ionicons } from "@expo/vector-icons";
 import { formatDate } from "../../utils/formatters";
 import { useAppColors } from "../../hooks/useAppColors";
 import { useCustomToast } from "../../contexts/ToastProvider";
+import { downloadPrintBatch } from "../../services/printBatchService";
+import { triggerBrowserDownload } from "../../utils/download";
 
 interface Props {
     id: number;
-    printed_by_employee: string;
-    created_at: string;
+    printedBy: string;
+    createdAt: string;
 }
 
 export default function PrintInfoCard({
     id,
-    printed_by_employee,
-    created_at,
+    printedBy,
+    createdAt,
 }: Props) {
     const { whiteColor, blackColor, tertiaryColor, borderColor } =
         useAppColors();
     const toast = useCustomToast();
 
-    const dowloadPrintBatch = () => {
+    const dowload = async () => {
         toast.showToast({
             title: "Realizando dowload...",
             description: "O arquivo esta sendo baixado.",
             status: "info",
         });
+
+        const pdfBlob = await downloadPrintBatch(id);
+        const filename = `lote-impressao-${id}.pdf`;
+        triggerBrowserDownload(pdfBlob, filename);
     };
 
     return (
@@ -53,7 +59,7 @@ export default function PrintInfoCard({
                             </Text>
                         </HStack>
                         <Button
-                            onPress={dowloadPrintBatch}
+                            onPress={dowload}
                             size="xs"
                             colorScheme="secondary"
                             rounded="xl"
@@ -81,12 +87,12 @@ export default function PrintInfoCard({
                         <InfoRow
                             iconName="calendar"
                             label="Criado em"
-                            value={formatDate(created_at)}
+                            value={formatDate(createdAt)}
                         />
                         <InfoRow
                             iconName="people"
                             label="Criado por"
-                            value={printed_by_employee}
+                            value={printedBy}
                         />
                     </VStack>
                 </VStack>

@@ -10,7 +10,7 @@ import { useAppColors } from "../../hooks/useAppColors";
 interface Props {
     iconName: ComponentProps<typeof Ionicons>["name"];
     label: string;
-    value: string;
+    value: string | number;
 }
 
 export default function InfoRow({ iconName, label, value }: Props) {

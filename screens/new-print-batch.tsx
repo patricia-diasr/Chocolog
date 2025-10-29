@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
     Box,
     Center,
@@ -9,100 +9,32 @@ import {
     Pressable,
     HStack,
     Flex,
+    Spinner,
 } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
 import { useAppColors } from "../hooks/useAppColors";
-import { ItemPrintBatch } from "../types/prints";
 import SortButtons, { SortOption } from "../components/layout/SortButtons";
 import SearchInput from "../components/layout/Searchbar";
 import FabButton from "../components/layout/FabButton";
 import PrintItemCard from "../components/print/PrintItemCard";
 import PrintAlert from "../components/print/PrintAlert";
 import { useCustomToast } from "../contexts/ToastProvider";
-
-const printItemsMock: ItemPrintBatch[] = [
-    {
-        id: "2",
-        order_id: "2",
-        status: "pending",
-        due_date: "2025-03-12",
-        is_printed: false,
-        order_detail: {
-            id: "2",
-            size: "1Kg",
-            flavor1: "Brigadeiro",
-            quantity: 1,
-            unit_price: 95,
-            total_price: 95,
-            status: "pending",
-            custom_made: false,
-        },
-        customer: {
-            id: "5",
-            name: "Ana Costa",
-            phone: "19888888888",
-            isReseller: true,
-        },
-    },
-    {
-        id: "3",
-        order_id: "3",
-        status: "pending",
-        due_date: "2025-03-15",
-        is_printed: false,
-        order_detail: {
-            id: "3",
-            size: "Coração",
-            flavor1: "Ninho",
-            flavor2: "Maracujá",
-            quantity: 5,
-            unit_price: 35,
-            total_price: 175,
-            status: "completed",
-            custom_made: false,
-        },
-        customer: {
-            id: "6",
-            name: "Carlos Souza",
-            phone: "21777777777",
-            isReseller: false,
-        },
-    },
-    {
-        id: "4",
-        order_id: "2",
-        status: "completed",
-        due_date: "2025-03-12",
-        is_printed: true,
-        order_detail: {
-            id: "3",
-            size: "500g",
-            flavor1: "Prestígio",
-            quantity: 1,
-            unit_price: 95,
-            total_price: 95,
-            notes: "Embalagem rosa",
-            status: "pending",
-            custom_made: false,
-        },
-        customer: {
-            id: "5",
-            name: "Ana Costa",
-            phone: "19888888888",
-            isReseller: true,
-        },
-    },
-];
+import { OrderItemResponse } from "../types/order";
+import { getItems } from "../services/orderService";
+import { createPrintBatch, downloadPrintBatch } from "../services/printBatchService";
+import { PrintBatchDetail } from "../types/prints";
+import { triggerBrowserDownload } from "../utils/download";
 
 export default function NewPrintBatchScreen() {
     const { backgroundColor, whiteColor, mediumGreyColor, secondaryColor } =
         useAppColors();
     const toast = useCustomToast();
 
-    const [printItems, setPrintItems] =
-        useState<ItemPrintBatch[]>(printItemsMock);
-    const [selectedIds, setSelectedIds] = useState<Array<string>>([]);
+    const [printItems, setPrintItems] = useState<OrderItemResponse[]>([]);
+    const [selectedIds, setSelectedIds] = useState<Array<number>>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [isSavingLoading, setIsSavingLoading] = useState<boolean>(false);
 
     const [searchTerm, setSearchTerm] = useState("");
     const [filterBy, setFilterBy] = useState<"all" | "not-printed">("all");
@@ -111,6 +43,28 @@ export default function NewPrintBatchScreen() {
         { value: "all", label: "Todos", icon: "people" },
         { value: "not-printed", label: "Não impressos", icon: "warning" },
     ];
+
+    const fetchItems = useCallback(async () => {
+        setIsLoading(true);
+
+        try {
+            const data = await getItems();
+            setPrintItems(data);
+        } catch (error) {
+            toast.showToast({
+                title: "Erro ao carregar!",
+                description:
+                    "Não foi possível buscar os itens. Tente novamente.",
+                status: "error",
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    }, [toast]);
+
+    useEffect(() => {
+        fetchItems();
+    }, [fetchItems]);
 
     const handleSelect = (id: number) => {
         if (selectedIds.includes(id)) {
@@ -145,13 +99,38 @@ export default function NewPrintBatchScreen() {
         }
     };
 
-    const handleSaveNewPrintBatch = () => {
-        toast.showToast({
-            title: "Sucesso!",
-            description: "O arquivo gerado esta sendo baixado.",
-            status: "success",
-        });
-        setIsModalOpen(false);
+    const handleSaveNewPrintBatch = async () => {
+        setIsSavingLoading(true);
+        if (selectedIds.length === 0) return;
+
+        try {
+            const newPrint = {
+                employeeId: 1,
+                orderItemIds: selectedIds,
+            };
+
+            const printBatch: PrintBatchDetail = await createPrintBatch(newPrint);
+
+            toast.showToast({
+                title: "Sucesso!",
+                description: "O arquivo gerado esta sendo baixado.",
+                status: "success",
+            });
+
+            const pdfBlob = await downloadPrintBatch(printBatch.id);
+            const filename = `lote-impressao-${printBatch.id}.pdf`;
+            triggerBrowserDownload(pdfBlob, filename);
+            
+            setIsModalOpen(false);
+        } catch (error) {
+            toast.showToast({
+                title: "Erro!",
+                description: "Não foi possível gerar o lote.",
+                status: "error",
+            });
+        } finally {
+            setIsSavingLoading(false);
+        }
     };
 
     const processedPrintItems = useMemo(() => {
@@ -160,15 +139,15 @@ export default function NewPrintBatchScreen() {
         if (searchTerm) {
             filtered = filtered.filter(
                 (item) =>
-                    item.customer.name
-                        .toLowerCase()
+                    item
+                        .customerName!.toLowerCase()
                         .includes(searchTerm.toLowerCase()) ||
-                    item.customer.phone.includes(searchTerm),
+                    item.customerPhone!.includes(searchTerm),
             );
         }
 
         if (filterBy === "not-printed") {
-            filtered = filtered.filter((item) => !item.is_printed);
+            filtered = filtered.filter((item) => !item.isPrinted);
         }
 
         return filtered;
@@ -176,6 +155,17 @@ export default function NewPrintBatchScreen() {
 
     const isEmpty = processedPrintItems.length === 0 && searchTerm !== "";
     const isEmptyInitial = printItems.length === 0;
+
+    if (isLoading) {
+        return (
+            <Center flex={1} bg={backgroundColor}>
+                <Spinner size="lg" color={secondaryColor} />
+                <Text mt={4} color={mediumGreyColor}>
+                    Carregando itens...
+                </Text>
+            </Center>
+        );
+    }
 
     return (
         <>
@@ -399,7 +389,7 @@ export default function NewPrintBatchScreen() {
                                                     px={2}
                                                 >
                                                     <PrintItemCard
-                                                        {...item}
+                                                        item={item}
                                                         isSelected={selectedIds.includes(
                                                             item.id,
                                                         )}
@@ -423,6 +413,7 @@ export default function NewPrintBatchScreen() {
                 onClose={() => setIsModalOpen(false)}
                 onConfirm={handleSaveNewPrintBatch}
                 selectedCount={selectedIds.length}
+                isLoading={isSavingLoading}
             />
         </>
     );
