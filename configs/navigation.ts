@@ -11,6 +11,7 @@ import CustomerScreen from "../screens/customer";
 import MenuScreen from "../screens/menu";
 import PrintBatchScreen from "../screens/print-batch";
 import NewPrintBatchScreen from "../screens/new-print-batch";
+import ReportsScreen from "../screens/reports";
 
 type IconName = keyof typeof Ionicons.glyphMap;
 
@@ -68,6 +69,13 @@ export const SCREEN_CONFIG: Record<string, ScreenConfig> = {
         title: "Sabores",
         icon: "ice-cream",
         subtitle: "Adicione, edite ou remova sabores",
+        isMenuItem: true,
+    },
+    Reports: {
+        component: ReportsScreen,
+        title: "Relatórios",
+        icon: "bar-chart",
+        subtitle: "Visualize relatórios de venda e produção",
         isMenuItem: true,
     },
     Order: {

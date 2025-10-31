@@ -6,6 +6,7 @@ export type OrderStatus =
     | "READY_FOR_PICKUP"
     | "COMPLETED"
     | "CANCELLED";
+    
 export type ChargeStatus = "PAID" | "UNPAID" | "PARTIAL" | "OVERDUE";
 
 export type OrderItemResponse = {
