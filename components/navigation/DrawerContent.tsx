@@ -1,18 +1,29 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { VStack } from "native-base";
 import {
     DrawerContentComponentProps,
     DrawerContentScrollView,
 } from "@react-navigation/drawer";
-import { MENU_ITEMS } from "../../configs/navigation";
+import { MENU_ITEMS, SCREEN_CONFIG } from "../../configs/navigation";
 import { RootDrawerParamList } from "../../types/navigation";
 import ItemNavigation from "./ItemNavigation";
+import { useAuth } from "../../contexts/AuthContext";
 
-type Props = DrawerContentComponentProps & {
-    onLogout: () => void;
-};
+type Props = DrawerContentComponentProps;
 
 export default function DrawerContent(props: Props) {
+    const { logout, userRole } = useAuth();
+
+    const accessibleMenuItems = useMemo(() => {
+        return MENU_ITEMS.filter((item) => {
+            const config = SCREEN_CONFIG[item.route];
+            if (!config) return false;
+            return (
+                !config.adminOnly || (config.adminOnly && userRole === "ADMIN")
+            );
+        });
+    }, [userRole]);
+
     return (
         <DrawerContentScrollView
             {...props}
@@ -20,7 +31,7 @@ export default function DrawerContent(props: Props) {
             showsVerticalScrollIndicator={false}
         >
             <VStack space={4} my={4} mx={2}>
-                {MENU_ITEMS.map((item) => (
+                {accessibleMenuItems.map((item) => (
                     <ItemNavigation
                         key={item.name}
                         name={item.name}
@@ -37,7 +48,7 @@ export default function DrawerContent(props: Props) {
                     name="Sair"
                     subtitle="Realize logout"
                     icon="log-out"
-                    onPress={props.onLogout}
+                    onPress={logout}
                 />
             </VStack>
         </DrawerContentScrollView>

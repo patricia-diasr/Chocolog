@@ -12,14 +12,10 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useAppColors } from "../../hooks/useAppColors";
 import { useCustomToast } from "../../contexts/ToastProvider";
-
-export interface LoginCredentials {
-    login: string;
-    password: string;
-}
+import { LoginRequest } from "../../types/login";
 
 interface Props {
-    onLoginSubmit: (credentials: LoginCredentials) => void;
+    onLoginSubmit: (credentials: LoginRequest) => void;
     isLoading: boolean;
 }
 
@@ -103,7 +99,7 @@ export default function LoginForm({ onLoginSubmit, isLoading }: Props) {
                     <Input
                         value={login}
                         onChangeText={setLogin}
-                        placeholder="login.exemplo"
+                        placeholder="Seu login"
                         bg={backgroundColor}
                         size="lg"
                         variant="filled"

@@ -1,25 +1,38 @@
-import React, { useState } from "react";
+import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
-import { useBreakpointValue } from "native-base";
+import { useBreakpointValue, Spinner, Center } from "native-base";
 import AuthNavigator from "./AuthNavigator";
 import MobileNavigator from "./MobileNavigator";
 import DesktopNavigator from "./DesktopNavigator";
+import { useAuth } from "../contexts/AuthContext"; 
+
+const LoadingScreen = () => (
+    <Center flex={1}>
+        <Spinner size="lg" />
+    </Center>
+);
 
 export const Navigator = () => {
-    const [isAuthenticated, setIsAuthenticated] = useState(true);
+    const { isAuthenticated, isLoading } = useAuth();
     const isMobile = useBreakpointValue({ base: true, md: false });
 
-    const handleLogin = () => setIsAuthenticated(true);
-    const handleLogout = () => setIsAuthenticated(false);
+    if (isLoading) {
+        return (
+            <NavigationContainer>
+                <LoadingScreen />
+            </NavigationContainer>
+        );
+    }
 
     const renderNavigator = () => {
         if (!isAuthenticated) {
-            return <AuthNavigator onLogin={handleLogin} />;
+            return <AuthNavigator />;
         }
+
         if (isMobile) {
-            return <MobileNavigator onLogout={handleLogout} />;
+            return <MobileNavigator />;
         }
-        return <DesktopNavigator onLogout={handleLogout} />;
+        return <DesktopNavigator />;
     };
 
     return <NavigationContainer>{renderNavigator()}</NavigationContainer>;

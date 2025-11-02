@@ -15,6 +15,7 @@ import {
     Poppins_700Bold,
 } from "@expo-google-fonts/poppins";
 import { ToastProvider } from "./contexts/ToastProvider";
+import { AuthProvider } from "./contexts/AuthContext";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -47,7 +48,9 @@ export default function App() {
         <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
             <NativeBaseProvider theme={theme}>
                 <ToastProvider>
-                    <Navigator />
+                    <AuthProvider>
+                        <Navigator />
+                    </AuthProvider>
                 </ToastProvider>
             </NativeBaseProvider>
         </View>

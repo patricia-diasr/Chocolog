@@ -22,6 +22,7 @@ export interface ScreenConfig {
     subtitle?: string;
     isTab?: boolean;
     isMenuItem?: boolean;
+    adminOnly?: boolean;
 }
 
 export const SCREEN_CONFIG: Record<string, ScreenConfig> = {
@@ -63,6 +64,7 @@ export const SCREEN_CONFIG: Record<string, ScreenConfig> = {
         icon: "person-circle",
         subtitle: "Visualize e gerencie funcionários",
         isMenuItem: true,
+        adminOnly: true,
     },
     FlavorList: {
         component: FlavorListScreen,
@@ -70,6 +72,7 @@ export const SCREEN_CONFIG: Record<string, ScreenConfig> = {
         icon: "ice-cream",
         subtitle: "Adicione, edite ou remova sabores",
         isMenuItem: true,
+        adminOnly: true,
     },
     Reports: {
         component: ReportsScreen,
@@ -77,6 +80,7 @@ export const SCREEN_CONFIG: Record<string, ScreenConfig> = {
         icon: "bar-chart",
         subtitle: "Visualize relatórios de venda e produção",
         isMenuItem: true,
+        adminOnly: true,
     },
     Order: {
         component: OrderScreen,

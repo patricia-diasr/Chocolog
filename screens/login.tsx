@@ -1,18 +1,23 @@
 import React, { useState } from "react";
 import { Box, Center } from "native-base";
-
-import LoginForm, { LoginCredentials } from "../components/login/LoginForm";
+import { AxiosError } from "axios";
+import LoginForm from "../components/login/LoginForm";
 import LoginBackground from "../components/login/LoginBackground";
+import { authService } from "../services/authService";
+import { useCustomToast } from "../contexts/ToastProvider";
+import { LoginRequest } from "../types/login";
+import { useAuth } from "../contexts/AuthContext";
 
-export default function LoginScreen({ onLogin }: { onLogin: () => void }) {
-    const [isLoading, setIsLoading] = useState<boolean>(false);
+export default function LoginScreen() {
+    const { login, isLoading } = useAuth();
+    const toast = useCustomToast();
 
-    const handleLoginSubmit = (credentials: LoginCredentials) => {
-        setIsLoading(true);
-        setTimeout(() => {
-            setIsLoading(false);
-            onLogin();
-        }, 1500);
+    const handleLoginSubmit = async (credentials: LoginRequest) => {
+        try {
+            await login(credentials);
+        } catch (error) {
+            console.log("Falha no handleLoginSubmit do LoginScreen");
+        }
     };
 
     return (

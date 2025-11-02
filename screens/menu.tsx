@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { VStack, ScrollView, Box, Center } from "native-base";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -10,16 +10,26 @@ import {
 import { RootStackParamList } from "../types/navigation";
 import ItemNavigation from "../components/navigation/ItemNavigation";
 import { useAppColors } from "../hooks/useAppColors";
+import { useAuth } from "../contexts/AuthContext";
 
 type MenuScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function MenuScreen() {
     const { backgroundColor } = useAppColors();
+    const { logout, userRole } = useAuth();
     const navigation = useNavigation<MenuScreenNavigationProp>();
 
-    const route = useRoute();
-    const { onLogout } = route.params as { onLogout: () => void };
+    const accessibleMenuItems = useMemo(() => {
+        return MENU_ITEMS.filter((item) => {
+            const config = SCREEN_CONFIG[item.route];
+            if (!config) return false;
 
+            return (
+                !config.adminOnly || (config.adminOnly && userRole === "ADMIN")
+            );
+        });
+    }, [userRole]);
+    
     const handleNavigation = (routeTarget: AppScreenName) => {
         const screenConfig = SCREEN_CONFIG[routeTarget];
         if (!screenConfig) return;
@@ -45,7 +55,7 @@ export default function MenuScreen() {
                     pt={6}
                 >
                     <VStack space={4}>
-                        {MENU_ITEMS.map((item) => {
+                        {accessibleMenuItems.map((item) => {
                             return (
                                 <ItemNavigation
                                     key={item.name}
@@ -61,7 +71,7 @@ export default function MenuScreen() {
                             name="Sair"
                             subtitle="Realize logout"
                             icon="log-out"
-                            onPress={onLogout}
+                            onPress={logout}
                         />
                     </VStack>
                 </Box>
