@@ -177,6 +177,7 @@ export default function ScheduleScreen() {
             navigation.navigate("Order", {
                 customerId: customerId,
                 orderId: orderId,
+                source: "Schedule",
             });
         }
     };

@@ -14,6 +14,8 @@ import PrintInfoCard from "../components/print/PrintInfoCard";
 import { RootStackParamList } from "../types/navigation";
 import { getPrintBatch } from "../services/printBatchService";
 import { useCustomToast } from "../contexts/ToastProvider";
+import Breadcrumbs from "../components/navigation/Breadcrumbs";
+import { id } from "date-fns/locale";
 
 type PrintBatchScreenRouteProp = RouteProp<RootStackParamList, "PrintBatch">;
 
@@ -47,7 +49,7 @@ export default function PrintBatchScreen({ route }: Props) {
         } finally {
             setIsLoading(false);
         }
-    }, [toast, printBatchId]); 
+    }, [toast, printBatchId]);
 
     useEffect(() => {
         fetchPrintBatch();
@@ -90,9 +92,7 @@ export default function PrintBatchScreen({ route }: Props) {
     }, [printBatchData]);
 
     const handleNavigateToOrder = (orderItemId: number) => {
-        const item = printBatchData!.items.find(
-            (oi) => oi.id === orderItemId,
-        );
+        const item = printBatchData!.items.find((oi) => oi.id === orderItemId);
         const customerId = item?.orderItem.customerId;
         const orderId = item?.orderItem.orderId;
 
@@ -100,6 +100,8 @@ export default function PrintBatchScreen({ route }: Props) {
             navigation.navigate("Order", {
                 customerId: customerId,
                 orderId: orderId,
+                printBatchId: printBatchId,
+                source: "PrintBatch",
             });
         }
     };
@@ -129,6 +131,7 @@ export default function PrintBatchScreen({ route }: Props) {
                         px={4}
                         pt={6}
                     >
+                        <Breadcrumbs />
                         <VStack space={4}>
                             <PrintInfoCard
                                 id={printBatchData.id}

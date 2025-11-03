@@ -32,7 +32,11 @@ export const Navigator = () => {
         if (isMobile) {
             return <MobileNavigator />;
         }
-        return <DesktopNavigator />;
+        return (
+            <>
+                <DesktopNavigator />
+            </>
+        );
     };
 
     return <NavigationContainer>{renderNavigator()}</NavigationContainer>;

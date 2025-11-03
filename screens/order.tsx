@@ -17,7 +17,7 @@ import {
     OrderRequest,
     OrderResponse,
     PaymentRequest,
-    PaymentResponse
+    PaymentResponse,
 } from "../types/order";
 import { getStatusDetails } from "../utils/statusConfig";
 import {
@@ -28,7 +28,17 @@ import {
 import { useCustomToast } from "../contexts/ToastProvider";
 import { RootStackParamList } from "../types/navigation";
 import { RouteProp } from "@react-navigation/native";
-import { createItem, createPayment, deleteItem, deletePayment, getOrder, updateItem, updateOrder, updatePayment } from "../services/orderService";
+import {
+    createItem,
+    createPayment,
+    deleteItem,
+    deletePayment,
+    getOrder,
+    updateItem,
+    updateOrder,
+    updatePayment,
+} from "../services/orderService";
+import Breadcrumbs from "../components/navigation/Breadcrumbs";
 
 type ModalType =
     | "editOrder"
@@ -104,11 +114,7 @@ export default function OrderScreen({ route }: Props) {
         setIsSavingLoading(true);
 
         try {
-            const updated = await updateOrder(
-                customerId,
-                orderId,
-                updatedData,
-            );
+            const updated = await updateOrder(customerId, orderId, updatedData);
 
             toast.showToast({
                 title: "Sucesso!",
@@ -131,10 +137,12 @@ export default function OrderScreen({ route }: Props) {
 
     const handleSaveOrderDetail = async (itemData: OrderItemRequest) => {
         setIsSavingLoading(true);
-        
+
         const isEditing = modalState.type === "editOrderDetail";
-        const itemId = isEditing ? (modalState.data as OrderItemResponse)?.id : null;
-        
+        const itemId = isEditing
+            ? (modalState.data as OrderItemResponse)?.id
+            : null;
+
         if (!orderData) {
             toast.showToast({
                 title: "Erro!",
@@ -163,7 +171,7 @@ export default function OrderScreen({ route }: Props) {
                     itemId!,
                     itemData,
                 );
-                
+
                 setOrderData((prevData) => {
                     if (!prevData) return prevData;
                     const updatedItems = prevData.orderItems.map((item) =>
@@ -204,8 +212,10 @@ export default function OrderScreen({ route }: Props) {
     const handleSavePayment = async (paymentData: PaymentRequest) => {
         setIsSavingLoading(true);
 
-        const isEditing = modalState.type === "editPayment"; 
-        const paymentId = isEditing ? (modalState.data as PaymentResponse)?.id : null;
+        const isEditing = modalState.type === "editPayment";
+        const paymentId = isEditing
+            ? (modalState.data as PaymentResponse)?.id
+            : null;
 
         if (!orderData) {
             toast.showToast({
@@ -229,7 +239,12 @@ export default function OrderScreen({ route }: Props) {
 
         try {
             if (isEditing) {
-                await updatePayment(customerId, orderId, paymentId!, paymentData);
+                await updatePayment(
+                    customerId,
+                    orderId,
+                    paymentId!,
+                    paymentData,
+                );
 
                 toast.showToast({
                     title: "Sucesso!",
@@ -270,7 +285,7 @@ export default function OrderScreen({ route }: Props) {
             type: "payment" | "orderDetail";
         };
 
-        setIsSavingLoading(true); 
+        setIsSavingLoading(true);
 
         try {
             if (type === "orderDetail") {
@@ -313,7 +328,9 @@ export default function OrderScreen({ route }: Props) {
                     badgeColor: status.colorScheme,
                     badgeIcon: status.icon,
                     badgeLabel: status.label,
-                    itemActionsDisabled: item.status === "COMPLETED" || item.status === "CANCELLED",
+                    itemActionsDisabled:
+                        item.status === "COMPLETED" ||
+                        item.status === "CANCELLED",
                 };
             }),
         [orderData?.orderItems],
@@ -323,7 +340,9 @@ export default function OrderScreen({ route }: Props) {
         () =>
             orderData?.charges.payments.map((payment) => ({
                 id: payment.id,
-                title: `${formatDate(payment.paymentDate)} - ${payment.paymentMethod}`,
+                title: `${formatDate(payment.paymentDate)} - ${
+                    payment.paymentMethod
+                }`,
                 info: formatPrice(payment.paidAmount),
             })),
         [orderData?.charges.payments],
@@ -354,6 +373,7 @@ export default function OrderScreen({ route }: Props) {
                         px={4}
                         pt={6}
                     >
+                        <Breadcrumbs />
                         <VStack space={4}>
                             <OrderInfoCard order={orderData} />
 
@@ -427,7 +447,9 @@ export default function OrderScreen({ route }: Props) {
                                         });
                                     }
                                 }}
-                                isAddDisabled={orderData.charges.status === "PAID"}
+                                isAddDisabled={
+                                    orderData.charges.status === "PAID"
+                                }
                             />
                         </VStack>
                     </Box>

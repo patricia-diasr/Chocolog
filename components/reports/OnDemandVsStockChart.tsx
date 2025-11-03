@@ -32,7 +32,7 @@ interface Props {
 }
 
 export default function OnDemandVsStockChart({ data, h }: Props) {
-    const { lightGreyColor, mediumGreyColor } = useAppColors();
+    const { whiteColor, lightGreyColor, mediumGreyColor } = useAppColors();
 
     return (
         <ChartCard title="Sob-demanda vs Estoque" icon="cube">
@@ -53,7 +53,7 @@ export default function OnDemandVsStockChart({ data, h }: Props) {
                         <YAxis tick={{ fill: mediumGreyColor, fontSize: 11 }} />
                         <Tooltip
                             contentStyle={{
-                                backgroundColor: "#fff",
+                                backgroundColor: whiteColor,
                                 border: `1px solid ${lightGreyColor}`,
                                 borderRadius: "8px",
                                 fontSize: "12px",

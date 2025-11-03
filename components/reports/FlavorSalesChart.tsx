@@ -32,7 +32,7 @@ export default function FlavorSalesChart({
     data,
     sizes
 }: Props) {
-    const { lightGreyColor, mediumGreyColor } = useAppColors();
+    const { whiteColor, lightGreyColor, mediumGreyColor } = useAppColors();
     const sizeColors = ["#3B82F6", "#8B5CF6", "#10B981", "#F59E0B"];
 
     return (
@@ -54,7 +54,7 @@ export default function FlavorSalesChart({
                         <YAxis tick={{ fill: mediumGreyColor, fontSize: 11 }} />
                         <Tooltip
                             contentStyle={{
-                                backgroundColor: "#fff",
+                                backgroundColor: whiteColor,
                                 border: `1px solid ${lightGreyColor}`,
                                 borderRadius: "8px",
                                 fontSize: "12px",

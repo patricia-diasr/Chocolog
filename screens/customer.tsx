@@ -23,6 +23,7 @@ import { useCustomToast } from "../contexts/ToastProvider";
 import { CustomerStackParamList } from "../types/navigation";
 import { getCustomer, updateCustomer } from "../services/customerService";
 import { createOrder, getOrders } from "../services/orderService";
+import Breadcrumbs from "../components/navigation/Breadcrumbs";
 
 type VisibleModal = "editCustomer" | "addOrder" | "addOrderDetail";
 type CustomerScreenRouteProp = RouteProp<CustomerStackParamList, "Customer">;
@@ -109,7 +110,8 @@ export default function CustomerScreen({ route }: Props) {
         if (!pendingOrder) {
             toast.showToast({
                 title: "Erro!",
-                description: "Os dados do pedido principal não foram encontrados.",
+                description:
+                    "Os dados do pedido principal não foram encontrados.",
                 status: "error",
             });
             setVisibleModal(null);
@@ -143,6 +145,7 @@ export default function CustomerScreen({ route }: Props) {
         navigation.navigate("Order", {
             customerId: customerId,
             orderId: orderId,
+            source: "Customer",
         });
     };
 
@@ -200,6 +203,7 @@ export default function CustomerScreen({ route }: Props) {
                         px={4}
                         pt={6}
                     >
+                        <Breadcrumbs />
                         <VStack space={4}>
                             <CustomerInfoCard customer={customerData} />
 

@@ -31,7 +31,7 @@ interface Props {
 }
 
 export default function PaymentMethodChart({ data, h }: Props) {
-    const { lightGreyColor, mediumGreyColor } = useAppColors();
+    const { whiteColor, lightGreyColor, mediumGreyColor } = useAppColors();
 
     return (
         <ChartCard title="Recebido por Método de Pagamento" icon="card">
@@ -59,7 +59,7 @@ export default function PaymentMethodChart({ data, h }: Props) {
                         <Tooltip
                             formatter={(value: number) => formatPrice(value)}
                             contentStyle={{
-                                backgroundColor: "#fff",
+                                backgroundColor: whiteColor,
                                 border: `1px solid ${lightGreyColor}`,
                                 borderRadius: "8px",
                                 fontSize: "12px",

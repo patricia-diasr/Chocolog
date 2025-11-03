@@ -5,6 +5,7 @@ import { SCREEN_CONFIG, AppScreenName } from "../configs/navigation";
 import Header from "../components/navigation/Header";
 import CustomDrawerContent from "../components/navigation/DrawerContent";
 import { useAuth } from "../contexts/AuthContext";
+import { View } from "react-native"; 
 
 const Drawer = createDrawerNavigator<RootDrawerParamList>();
 
@@ -22,7 +23,7 @@ export default function DesktopNavigator() {
     return (
         <Drawer.Navigator
             drawerContent={(props) => (
-                <CustomDrawerContent {...props} onLogout={logout} />
+                <CustomDrawerContent {...props} />
             )}
             screenOptions={({ navigation, route }) => {
                 const screenConfig = SCREEN_CONFIG[route.name as AppScreenName];
@@ -30,10 +31,12 @@ export default function DesktopNavigator() {
 
                 return {
                     header: () => (
-                        <Header
-                            title={headerTitle}
-                            onMenuPress={() => navigation.toggleDrawer()}
-                        />
+                        <View>
+                            <Header
+                                title={headerTitle}
+                                onMenuPress={() => navigation.toggleDrawer()}
+                            />
+                        </View>
                     ),
                     drawerPosition: "left",
                 };

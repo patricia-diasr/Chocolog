@@ -28,7 +28,7 @@ interface Props {
 }
 
 export default function SalesByPeriodChart({ data }: Props) {
-    const { lightGreyColor, mediumGreyColor } = useAppColors();
+    const { whiteColor, lightGreyColor, mediumGreyColor } = useAppColors();
 
     return (
         <ChartCard title="Vendas por Período" icon="analytics">
@@ -49,7 +49,7 @@ export default function SalesByPeriodChart({ data }: Props) {
                         <YAxis tick={{ fill: mediumGreyColor, fontSize: 11 }} />
                         <Tooltip
                             contentStyle={{
-                                backgroundColor: "#fff",
+                                backgroundColor: whiteColor,
                                 border: `1px solid ${lightGreyColor}`,
                                 borderRadius: "8px",
                                 fontSize: "12px",

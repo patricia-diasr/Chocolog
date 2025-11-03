@@ -21,9 +21,13 @@ import PrintAlert from "../components/print/PrintAlert";
 import { useCustomToast } from "../contexts/ToastProvider";
 import { OrderItemResponse } from "../types/order";
 import { getItems } from "../services/orderService";
-import { createPrintBatch, downloadPrintBatch } from "../services/printBatchService";
+import {
+    createPrintBatch,
+    downloadPrintBatch,
+} from "../services/printBatchService";
 import { PrintBatchDetail } from "../types/prints";
 import { triggerBrowserDownload } from "../utils/download";
+import Breadcrumbs from "../components/navigation/Breadcrumbs";
 
 export default function NewPrintBatchScreen() {
     const { backgroundColor, whiteColor, mediumGreyColor, secondaryColor } =
@@ -109,7 +113,9 @@ export default function NewPrintBatchScreen() {
                 orderItemIds: selectedIds,
             };
 
-            const printBatch: PrintBatchDetail = await createPrintBatch(newPrint);
+            const printBatch: PrintBatchDetail = await createPrintBatch(
+                newPrint,
+            );
 
             toast.showToast({
                 title: "Sucesso!",
@@ -120,7 +126,7 @@ export default function NewPrintBatchScreen() {
             const pdfBlob = await downloadPrintBatch(printBatch.id);
             const filename = `lote-impressao-${printBatch.id}.pdf`;
             triggerBrowserDownload(pdfBlob, filename);
-            
+
             setIsModalOpen(false);
         } catch (error) {
             toast.showToast({
@@ -181,6 +187,7 @@ export default function NewPrintBatchScreen() {
                         px={4}
                         pt={6}
                     >
+                        <Breadcrumbs />
                         <VStack space={4}>
                             <VStack space={4}>
                                 {!isEmptyInitial && (

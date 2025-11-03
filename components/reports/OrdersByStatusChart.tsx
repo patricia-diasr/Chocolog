@@ -24,7 +24,7 @@ interface Props {
 }
 
 export default function OrdersByStatusChart({ data, h }: Props) {
-    const { lightGreyColor } = useAppColors();
+    const { whiteColor, lightGreyColor } = useAppColors();
 
     return (
         <ChartCard title="Pedidos por Status" icon="clipboard">
@@ -50,7 +50,7 @@ export default function OrdersByStatusChart({ data, h }: Props) {
                         </Pie>
                         <Tooltip
                             contentStyle={{
-                                backgroundColor: "#fff",
+                                backgroundColor: whiteColor,
                                 border: `1px solid ${lightGreyColor}`,
                                 borderRadius: "8px",
                                 fontSize: "12px",

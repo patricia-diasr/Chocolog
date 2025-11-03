@@ -36,7 +36,7 @@ interface Props {
 }
 
 export default function RevenueVsReceivedChart({ data, h }: Props) {
-    const { lightGreyColor, mediumGreyColor } = useAppColors();
+    const { whiteColor, lightGreyColor, mediumGreyColor } = useAppColors();
 
     return (
         <ChartCard title="Faturamento vs Recebido" icon="stats-chart">
@@ -63,7 +63,7 @@ export default function RevenueVsReceivedChart({ data, h }: Props) {
                         <Tooltip
                             formatter={(value: number) => formatPrice(value)}
                             contentStyle={{
-                                backgroundColor: "#fff",
+                                backgroundColor: whiteColor,
                                 border: `1px solid ${lightGreyColor}`,
                                 borderRadius: "8px",
                                 fontSize: "12px",
