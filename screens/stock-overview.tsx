@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import {
     ScrollView,
     Flex,
@@ -9,6 +9,7 @@ import {
     Text,
     Center,
     Pressable,
+    Spinner,
 } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
 import StockCard from "../components/stock/StockCard";
@@ -16,87 +17,22 @@ import StatsCard from "../components/layout/StatsCard";
 import SearchInput from "../components/layout/Searchbar";
 import SortButtons, { SortOption } from "../components/layout/SortButtons";
 import { normalizeText } from "../utils/formatters";
-import { StockItem } from "../types/stock";
 import { StatItem } from "../types/stats";
 import { useAppColors } from "../hooks/useAppColors";
 import { STOCK_STATUS } from "../configs/stock";
+import { Flavor } from "../types/flavor";
+import { useCustomToast } from "../contexts/ToastProvider";
+import { getFlavors } from "../services/flavorService";
+import { getFlavorStockStatus } from "../utils/statusConfig";
+import { StockStatus } from "../types/stock";
 
 export default function StockOverviewScreen() {
     const { backgroundColor, whiteColor, mediumGreyColor, secondaryColor } =
         useAppColors();
+    const toast = useCustomToast();
 
-    const stockData: StockItem[] = [
-        {
-            flavor: "Prestígio",
-            sizes: [
-                { size: "500g", quantity: 150 },
-                { size: "350g", quantity: 200 },
-                { size: "Coração", quantity: 20 },
-                { size: "1Kg", quantity: 3 },
-            ],
-            status: STOCK_STATUS.high,
-        },
-        {
-            flavor: "Brigadeiro",
-            sizes: [
-                { size: "500g", quantity: 120 },
-                { size: "350g", quantity: 180 },
-                { size: "Coração", quantity: 28 },
-                { size: "1Kg", quantity: 3 },
-            ],
-            status: STOCK_STATUS.high,
-        },
-        {
-            flavor: "Sensação",
-            sizes: [
-                { size: "500g", quantity: 80 },
-                { size: "350g", quantity: 60 },
-                { size: "Coração", quantity: 12 },
-                { size: "1Kg", quantity: 0 },
-            ],
-            status: STOCK_STATUS.medium,
-        },
-        {
-            flavor: "Doce de Leite",
-            sizes: [
-                { size: "500g", quantity: 40 },
-                { size: "350g", quantity: 25 },
-                { size: "Coração", quantity: 8 },
-                { size: "1Kg", quantity: 0 },
-            ],
-            status: STOCK_STATUS.low,
-        },
-        {
-            flavor: "Maracujá",
-            sizes: [
-                { size: "500g", quantity: 80 },
-                { size: "350g", quantity: 60 },
-                { size: "Coração", quantity: 6 },
-                { size: "1Kg", quantity: 0 },
-            ],
-            status: STOCK_STATUS.medium,
-        },
-        {
-            flavor: "Limão",
-            sizes: [
-                { size: "500g", quantity: 80 },
-                { size: "350g", quantity: 60 },
-                { size: "Coração", quantity: 3 },
-                { size: "1Kg", quantity: 0 },
-            ],
-            status: STOCK_STATUS.medium,
-        },
-        {
-            flavor: "Ninho",
-            sizes: [
-                { size: "500g", quantity: 180 },
-                { size: "350g", quantity: 150 },
-                { size: "Coração", quantity: 18 },
-                { size: "1Kg", quantity: 0 },
-            ],
-            status: STOCK_STATUS.high,
-        },
-    ];
+    const [flavors, setFlavors] = useState<Flavor[]>([]);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
 
     const [searchTerm, setSearchTerm] = useState("");
     const [sortBy, setSortBy] = useState<"name" | "quantity">("name");
@@ -106,25 +42,87 @@ export default function StockOverviewScreen() {
         { value: "quantity", label: "Quantidade", icon: "bar-chart" },
     ];
 
+    const fetchStock = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            const data = await getFlavors();
+
+            const processedFlavors = data.map((flavor) => {
+                const sizeStatuses: StockStatus[] = flavor.sizes.map((size) =>
+                    getFlavorStockStatus(
+                        size.totalQuantity,
+                        size.remainingQuantity,
+                    ),
+                );
+
+                let overallStatus: StockStatus;
+
+                if (sizeStatuses.length === 0) {
+                    overallStatus = STOCK_STATUS.OUT_OF_STOCK;
+                } else if (
+                    sizeStatuses.some(
+                        (status) => status.label === STOCK_STATUS.LOW.label,
+                    )
+                ) {
+                    overallStatus = STOCK_STATUS.LOW;
+                } else if (
+                    sizeStatuses.some(
+                        (status) => status.label === STOCK_STATUS.MEDIUM.label,
+                    )
+                ) {
+                    overallStatus = STOCK_STATUS.MEDIUM;
+                } else if (
+                    sizeStatuses.some(
+                        (status) => status.label === STOCK_STATUS.HIGH.label,
+                    )
+                ) {
+                    overallStatus = STOCK_STATUS.HIGH;
+                } else {
+                    overallStatus = STOCK_STATUS.OUT_OF_STOCK;
+                }
+
+                return {
+                    ...flavor,
+                    status: overallStatus,
+                };
+            });
+
+            setFlavors(processedFlavors);
+        } catch (error) {
+            toast.showToast({
+                title: "Erro ao carregar!",
+                description:
+                    "Não foi possível buscar o estoque. Tente novamente.",
+                status: "error",
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    }, [toast]);
+
+    useEffect(() => {
+        fetchStock();
+    }, [fetchStock]);
+
     const stockStats = useMemo(() => {
-        const totalProducts = stockData.length;
-        const totalUnits = stockData.reduce(
+        const totalProducts = flavors.length;
+        const totalUnits = flavors.reduce(
             (sum, item) =>
                 sum +
                 item.sizes.reduce(
-                    (sizeSum, size) => sizeSum + size.quantity,
+                    (sizeSum, size) => sizeSum + size.totalQuantity,
                     0,
                 ),
             0,
         );
 
-        const lowStockCount = stockData.filter(
-            (item) => item.status === STOCK_STATUS.low,
+        const lowStockCount = flavors.filter(
+            (item) => item.status === STOCK_STATUS.LOW,
         ).length;
 
-        const outOfStockCount = stockData.filter((item) => {
+        const outOfStockCount = flavors.filter((item) => {
             const total = item.sizes.reduce(
-                (sum, size) => sum + size.quantity,
+                (sum, size) => sum + size.totalQuantity,
                 0,
             );
             return total === 0;
@@ -159,20 +157,20 @@ export default function StockOverviewScreen() {
             outOfStockCount,
             stats,
         };
-    }, [stockData]);
+    }, [flavors]);
 
     const processedStock = useMemo(() => {
-        let filtered = stockData.filter((item) =>
-            normalizeText(item.flavor).includes(normalizeText(searchTerm)),
+        let filtered = flavors.filter((item) =>
+            normalizeText(item.name).includes(normalizeText(searchTerm)),
         );
 
         filtered.sort((a, b) => {
             const totalA = a.sizes.reduce(
-                (sum, size) => sum + size.quantity,
+                (sum, size) => sum + size.totalQuantity,
                 0,
             );
             const totalB = b.sizes.reduce(
-                (sum, size) => sum + size.quantity,
+                (sum, size) => sum + size.totalQuantity,
                 0,
             );
 
@@ -180,16 +178,26 @@ export default function StockOverviewScreen() {
                 case "quantity":
                     return totalB - totalA;
                 default:
-                    return a.flavor.localeCompare(b.flavor);
+                    return a.name.localeCompare(b.name);
             }
         });
 
         return filtered;
-    }, [stockData, searchTerm, sortBy]);
+    }, [flavors, searchTerm, sortBy]);
 
     const isEmpty = processedStock.length === 0 && searchTerm !== "";
-    const isEmptyInitial = stockData.length === 0;
+    const isEmptyInitial = flavors.length === 0;
 
+    if (isLoading) {
+        return (
+            <Center flex={1} bg={backgroundColor}>
+                <Spinner size="lg" color={secondaryColor} />
+                <Text mt={4} color={mediumGreyColor}>
+                    Carregando estoque...
+                </Text>
+            </Center>
+        );
+    }
     return (
         <ScrollView
             flex={1}
@@ -380,7 +388,8 @@ export default function StockOverviewScreen() {
                                             px={2}
                                         >
                                             <StockCard
-                                                flavor={item.flavor}
+                                                id={item.id}
+                                                name={item.name}
                                                 sizes={item.sizes}
                                                 status={item.status}
                                             />

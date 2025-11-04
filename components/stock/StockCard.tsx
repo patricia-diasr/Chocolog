@@ -1,74 +1,47 @@
 import React from "react";
-import { Box, Text, VStack, HStack, Divider } from "native-base";
-import { StockItem } from "../../types/stock";
-import LabelBadge from "../layout/LabelBadge";
+import { Box, VStack, Divider } from "native-base";
 import { useAppColors } from "../../hooks/useAppColors";
+import { Flavor } from "../../types/flavor";
+import StockCardHeader from "./StockCardHeader";
+import StockCardSizeItem from "./StockCardSizeItem";
 
-export default function StockCard({ flavor, sizes, status }: StockItem) {
+export default function StockCard({ name, sizes, status }: Flavor) {
     const {
         whiteColor,
         mediumGreyColor,
         lightGreyColor,
         darkGreyColor,
-        blackColor,
-        secondaryColor,
-        borderColor,
     } = useAppColors();
-    const totalQuantity = sizes.reduce((sum, size) => sum + size.quantity, 0);
+
+    const totalQuantity = sizes.reduce(
+        (sum, size) => sum + size.totalQuantity,
+        0,
+    );
+
+    const totalRemainingQuantity = sizes.reduce(
+        (sum, size) => sum + size.remainingQuantity,
+        0,
+    );
 
     return (
-        <Box bg={whiteColor} p={5} rounded="2xl" shadow={4}>
-            <VStack space={3} mb={4}>
-                <HStack justifyContent="space-between" alignItems="flex-start">
-                    <VStack flex={1}>
-                        <HStack alignItems="center" space={2}>
-                            <Text
-                                fontSize="lg"
-                                fontWeight="bold"
-                                color={secondaryColor}
-                            >
-                                {flavor}
-                            </Text>
-                        </HStack>
-                        <Text fontSize="xs" color="gray.500">
-                            Total: {totalQuantity} un.
-                        </Text>
-                    </VStack>
-
-                    <LabelBadge
-                        color={status.color}
-                        icon={status.icon}
-                        label={status.label}
-                    />
-                </HStack>
-                <Divider bg={lightGreyColor} />
-            </VStack>
-
-            <VStack space={3}>
+        <Box bg={whiteColor} p={4} rounded="xl" shadow={2}>
+            <StockCardHeader
+                name={name}
+                status={status}
+                totalQuantity={totalQuantity}
+                totalRemainingQuantity={totalRemainingQuantity}
+            />
+            <Divider bg={lightGreyColor} />
+            <VStack space={3} mt={4}>
                 {sizes.map((sizeItem, index) => (
-                    <Box>
-                        <HStack
-                            key={index}
-                            justifyContent="space-between"
-                            alignItems="center"
-                        >
-                            <HStack space={2} alignItems="center">
-                                <Text fontSize="sm" color={darkGreyColor}>
-                                    {sizeItem.size}
-                                </Text>
-                            </HStack>
-                            <Text
-                                fontSize="sm"
-                                fontWeight="semibold"
-                                color={blackColor}
-                            >
-                                <Text bold>{sizeItem.quantity}</Text> un.
-                            </Text>
-                        </HStack>
-                        {index < sizes.length - 1 && (
-                            <Divider bg={lightGreyColor} />
-                        )}
-                    </Box>
+                    <StockCardSizeItem
+                        key={sizeItem.name}
+                        sizeItem={sizeItem}
+                        isLastItem={index === sizes.length - 1}
+                        mediumGreyColor={mediumGreyColor}
+                        darkGreyColor={darkGreyColor}
+                        lightGreyColor={lightGreyColor}
+                    />
                 ))}
             </VStack>
         </Box>

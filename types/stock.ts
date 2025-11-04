@@ -1,5 +1,5 @@
 export type StockStatus = {
-    color: "error" | "warning" | "success";
+    color: "error" | "warning" | "success" | "info";
     label: string;
     icon: string;
 };

@@ -1,18 +1,23 @@
 export const STOCK_STATUS = {
-    low: {
+    LOW: {
         color: "error",
         label: "Baixo",
         icon: "alert-circle",
     },
-    medium: {
+    MEDIUM: {
         color: "warning",
         label: "Médio",
         icon: "warning",
     },
-    high: {
+    HIGH: {
         color: "success",
         label: "Alto",
         icon: "checkmark-circle",
+    },
+    OUT_OF_STOCK: {
+        color: "info",
+        label: "Sem Estoque",
+        icon: "information-circle",
     },
 } as const;
 

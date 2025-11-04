@@ -1,3 +1,5 @@
+import { StockStatus } from "./stock";
+
 export interface FlavorSize {
     sizeId: number;
     name: string;
@@ -11,6 +13,7 @@ export interface Flavor {
     id: number;
     name: string;
     sizes: FlavorSize[];
+    status?: StockStatus;
 }
 
 export interface PriceFormData {

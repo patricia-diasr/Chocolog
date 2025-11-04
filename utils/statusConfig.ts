@@ -1,3 +1,6 @@
+import { STOCK_STATUS } from "../configs/stock";
+import { StockStatus } from "../types/stock";
+
 type StatusConfig = {
     [key: string]: {
         label: string;
@@ -30,7 +33,7 @@ export const statusConfig: StatusConfig = {
     PARTIAL: {
         label: "Parcialmente Pago",
         colorScheme: "warning",
-        icon: "pie-chart", 
+        icon: "pie-chart",
     },
     READY_FOR_PICKUP: {
         label: "Pronto",
@@ -56,4 +59,36 @@ export const statusConfig: StatusConfig = {
 
 export const getStatusDetails = (status: string) => {
     return statusConfig[status] || statusConfig.DEFAULT;
+};
+
+const LOW_STOCK_THRESHOLD = 20;
+const MEDIUM_STOCK_THRESHOLD = 60;
+
+export const getFlavorStockStatus = (
+    totalQuantity: number,
+    remainingQuantity: number,
+): StockStatus => {
+    if (totalQuantity < 0) {
+        return STOCK_STATUS.LOW;
+    }
+
+    if (totalQuantity === 0 && remainingQuantity === 0) {
+        return STOCK_STATUS.OUT_OF_STOCK;
+    }
+
+    if (totalQuantity === 0) {
+        return STOCK_STATUS.LOW;
+    }
+
+    const percentage = (remainingQuantity / totalQuantity) * 100;
+
+    if (percentage <= LOW_STOCK_THRESHOLD) {
+        return STOCK_STATUS.LOW;
+    }
+    
+    if (percentage <= MEDIUM_STOCK_THRESHOLD) {
+        return STOCK_STATUS.MEDIUM;
+    }
+
+    return STOCK_STATUS.HIGH;
 };
