@@ -4,7 +4,15 @@ import {
     useNavigation,
     CommonActions,
 } from "@react-navigation/native";
-import { HStack, Text, Pressable, Center, Box, Icon } from "native-base";
+import {
+    HStack,
+    Text,
+    Pressable,
+    Center,
+    Box,
+    Icon,
+    useBreakpointValue,
+} from "native-base";
 import { Ionicons } from "@expo/vector-icons";
 import { SCREEN_CONFIG, AppScreenName } from "../../configs/navigation";
 import { useAppColors } from "../../hooks/useAppColors";
@@ -27,6 +35,8 @@ export default function Breadcrumbs() {
 
     const routeName = route.name as AppScreenName;
     const params = route.params as any;
+
+    const isLargeScreen = useBreakpointValue({ base: false, md: true });
 
     switch (routeName) {
         case "Customer":
@@ -91,7 +101,7 @@ export default function Breadcrumbs() {
             break;
     }
 
-    if (crumbs.length <= 1) {
+    if (crumbs.length <= 1 || !isLargeScreen) {
         return null;
     }
 

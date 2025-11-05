@@ -1,24 +1,30 @@
 import React, { useMemo, useCallback } from "react";
-import { Box, useToken, Icon, Heading } from "native-base";
+import { Box, useToken, Icon, Text, Modal, Heading } from "native-base";
 import { Calendar } from "react-native-calendars";
 import { Theme, DateData, MarkedDates } from "react-native-calendars/src/types";
 import { Ionicons } from "@expo/vector-icons";
 import { useAppColors } from "../../hooks/useAppColors";
 
 type Props = {
-    selectedDate: string;
-    currentDisplayMonth: string;
+    isOpen: boolean;
+    handleClose: () => void;
     handleDayPress: (day: DateData) => void;
     markedDates: MarkedDates;
+    currentDisplayMonth: string;
     onMonthChange: (monthString: string) => void;
+    minDate?: string;
+    disablePastDates?: boolean;
 };
 
-export default function MonthlyCalendar({
-    selectedDate,
-    currentDisplayMonth,
+export default function ModalCalendar({
+    isOpen,
+    handleClose,
     handleDayPress,
     markedDates,
+    currentDisplayMonth,
     onMonthChange,
+    minDate,
+    disablePastDates = false,
 }: Props) {
     const {
         whiteColor,
@@ -27,6 +33,7 @@ export default function MonthlyCalendar({
         mediumGreyColor,
         blackColor,
         borderColor,
+        lightGreyColor,
     } = useAppColors();
 
     const [
@@ -59,6 +66,7 @@ export default function MonthlyCalendar({
             textMonthFontWeight: "bold",
             indicatorColor: resolvedPrimaryColor,
             dotColor: resolvedSecondaryColor,
+            textDisabledColor: "#d9e1e8",
         }),
         [
             resolvedPrimaryColor,
@@ -73,12 +81,10 @@ export default function MonthlyCalendar({
     const renderCustomHeader = useCallback(
         (date: Date) => {
             const headerDate = new Date(date);
-            headerDate.setMonth(headerDate.getMonth());
-
             const currentYear = new Date().getFullYear();
             const options: Intl.DateTimeFormatOptions = {
                 month: "long",
-                timeZone: "UTC", 
+                timeZone: "UTC",
             };
 
             if (headerDate.getFullYear() !== currentYear) {
@@ -112,40 +118,57 @@ export default function MonthlyCalendar({
     );
 
     return (
-        <Box
-            bg={resolvedWhiteColor}
-            p={4}
-            rounded="2xl"
-            shadow={2}
-            borderWidth={1}
-            borderColor={borderColor}
-            width={{
-                base: "100%",
-                lg: "600px",
-            }}
-            maxWidth="100%"
-        >
-            <Calendar
-                current={currentDisplayMonth}
-                onDayPress={handleDayPress}
-                onMonthChange={handleMonthChange}
-                markedDates={markedDates}
-                theme={calendarTheme}
-                renderHeader={renderCustomHeader}
-                renderArrow={(direction: "left" | "right") => (
-                    <Icon
-                        as={Ionicons}
-                        name={
-                            direction === "left"
-                                ? "chevron-back"
-                                : "chevron-forward"
-                        }
-                        color={blackColor}
-                        size="md"
+        <Modal isOpen={isOpen} onClose={handleClose} size="lg">
+            <Modal.Content
+                maxWidth="400px"
+                bg={whiteColor}
+                rounded="2xl"
+                shadow={6}
+                borderWidth={1}
+                borderColor={borderColor}
+            >
+                <Modal.CloseButton rounded="full" _icon={{ size: "sm" }} />
+                <Modal.Header bg="transparent" borderBottomWidth={0} pb={2}>
+                    <Text
+                        fontSize="lg"
+                        fontWeight="bold"
+                        color={secondaryColor}
+                    >
+                        Selecionar data
+                    </Text>
+                </Modal.Header>
+                <Modal.Body
+                    px={6}
+                    py={5}
+                    borderTopWidth={1.5}
+                    borderBottomWidth={1.5}
+                    borderColor={lightGreyColor}
+                >
+                    <Calendar
+                        current={currentDisplayMonth}
+                        onDayPress={handleDayPress}
+                        onMonthChange={handleMonthChange}
+                        markedDates={markedDates}
+                        theme={calendarTheme}
+                        renderHeader={renderCustomHeader}
+                        renderArrow={(direction: "left" | "right") => (
+                            <Icon
+                                as={Ionicons}
+                                name={
+                                    direction === "left"
+                                        ? "chevron-back"
+                                        : "chevron-forward"
+                                }
+                                color={blackColor}
+                                size="md"
+                            />
+                        )}
+                        enableSwipeMonths={false}
+                        minDate={disablePastDates ? minDate : undefined}
+                        disableAllTouchEventsForDisabledDays={true}
                     />
-                )}
-                enableSwipeMonths={true}
-            />
-        </Box>
+                </Modal.Body>
+            </Modal.Content>
+        </Modal>
     );
 }

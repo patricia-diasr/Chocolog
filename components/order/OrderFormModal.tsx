@@ -9,22 +9,17 @@ import {
     Text,
     Icon,
     TextArea,
+    Pressable,
+    useToken,
 } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
 import { useAppColors } from "../../hooks/useAppColors";
 import { useCustomToast } from "../../contexts/ToastProvider";
-import {
-    ORDER_STATUS_MAP,
-    OrderRequest,
-    OrderStatus,
-} from "../../types/order";
-import {
-    applyDateMask,
-    formatDate,
-    parseInputDate,
-} from "../../utils/formatters";
+import { ORDER_STATUS_MAP, OrderRequest, OrderStatus } from "../../types/order";
+import { formatDate } from "../../utils/formatters";
 import Select from "../layout/Select";
-
+import { DateData } from "react-native-calendars";
+import ModalCalendar from "../schedule/ModalCalendar";
 interface Props {
     title: string;
     isOpen: boolean;
@@ -42,6 +37,9 @@ const createDefaultOrder = (): OrderRequest => ({
     orderItems: [],
     discount: 0,
 });
+
+const getMonthString = (dateString: string) => dateString.slice(0, 7);
+const getFirstDayOfMonth = (monthString: string) => `${monthString}-01`;
 
 export default function OrderFormModal({
     title,
@@ -62,6 +60,8 @@ export default function OrderFormModal({
         invalidColor,
     } = useAppColors();
 
+    const [resolvedSecondaryColor] = useToken("colors", [secondaryColor]);
+
     const [formData, setFormData] = useState<OrderRequest>(
         createDefaultOrder(),
     );
@@ -69,9 +69,20 @@ export default function OrderFormModal({
     const [discountText, setDiscountText] = useState<string>("");
     const [dateText, setDateText] = useState<string>("");
     const [hasAttemptedSave, setHasAttemptedSave] = useState(false);
-
+    const [isCalendarOpen, setIsCalendarOpen] = useState(false);
     const isEditing = !!orderData;
     const initialStatus = orderData?.status;
+
+    const initialDate = useMemo(() => {
+        const now = new Date();
+        const offset = now.getTimezoneOffset() * 60000;
+        const localTime = new Date(now.getTime() - offset);
+        return localTime.toISOString().slice(0, 10);
+    }, []);
+
+    const [currentMonth, setCurrentMonth] = useState<string>(
+        getMonthString(initialDate),
+    );
 
     useEffect(() => {
         if (isOpen) {
@@ -180,17 +191,6 @@ export default function OrderFormModal({
         [],
     );
 
-    const handleDateChange = useCallback((text: string) => {
-        const maskedText = applyDateMask(text);
-        setDateText(maskedText);
-
-        const isoDateString = parseInputDate(maskedText);
-        setFormData((prevData) => ({
-            ...prevData,
-            expectedPickupDate: isoDateString,
-        }));
-    }, []);
-
     const handleDiscountChange = useCallback((text: string) => {
         const cleanedText = text
             .replace(/[^0-9.]/g, "")
@@ -202,6 +202,19 @@ export default function OrderFormModal({
             discount: parseFloat(cleanedText) || 0,
         }));
     }, []);
+
+    const handleDayPress = useCallback(
+        (day: DateData) => {
+            const isoString = new Date(
+                `${day.dateString}T12:00:00Z`,
+            ).toISOString();
+
+            handleInputChange("expectedPickupDate", isoString);
+            setDateText(formatDate(isoString));
+            setIsCalendarOpen(false);
+        },
+        [handleInputChange],
+    );
 
     const handleSave = useCallback(() => {
         setHasAttemptedSave(true);
@@ -227,7 +240,7 @@ export default function OrderFormModal({
                 notes: formData.notes,
             };
             onSave(partialData);
-            return; 
+            return;
         }
 
         const dataToSave: OrderRequest = {
@@ -242,169 +255,219 @@ export default function OrderFormModal({
         onSave(dataToSave);
     }, [formData, onSave, toast, isEditing, isFormDisabled]);
 
+    const displayDateForCalendar = getFirstDayOfMonth(currentMonth);
+
+    const handleMonthChange = useCallback((monthString: string) => {
+        setCurrentMonth(monthString);
+    }, []);
+
+    const markedDates = useMemo(() => {
+        const marks: any = {};
+
+        if (formData.expectedPickupDate) {
+            const selectedDate = formData.expectedPickupDate.split("T")[0];
+            marks[selectedDate] = {
+                selected: true,
+                selectedColor: resolvedSecondaryColor,
+            };
+        }
+
+        return marks;
+    }, [formData.expectedPickupDate, initialDate, resolvedSecondaryColor]);
+
     return (
-        <Modal isOpen={isOpen} onClose={onClose} size="xl">
-            <Modal.Content
-                maxWidth="400px"
-                bg={whiteColor}
-                rounded="2xl"
-                shadow={6}
-                borderWidth={1}
-                borderColor={borderColor}
-            >
-                <Modal.CloseButton rounded="full" _icon={{ size: "sm" }} />
-                <Modal.Header bg="transparent" borderBottomWidth={0} pb={2}>
-                    <Text
-                        fontSize="lg"
-                        fontWeight="bold"
-                        color={secondaryColor}
-                    >
-                        {title}
-                    </Text>
-                </Modal.Header>
-                <Modal.Body
-                    px={6}
-                    py={5}
-                    borderTopWidth={1.5}
-                    borderBottomWidth={1.5}
-                    borderColor={lightGreyColor}
+        <>
+            <Modal isOpen={isOpen} onClose={onClose} size="xl">
+                <Modal.Content
+                    maxWidth="400px"
+                    bg={whiteColor}
+                    rounded="2xl"
+                    shadow={6}
+                    borderWidth={1}
+                    borderColor={borderColor}
                 >
-                    <VStack space={5}>
-                        {isEditing && (
-                            <FormControl isRequired isInvalid={isStatusInvalid}>
+                    <Modal.CloseButton rounded="full" _icon={{ size: "sm" }} />
+                    <Modal.Header bg="transparent" borderBottomWidth={0} pb={2}>
+                        <Text
+                            fontSize="lg"
+                            fontWeight="bold"
+                            color={secondaryColor}
+                        >
+                            {title}
+                        </Text>
+                    </Modal.Header>
+                    <Modal.Body
+                        px={6}
+                        py={5}
+                        borderTopWidth={1.5}
+                        borderBottomWidth={1.5}
+                        borderColor={lightGreyColor}
+                    >
+                        <VStack space={5}>
+                            {isEditing && (
+                                <FormControl
+                                    isRequired
+                                    isInvalid={isStatusInvalid}
+                                >
+                                    <FormControl.Label>
+                                        <HStack alignItems="center" space={2}>
+                                            <Icon
+                                                as={Ionicons}
+                                                name="checkmark-done"
+                                                size="sm"
+                                            />
+                                            <Text fontWeight="medium">
+                                                Status{" "}
+                                            </Text>
+                                        </HStack>
+                                    </FormControl.Label>
+                                    <Select
+                                        modalTitle="Selecione o Status"
+                                        placeholder="Selecione um status"
+                                        data={statusOptions}
+                                        itemValue={(item) => item.value}
+                                        itemLabel={(item) => item.label}
+                                        selectedValue={formData.status || ""}
+                                        onValueChange={(value) =>
+                                            handleInputChange("status", value)
+                                        }
+                                        isInvalid={isStatusInvalid}
+                                        isDisabled={isFormDisabled}
+                                    />
+                                </FormControl>
+                            )}
+
+                            <FormControl
+                                isRequired
+                                isInvalid={isExpectedPickupDateInvalid}
+                            >
                                 <FormControl.Label>
                                     <HStack alignItems="center" space={2}>
                                         <Icon
                                             as={Ionicons}
-                                            name="checkmark-done"
+                                            name="hourglass"
                                             size="sm"
                                         />
-                                        <Text fontWeight="medium">Status </Text>
+                                        <Text fontWeight="medium">Prazo </Text>
                                     </HStack>
                                 </FormControl.Label>
-                                <Select
-                                    modalTitle="Selecione o Status"
-                                    placeholder="Selecione um status"
-                                    data={statusOptions}
-                                    itemValue={(item) => item.value}
-                                    itemLabel={(item) => item.label}
-                                    selectedValue={formData.status || ""}
-                                    onValueChange={(value) =>
-                                        handleInputChange("status", value)
+                                <Pressable
+                                    onPress={() =>
+                                        !isFormDisabled &&
+                                        setIsCalendarOpen(true)
                                     }
-                                    isInvalid={isStatusInvalid}
-                                    isDisabled={isFormDisabled}
+                                >
+                                    <Input
+                                        value={dateText}
+                                        placeholder="DD/MM/AAAA"
+                                        isReadOnly
+                                        bg={backgroundColor}
+                                        variant="filled"
+                                        size="lg"
+                                        borderColor={
+                                            isExpectedPickupDateInvalid
+                                                ? invalidColor
+                                                : backgroundColor
+                                        }
+                                    />
+                                </Pressable>
+                            </FormControl>
+
+                            <FormControl>
+                                <FormControl.Label>
+                                    <HStack alignItems="center" space={2}>
+                                        <Icon
+                                            as={Ionicons}
+                                            name="gift"
+                                            size="sm"
+                                        />
+                                        <Text fontWeight="medium">
+                                            Desconto
+                                        </Text>
+                                    </HStack>
+                                </FormControl.Label>
+                                <Input
+                                    value={discountText}
+                                    onChangeText={handleDiscountChange}
+                                    placeholder="0.00"
+                                    keyboardType="numeric"
+                                    bg={backgroundColor}
+                                    variant="filled"
+                                    size="lg"
                                 />
                             </FormControl>
-                        )}
 
-                        <FormControl
-                            isRequired
-                            isInvalid={isExpectedPickupDateInvalid}
-                        >
-                            <FormControl.Label>
-                                <HStack alignItems="center" space={2}>
-                                    <Icon
-                                        as={Ionicons}
-                                        name="hourglass"
-                                        size="sm"
-                                    />
-                                    <Text fontWeight="medium">Prazo </Text>
-                                </HStack>
-                            </FormControl.Label>
-                            <Input
-                                value={dateText}
-                                placeholder="DD/MM/AAAA"
-                                onChangeText={handleDateChange}
-                                keyboardType="numeric"
-                                maxLength={10}
-                                bg={backgroundColor}
-                                variant="filled"
+                            <FormControl>
+                                <FormControl.Label>
+                                    <HStack alignItems="center" space={2}>
+                                        <Icon
+                                            as={Ionicons}
+                                            name="document-text"
+                                            size="sm"
+                                        />
+                                        <Text fontWeight="medium">
+                                            Observação
+                                        </Text>
+                                    </HStack>
+                                </FormControl.Label>
+                                <TextArea
+                                    value={formData.notes || ""}
+                                    onChangeText={(text) =>
+                                        handleInputChange("notes", text)
+                                    }
+                                    placeholder="Alguma observação sobre o pedido..."
+                                    bg={backgroundColor}
+                                    variant="filled"
+                                    h={20}
+                                />
+                            </FormControl>
+                        </VStack>
+                    </Modal.Body>
+                    <Modal.Footer bg="transparent" pt={4}>
+                        <Button.Group space={3} flex={1}>
+                            <Button
+                                variant="ghost"
+                                colorScheme="gray"
+                                onPress={onClose}
+                                rounded="xl"
+                                flex={1}
+                                py={3}
+                                isDisabled={isLoading}
+                            >
+                                Cancelar
+                            </Button>
+                            <Button
+                                onPress={handleSave}
                                 size="lg"
-                                borderColor={
-                                    isExpectedPickupDateInvalid
-                                        ? invalidColor
-                                        : backgroundColor
-                                }
-                                isDisabled={isFormDisabled}
-                            />
-                        </FormControl>
+                                colorScheme="secondary"
+                                rounded="xl"
+                                _pressed={{ bg: tertiaryColor }}
+                                _hover={{ bg: tertiaryColor }}
+                                flex={1}
+                                py={3}
+                                shadow={2}
+                                _text={{ fontSize: "md", fontWeight: "medium" }}
+                                isLoading={isLoading}
+                                isLoadingText="Salvando..."
+                                _loading={{ bg: tertiaryColor }}
+                            >
+                                Salvar
+                            </Button>
+                        </Button.Group>
+                    </Modal.Footer>
+                </Modal.Content>
+            </Modal>
 
-                        <FormControl>
-                            <FormControl.Label>
-                                <HStack alignItems="center" space={2}>
-                                    <Icon as={Ionicons} name="gift" size="sm" />
-                                    <Text fontWeight="medium">Desconto</Text>
-                                </HStack>
-                            </FormControl.Label>
-                            <Input
-                                value={discountText}
-                                onChangeText={handleDiscountChange}
-                                placeholder="0.00"
-                                keyboardType="numeric"
-                                bg={backgroundColor}
-                                variant="filled"
-                                size="lg"
-                            />
-                        </FormControl>
-
-                        <FormControl>
-                            <FormControl.Label>
-                                <HStack alignItems="center" space={2}>
-                                    <Icon
-                                        as={Ionicons}
-                                        name="document-text"
-                                        size="sm"
-                                    />
-                                    <Text fontWeight="medium">Observação</Text>
-                                </HStack>
-                            </FormControl.Label>
-                            <TextArea
-                                value={formData.notes || ""}
-                                onChangeText={(text) =>
-                                    handleInputChange("notes", text)
-                                }
-                                placeholder="Alguma observação sobre o pedido..."
-                                bg={backgroundColor}
-                                variant="filled"
-                                h={20}
-                            />
-                        </FormControl>
-                    </VStack>
-                </Modal.Body>
-                <Modal.Footer bg="transparent" pt={4}>
-                    <Button.Group space={3} flex={1}>
-                        <Button
-                            variant="ghost"
-                            colorScheme="gray"
-                            onPress={onClose}
-                            rounded="xl"
-                            flex={1}
-                            py={3}
-                            isDisabled={isLoading}
-                        >
-                            Cancelar
-                        </Button>
-                        <Button
-                            onPress={handleSave}
-                            size="lg"
-                            colorScheme="secondary"
-                            rounded="xl"
-                            _pressed={{ bg: tertiaryColor }}
-                            _hover={{ bg: tertiaryColor }}
-                            flex={1}
-                            py={3}
-                            shadow={2}
-                            _text={{ fontSize: "md", fontWeight: "medium" }}
-                            isLoading={isLoading}
-                            isLoadingText="Salvando..."
-                            _loading={{ bg: tertiaryColor }}
-                        >
-                            Salvar
-                        </Button>
-                    </Button.Group>
-                </Modal.Footer>
-            </Modal.Content>
-        </Modal>
+            <ModalCalendar
+                handleDayPress={handleDayPress}
+                markedDates={markedDates}
+                isOpen={isCalendarOpen}
+                handleClose={() => setIsCalendarOpen(false)}
+                currentDisplayMonth={displayDateForCalendar}
+                onMonthChange={handleMonthChange}
+                minDate={initialDate}
+                disablePastDates={true}
+            />
+        </>
     );
 }

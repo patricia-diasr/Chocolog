@@ -16,6 +16,7 @@ import {
 } from "@expo-google-fonts/poppins";
 import { ToastProvider } from "./contexts/ToastProvider";
 import { AuthProvider } from "./contexts/AuthContext";
+import "./configs/calendar.ts";
 
 SplashScreen.preventAutoHideAsync();
 
