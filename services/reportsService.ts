@@ -1,5 +1,5 @@
-import { ReportData } from "../types/reports";
 import api from "./api";
+import { ReportData } from "../types/reports";
 
 export const getReports = async (): Promise<ReportData> => {
     const response = await api.get(

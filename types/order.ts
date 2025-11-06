@@ -90,13 +90,6 @@ export type ChargeResponse = {
     payments: PaymentResponse[];
 };
 
-export const ORDER_STATUS: { value: OrderStatus; label: string }[] = [
-    { value: "PENDING", label: "Pendente" },
-    { value: "READY_FOR_PICKUP", label: "Pronto" },
-    { value: "COMPLETED", label: "Concluído" },
-    { value: "CANCELLED", label: "Cancelado" },
-];
-
 export const ORDER_STATUS_MAP: Record<OrderStatus, string> = {
     PENDING: "Pendente",
     READY_FOR_PICKUP: "Pronto para Retirada",

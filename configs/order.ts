@@ -7,20 +7,11 @@ export const PAYMENT_METHODS: string[] = [
     "Outro",
 ];
 
-export const flavors: String[] = [
-    "Prestígio",
-    "Brigadeiro",
-    "Sensação",
-    "Maracujá",
-    "Limão",
-    "Doce de Leite",
-];
-
-export const sizes: String[] = ["350g", "500g", "Coração", "1Kg"];
-
 export const SIZES = [
     { id: 1, name: "350g" },
     { id: 2, name: "500g" },
     { id: 3, name: "Coração" },
     { id: 4, name: "1kg" },
 ];
+
+export const SIZES_NAMES = ["350g", "500g", "Coração", "1Kg"];

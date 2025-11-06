@@ -1,7 +1,5 @@
 import React from "react";
-import { useAppColors } from "../../hooks/useAppColors";
 import { Box } from "native-base";
-import { FlavorChartData } from "../../types/reports";
 import {
     BarChart as RechartsBarChart,
     Bar as RechartsBar,
@@ -12,6 +10,8 @@ import {
     Legend as RechartsLegend,
     ResponsiveContainer as RechartsResponsiveContainer,
 } from "recharts";
+import { useAppColors } from "../../hooks/useAppColors";
+import { FlavorChartData } from "../../types/reports";
 import ChartCard from "./ChartCard";
 
 const ResponsiveContainer = RechartsResponsiveContainer as any;
@@ -28,10 +28,7 @@ interface Props {
     sizes: string[];
 }
 
-export default function FlavorSalesChart({
-    data,
-    sizes
-}: Props) {
+export default function FlavorSalesChart({ data, sizes }: Props) {
     const { whiteColor, lightGreyColor, mediumGreyColor } = useAppColors();
     const sizeColors = ["#3B82F6", "#8B5CF6", "#10B981", "#F59E0B"];
 

@@ -1,8 +1,8 @@
 import React from "react";
 import { HStack } from "native-base";
-import KPICard from "./KPICard";
 import { formatPrice } from "../../utils/formatters";
 import { KPIs } from "../../types/reports";
+import KPICard from "./KPICard";
 
 interface Props {
     kpis: KPIs;

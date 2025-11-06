@@ -1,10 +1,10 @@
 import React from "react";
-import { NavigationContainer } from "@react-navigation/native";
 import { useBreakpointValue, Spinner, Center } from "native-base";
+import { NavigationContainer } from "@react-navigation/native";
+import { useAuth } from "../contexts/AuthContext"; 
 import AuthNavigator from "./AuthNavigator";
 import MobileNavigator from "./MobileNavigator";
 import DesktopNavigator from "./DesktopNavigator";
-import { useAuth } from "../contexts/AuthContext"; 
 
 const LoadingScreen = () => (
     <Center flex={1}>

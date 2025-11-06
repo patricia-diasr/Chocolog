@@ -1,7 +1,6 @@
 import React from "react";
-import { useAppColors } from "../../hooks/useAppColors";
 import { Box } from "native-base";
-import { ChartDataItem } from "../../types/reports";
+import { ResponsiveValue } from "native-base/lib/typescript/components/types";
 import {
     PieChart as RechartsPieChart,
     Pie as RechartsPie,
@@ -9,8 +8,9 @@ import {
     Tooltip as RechartsTooltip,
     ResponsiveContainer as RechartsResponsiveContainer,
 } from "recharts";
+import { ChartDataItem } from "../../types/reports";
+import { useAppColors } from "../../hooks/useAppColors";
 import ChartCard from "./ChartCard";
-import { ResponsiveValue } from "native-base/lib/typescript/components/types";
 
 const ResponsiveContainer = RechartsResponsiveContainer as any;
 const PieChart = RechartsPieChart as any;

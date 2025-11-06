@@ -1,28 +1,26 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { RouteProp, useNavigation } from "@react-navigation/native";
 import { Box, Center, Text, ScrollView, Spinner, VStack } from "native-base";
-
-import InfoList from "../components/layout/InfoList";
-import FabButton from "../components/layout/FabButton";
-import CustomerInfoCard from "../components/customer/CustomerInfoCard";
-import CustomerFormModal from "../components/customer/CustomerFormModal";
-import OrderFormModal from "../components/order/OrderFormModal";
-import OrderDetailFormModal from "../components/order/OrderDetailFormModal";
-
+import { useCustomToast } from "../contexts/ToastProvider";
 import { useAppColors } from "../hooks/useAppColors";
+import { createOrder, getOrders } from "../services/orderService";
+import { getCustomer, updateCustomer } from "../services/customerService";
+import { getStatusDetails } from "../utils/statusConfig";
+import { formatDate, formatPrice } from "../utils/formatters";
 import { Customer } from "../types/customer";
+import { CustomerStackParamList } from "../types/navigation";
 import {
     ChargeResponse,
     OrderItemRequest,
     OrderRequest,
     OrderResponse,
 } from "../types/order";
-import { getStatusDetails } from "../utils/statusConfig";
-import { formatDate, formatPrice } from "../utils/formatters";
-import { useCustomToast } from "../contexts/ToastProvider";
-import { CustomerStackParamList } from "../types/navigation";
-import { getCustomer, updateCustomer } from "../services/customerService";
-import { createOrder, getOrders } from "../services/orderService";
+import InfoList from "../components/layout/InfoList";
+import FabButton from "../components/layout/FabButton";
+import CustomerInfoCard from "../components/customer/CustomerInfoCard";
+import CustomerFormModal from "../components/customer/CustomerFormModal";
+import OrderFormModal from "../components/order/OrderFormModal";
+import OrderDetailFormModal from "../components/order/OrderDetailFormModal";
 import Breadcrumbs from "../components/navigation/Breadcrumbs";
 
 type VisibleModal = "editCustomer" | "addOrder" | "addOrderDetail";
@@ -48,6 +46,35 @@ export default function CustomerScreen({ route }: Props) {
     const [isSavingLoading, setIsSavingLoading] = useState<boolean>(false);
     const [visibleModal, setVisibleModal] = useState<VisibleModal | null>(null);
 
+    const orderItems = useMemo(() => {
+        return ordersData.map((order) => {
+            const status = getStatusDetails(order.status);
+            return {
+                id: order.id,
+                title: `Pedido #${order.id}`,
+                info: formatDate(order.expectedPickupDate),
+                badgeColor: status.colorScheme,
+                badgeIcon: status.icon,
+                badgeLabel: status.label,
+            };
+        });
+    }, [ordersData]);
+
+    const chargeItems = useMemo(() => {
+        return chargesData.map((charge) => {
+            const status = getStatusDetails(charge.status);
+            return {
+                id: charge.orderId,
+                title: `Cobrança #${charge.id}`,
+                info: formatDate(charge.date),
+                aditionalInfo: formatPrice(charge.totalAmount),
+                badgeColor: status.colorScheme,
+                badgeIcon: status.icon,
+                badgeLabel: status.label,
+            };
+        });
+    }, [chargesData]);
+    
     const fetchCustomer = useCallback(async () => {
         setIsLoading(true);
 
@@ -148,35 +175,6 @@ export default function CustomerScreen({ route }: Props) {
             source: "Customer",
         });
     };
-
-    const orderItems = useMemo(() => {
-        return ordersData.map((order) => {
-            const status = getStatusDetails(order.status);
-            return {
-                id: order.id,
-                title: `Pedido #${order.id}`,
-                info: formatDate(order.expectedPickupDate),
-                badgeColor: status.colorScheme,
-                badgeIcon: status.icon,
-                badgeLabel: status.label,
-            };
-        });
-    }, [ordersData]);
-
-    const chargeItems = useMemo(() => {
-        return chargesData.map((charge) => {
-            const status = getStatusDetails(charge.status);
-            return {
-                id: charge.orderId,
-                title: `Cobrança #${charge.id}`,
-                info: formatDate(charge.date),
-                aditionalInfo: formatPrice(charge.totalAmount),
-                badgeColor: status.colorScheme,
-                badgeIcon: status.icon,
-                badgeLabel: status.label,
-            };
-        });
-    }, [chargesData]);
 
     if (isLoading || customerData === undefined) {
         return (

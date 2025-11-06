@@ -1,13 +1,13 @@
 import React from "react";
 import { useNavigation } from "@react-navigation/native";
 import { Text, VStack, HStack, Icon, Pressable } from "native-base";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
-import { Customer } from "../../types/customer";
-import LabelBadge from "../layout/LabelBadge";
 import { useAppColors } from "../../hooks/useAppColors";
 import { maskPhone } from "../../utils/formatters";
+import { Customer } from "../../types/customer";
 import { CustomerStackParamList } from "../../types/navigation";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import LabelBadge from "../layout/LabelBadge";
 
 type CustomersScreenNavigationProp = NativeStackNavigationProp<
     CustomerStackParamList,

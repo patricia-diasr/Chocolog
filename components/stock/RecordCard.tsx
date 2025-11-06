@@ -1,11 +1,11 @@
 import { Box, Divider, HStack, Icon, Text, VStack } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
-import LabelBadge from "../layout/LabelBadge";
-import { StockRecord } from "../../types/stock";
 import { useAppColors } from "../../hooks/useAppColors";
 import { formatDate } from "../../utils/formatters";
+import { StockRecord } from "../../types/stock";
+import LabelBadge from "../layout/LabelBadge";
 
-type Props = {
+interface Props {
     date: string;
     records: StockRecord[];
 };
@@ -115,7 +115,7 @@ export default function RecordCard({ date, records }: Props) {
                                                 : "remove"
                                         }
                                         color={
-                                            record.type === "INBOUND"
+                                            record.movementType === "INBOUND"
                                                 ? "green.600"
                                                 : "red.600"
                                         }

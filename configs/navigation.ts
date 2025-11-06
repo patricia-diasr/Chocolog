@@ -118,3 +118,5 @@ export const MENU_ITEMS = Object.entries(SCREEN_CONFIG)
         icon: config.icon,
         route: name as AppScreenName,
     }));
+
+export type ScreenConfigMap = typeof SCREEN_CONFIG;

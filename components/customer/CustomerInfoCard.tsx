@@ -1,9 +1,9 @@
 import { VStack, HStack, Box, Text, Icon } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
-import LabelBadge from "../layout/LabelBadge";
+import { useAppColors } from "../../hooks/useAppColors";
 import { maskPhone } from "../../utils/formatters";
 import { Customer } from "../../types/customer";
-import { useAppColors } from "../../hooks/useAppColors";
+import LabelBadge from "../layout/LabelBadge";
 
 interface Props {
     customer: Customer;

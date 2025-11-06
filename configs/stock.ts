@@ -20,5 +20,3 @@ export const STOCK_STATUS = {
         icon: "information-circle",
     },
 } as const;
-
-export type StockStatus = (typeof STOCK_STATUS)[keyof typeof STOCK_STATUS];

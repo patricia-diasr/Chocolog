@@ -1,7 +1,9 @@
 import React, { useMemo } from "react";
 import { VStack, ScrollView, Box, Center } from "native-base";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useAppColors } from "../hooks/useAppColors";
+import { useAuth } from "../contexts/AuthContext";
 import {
     MENU_ITEMS,
     SCREEN_CONFIG,
@@ -9,8 +11,6 @@ import {
 } from "../configs/navigation";
 import { RootStackParamList } from "../types/navigation";
 import ItemNavigation from "../components/navigation/ItemNavigation";
-import { useAppColors } from "../hooks/useAppColors";
-import { useAuth } from "../contexts/AuthContext";
 
 type MenuScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 

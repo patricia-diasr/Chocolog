@@ -28,7 +28,6 @@ export default function StockCard({ name, sizes, status }: Flavor) {
             <StockCardHeader
                 name={name}
                 status={status}
-                totalQuantity={totalQuantity}
                 totalRemainingQuantity={totalRemainingQuantity}
             />
             <Divider bg={lightGreyColor} />

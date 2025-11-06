@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
     FormControl,
     Input,
@@ -9,6 +9,7 @@ import {
     Icon,
     Pressable,
 } from "native-base";
+import { TextInput } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAppColors } from "../../hooks/useAppColors";
 import { useCustomToast } from "../../contexts/ToastProvider";
@@ -21,7 +22,6 @@ interface Props {
 
 export default function LoginForm({ onLoginSubmit, isLoading }: Props) {
     const toast = useCustomToast();
-
     const {
         primaryColor,
         secondaryColor,
@@ -38,6 +38,7 @@ export default function LoginForm({ onLoginSubmit, isLoading }: Props) {
     const [hasAttemptedSubmit, setHasAttemptedSubmit] =
         useState<boolean>(false);
 
+    const passwordInputRef = useRef<TextInput>(null);
     const isLoginInvalid = hasAttemptedSubmit && !login.trim();
     const isPasswordInvalid = hasAttemptedSubmit && !password.trim();
 
@@ -105,6 +106,10 @@ export default function LoginForm({ onLoginSubmit, isLoading }: Props) {
                         variant="filled"
                         keyboardType="email-address"
                         autoCapitalize="none"
+                        returnKeyType="next"
+                        onSubmitEditing={() => {
+                            passwordInputRef.current?.focus();
+                        }}
                     />
                 </FormControl>
 
@@ -116,6 +121,7 @@ export default function LoginForm({ onLoginSubmit, isLoading }: Props) {
                         </HStack>
                     </FormControl.Label>
                     <Input
+                        ref={passwordInputRef}
                         value={password}
                         onChangeText={setPassword}
                         placeholder="Sua senha"
@@ -123,6 +129,8 @@ export default function LoginForm({ onLoginSubmit, isLoading }: Props) {
                         size="lg"
                         variant="filled"
                         type={showPassword ? "text" : "password"}
+                        returnKeyType="done"
+                        onSubmitEditing={handleSubmit}
                         InputRightElement={
                             <Pressable
                                 onPress={() => setShowPassword(!showPassword)}

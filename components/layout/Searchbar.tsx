@@ -15,12 +15,8 @@ export default function SearchInput({
     placeholder = "Buscar...",
     onClear,
 }: Props) {
-    const {
-        whiteColor,
-        mediumGreyColor,
-        primaryColor,
-        borderColor,
-    } = useAppColors();
+    const { whiteColor, mediumGreyColor, primaryColor, borderColor } =
+        useAppColors();
     const handleClear = () => {
         onChangeText("");
         onClear?.();

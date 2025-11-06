@@ -1,27 +1,25 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { RouteProp, useNavigation } from "@react-navigation/native";
 import { Box, Center, ScrollView, Spinner, VStack, Text } from "native-base";
-
-import InfoList from "../components/layout/InfoList";
+import { RouteProp, useNavigation } from "@react-navigation/native";
+import { useCustomToast } from "../contexts/ToastProvider";
 import { useAppColors } from "../hooks/useAppColors";
-import { getStatusDetails } from "../utils/statusConfig";
+import { getPrintBatch } from "../services/printBatchService";
 import {
     formatDate,
     formatOrderDetailTitleWithNotes,
 } from "../utils/formatters";
+import { getStatusDetails } from "../utils/statusConfig";
 import { PrintBatchDetail } from "../types/prints";
-import PrintInfoCard from "../components/print/PrintInfoCard";
 import { RootStackParamList } from "../types/navigation";
-import { getPrintBatch } from "../services/printBatchService";
-import { useCustomToast } from "../contexts/ToastProvider";
+import InfoList from "../components/layout/InfoList";
+import PrintInfoCard from "../components/print/PrintInfoCard";
 import Breadcrumbs from "../components/navigation/Breadcrumbs";
-import { id } from "date-fns/locale";
 
 type PrintBatchScreenRouteProp = RouteProp<RootStackParamList, "PrintBatch">;
 
-type Props = {
+interface Props {
     route: PrintBatchScreenRouteProp;
-};
+}
 
 export default function PrintBatchScreen({ route }: Props) {
     const { backgroundColor, secondaryColor, mediumGreyColor } = useAppColors();
@@ -32,28 +30,6 @@ export default function PrintBatchScreen({ route }: Props) {
 
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [printBatchData, setPrintBatchData] = useState<PrintBatchDetail>();
-
-    const fetchPrintBatch = useCallback(async () => {
-        setIsLoading(true);
-
-        try {
-            const data = await getPrintBatch(printBatchId);
-            setPrintBatchData(data);
-        } catch (error) {
-            toast.showToast({
-                title: "Erro ao carregar!",
-                description:
-                    "Não foi possível buscar o lote de impressão. Tente novamente.",
-                status: "error",
-            });
-        } finally {
-            setIsLoading(false);
-        }
-    }, [toast, printBatchId]);
-
-    useEffect(() => {
-        fetchPrintBatch();
-    }, [fetchPrintBatch]);
 
     const printItems = useMemo(() => {
         if (!printBatchData) {
@@ -90,6 +66,28 @@ export default function PrintBatchScreen({ route }: Props) {
             };
         });
     }, [printBatchData]);
+
+    const fetchPrintBatch = useCallback(async () => {
+        setIsLoading(true);
+
+        try {
+            const data = await getPrintBatch(printBatchId);
+            setPrintBatchData(data);
+        } catch (error) {
+            toast.showToast({
+                title: "Erro ao carregar!",
+                description:
+                    "Não foi possível buscar o lote de impressão. Tente novamente.",
+                status: "error",
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    }, [toast, printBatchId]);
+
+    useEffect(() => {
+        fetchPrintBatch();
+    }, [fetchPrintBatch]);
 
     const handleNavigateToOrder = (orderItemId: number) => {
         const item = printBatchData!.items.find((oi) => oi.id === orderItemId);

@@ -15,7 +15,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { useAppColors } from "../../hooks/useAppColors";
 import { useCustomToast } from "../../contexts/ToastProvider";
 import { Employee } from "../../types/employee";
-import { isLoading } from "expo-font";
 
 interface Props {
     title: string;
@@ -49,6 +48,20 @@ export default function EmployeeFormModal({
     const [hasAttemptedSave, setHasAttemptedSave] = useState<boolean>(false);
     const [showPassword, setShowPassword] = useState<boolean>(false);
 
+    const isNewEmployee = !formData?.id;
+    const passwordTrimmed = formData?.password?.trim() || "";
+
+    const nameIsInvalid = hasAttemptedSave && !formData?.name.trim();
+    const loginIsInvalid = hasAttemptedSave && !formData?.login.trim();
+
+    const passwordIsRequiredAndMissing = isNewEmployee && !passwordTrimmed;
+    const passwordIsProvidedAndShort =
+        passwordTrimmed.length > 0 && passwordTrimmed.length < 8;
+    const passwordIsInvalid =
+        hasAttemptedSave &&
+        (passwordIsRequiredAndMissing || passwordIsProvidedAndShort);
+
+        
     useEffect(() => {
         if (isOpen) {
             setFormData(employeeData);
@@ -66,21 +79,30 @@ export default function EmployeeFormModal({
 
     const handleSubmit = () => {
         setHasAttemptedSave(true);
+        if (!formData) return;
 
-        const isNewEmployee = !formData?.id;
-        const passwordIsRequired = isNewEmployee && !formData?.password?.trim();
-
-        if (
-            !formData ||
-            !formData.name.trim() ||
-            !formData.login.trim() ||
-            !formData.role.trim() ||
-            passwordIsRequired
-        ) {
+        if (nameIsInvalid || loginIsInvalid) {
             toast.showToast({
                 title: "Ops! Campos obrigatórios",
-                description:
-                    "Por favor, preencha nome, login, função e senha (para novos funcionários).",
+                description: "Por favor, preencha nome e login.",
+                status: "warning",
+            });
+            return;
+        }
+
+        if (passwordIsRequiredAndMissing) {
+            toast.showToast({
+                title: "Ops! Senha obrigatória",
+                description: "Para novos funcionários, a senha é obrigatória.",
+                status: "warning",
+            });
+            return;
+        }
+
+        if (passwordIsProvidedAndShort) {
+            toast.showToast({
+                title: "Ops! Senha inválida",
+                description: "A senha deve ter no mínimo 8 dígitos.",
                 status: "warning",
             });
             return;
@@ -119,12 +141,7 @@ export default function EmployeeFormModal({
                     borderColor={lightGreyColor}
                 >
                     <VStack space={5}>
-                        <FormControl
-                            isRequired
-                            isInvalid={
-                                hasAttemptedSave && !formData.name.trim()
-                            }
-                        >
+                        <FormControl isRequired isInvalid={nameIsInvalid}>
                             <FormControl.Label>
                                 <HStack alignItems="center" space={2}>
                                     <Icon
@@ -149,12 +166,7 @@ export default function EmployeeFormModal({
                             />
                         </FormControl>
 
-                        <FormControl
-                            isRequired
-                            isInvalid={
-                                hasAttemptedSave && !formData.login.trim()
-                            }
-                        >
+                        <FormControl isRequired isInvalid={loginIsInvalid}>
                             <FormControl.Label>
                                 <HStack alignItems="center" space={2}>
                                     <Icon as={Ionicons} name="at" size="sm" />
@@ -175,12 +187,8 @@ export default function EmployeeFormModal({
                         </FormControl>
 
                         <FormControl
-                            isRequired={!formData.id}
-                            isInvalid={
-                                hasAttemptedSave &&
-                                !formData.id &&
-                                !formData.password?.trim()
-                            }
+                            isRequired={isNewEmployee}
+                            isInvalid={passwordIsInvalid}
                         >
                             <FormControl.Label>
                                 <HStack alignItems="center" space={2}>

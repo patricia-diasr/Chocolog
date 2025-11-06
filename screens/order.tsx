@@ -1,33 +1,8 @@
-import { Box, Center, ScrollView, Spinner, VStack, Text } from "native-base";
-import { useAppColors } from "../hooks/useAppColors";
 import { useCallback, useEffect, useMemo, useState } from "react";
-
-import FabButton from "../components/layout/FabButton";
-import OrderInfoCard from "../components/order/OrderInfoCard";
-import ChargeInfoCard from "../components/order/ChargeInfoCard";
-import InfoSwipeList from "../components/layout/InfoSwipeList";
-import DeleteAlert from "../components/layout/DeleteAlert";
-import OrderFormModal from "../components/order/OrderFormModal";
-import OrderDetailFormModal from "../components/order/OrderDetailFormModal";
-import PaymentFormModal from "../components/order/PaymentFormModal";
-
-import {
-    OrderItemRequest,
-    OrderItemResponse,
-    OrderRequest,
-    OrderResponse,
-    PaymentRequest,
-    PaymentResponse,
-} from "../types/order";
-import { getStatusDetails } from "../utils/statusConfig";
-import {
-    formatDate,
-    formatOrderDetailTitle,
-    formatPrice,
-} from "../utils/formatters";
-import { useCustomToast } from "../contexts/ToastProvider";
-import { RootStackParamList } from "../types/navigation";
+import { Box, Center, ScrollView, Spinner, VStack, Text } from "native-base";
 import { RouteProp } from "@react-navigation/native";
+import { useCustomToast } from "../contexts/ToastProvider";
+import { useAppColors } from "../hooks/useAppColors";
 import {
     createItem,
     createPayment,
@@ -38,6 +13,29 @@ import {
     updateOrder,
     updatePayment,
 } from "../services/orderService";
+import { getStatusDetails } from "../utils/statusConfig";
+import {
+    formatDate,
+    formatOrderDetailTitle,
+    formatPrice,
+} from "../utils/formatters";
+import {
+    OrderItemRequest,
+    OrderItemResponse,
+    OrderRequest,
+    OrderResponse,
+    PaymentRequest,
+    PaymentResponse,
+} from "../types/order";
+import { RootStackParamList } from "../types/navigation";
+import FabButton from "../components/layout/FabButton";
+import OrderInfoCard from "../components/order/OrderInfoCard";
+import ChargeInfoCard from "../components/order/ChargeInfoCard";
+import InfoSwipeList from "../components/layout/InfoSwipeList";
+import DeleteAlert from "../components/layout/DeleteAlert";
+import OrderFormModal from "../components/order/OrderFormModal";
+import OrderDetailFormModal from "../components/order/OrderDetailFormModal";
+import PaymentFormModal from "../components/order/PaymentFormModal";
 import Breadcrumbs from "../components/navigation/Breadcrumbs";
 
 type ModalType =
@@ -62,9 +60,9 @@ type ModalState = {
 
 type OrderScreenRouteProp = RouteProp<RootStackParamList, "Order">;
 
-type Props = {
+interface Props {
     route: OrderScreenRouteProp;
-};
+}
 
 export default function OrderScreen({ route }: Props) {
     const { backgroundColor, secondaryColor, mediumGreyColor } = useAppColors();
@@ -76,6 +74,38 @@ export default function OrderScreen({ route }: Props) {
     const [isSavingLoading, setIsSavingLoading] = useState<boolean>(false);
     const [isOrderFinalized, setIsOrderFinalized] = useState<boolean>(false);
     const [modalState, setModalState] = useState<ModalState>({ type: null });
+
+    const orderDetailItems = useMemo(
+        () =>
+            orderData?.orderItems.map((item) => {
+                const status = getStatusDetails(item.status);
+                return {
+                    id: item.id,
+                    title: formatOrderDetailTitle(item),
+                    info: item.notes,
+                    aditionalInfo: formatPrice(item.totalPrice),
+                    badgeColor: status.colorScheme,
+                    badgeIcon: status.icon,
+                    badgeLabel: status.label,
+                    itemActionsDisabled:
+                        item.status === "COMPLETED" ||
+                        item.status === "CANCELLED",
+                };
+            }),
+        [orderData?.orderItems],
+    );
+
+    const paymentItems = useMemo(
+        () =>
+            orderData?.charges.payments.map((payment) => ({
+                id: payment.id,
+                title: `${formatDate(payment.paymentDate)} - ${
+                    payment.paymentMethod
+                }`,
+                info: formatPrice(payment.paidAmount),
+            })),
+        [orderData?.charges.payments],
+    );
 
     const fetchOrder = useCallback(async () => {
         setIsLoading(true);
@@ -315,38 +345,6 @@ export default function OrderScreen({ route }: Props) {
             setIsSavingLoading(false);
         }
     }, [modalState, handleCloseModals, toast, customerId, orderId]);
-
-    const orderDetailItems = useMemo(
-        () =>
-            orderData?.orderItems.map((item) => {
-                const status = getStatusDetails(item.status);
-                return {
-                    id: item.id,
-                    title: formatOrderDetailTitle(item),
-                    info: item.notes,
-                    aditionalInfo: formatPrice(item.totalPrice),
-                    badgeColor: status.colorScheme,
-                    badgeIcon: status.icon,
-                    badgeLabel: status.label,
-                    itemActionsDisabled:
-                        item.status === "COMPLETED" ||
-                        item.status === "CANCELLED",
-                };
-            }),
-        [orderData?.orderItems],
-    );
-
-    const paymentItems = useMemo(
-        () =>
-            orderData?.charges.payments.map((payment) => ({
-                id: payment.id,
-                title: `${formatDate(payment.paymentDate)} - ${
-                    payment.paymentMethod
-                }`,
-                info: formatPrice(payment.paidAmount),
-            })),
-        [orderData?.charges.payments],
-    );
 
     if (isLoading || orderData === undefined) {
         return (

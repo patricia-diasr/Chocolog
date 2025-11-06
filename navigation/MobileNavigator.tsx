@@ -5,12 +5,12 @@ import {
     NativeStackNavigationOptions,
 } from "@react-navigation/native-stack";
 import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
-import { MobileTabParamList, RootStackParamList } from "../types/navigation";
 import {
     SCREEN_CONFIG,
     TAB_ROUTES,
     AppScreenName,
 } from "../configs/navigation";
+import { MobileTabParamList, RootStackParamList } from "../types/navigation";
 import TabBar from "../components/navigation/TabBar";
 import Header from "../components/navigation/Header";
 import { useAuth } from "../contexts/AuthContext";

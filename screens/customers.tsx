@@ -12,19 +12,17 @@ import {
 } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
 import { useState, useMemo, useCallback, useEffect } from "react";
-
+import { useCustomToast } from "../contexts/ToastProvider";
+import { useAppColors } from "../hooks/useAppColors";
+import { createCustomer, getCustomers } from "../services/customerService";
+import { Customer } from "../types/customer";
+import { StatItem } from "../types/stats";
 import StatsCard from "../components/layout/StatsCard";
 import SearchInput from "../components/layout/Searchbar";
 import FabButton from "../components/layout/FabButton";
 import SortButtons, { SortOption } from "../components/layout/SortButtons";
 import CustomerCard from "../components/customer/CustomerCard";
 import CustomerFormModal from "../components/customer/CustomerFormModal";
-
-import { useAppColors } from "../hooks/useAppColors";
-import { Customer } from "../types/customer";
-import { StatItem } from "../types/stats";
-import { useCustomToast } from "../contexts/ToastProvider";
-import { createCustomer, getCustomers } from "../services/customerService";
 
 const newCustomerTemplate: Customer = {
     id: 0,
@@ -50,58 +48,6 @@ export default function CustomersScreen() {
         { value: "all", label: "Todos", icon: "people" },
         { value: "reseller", label: "Revendedor", icon: "business" },
     ];
-
-    const fetchCustomers = useCallback(async () => {
-        setIsLoading(true);
-
-        try {
-            const data = await getCustomers();
-            setCustomers(data);
-        } catch (error) {
-            toast.showToast({
-                title: "Erro ao carregar!",
-                description:
-                    "Não foi possível buscar os clientes. Tente novamente.",
-                status: "error",
-            });
-        } finally {
-            setIsLoading(false);
-        }
-    }, [toast]);
-
-    useEffect(() => {
-        fetchCustomers();
-    }, [fetchCustomers]);
-
-    const handleOpenAddModal = () => {
-        setIsModalOpen(true);
-    };
-
-    const handleSaveNewCustomer = async (newCustomer: Customer) => {
-        setIsSavingLoading(true);
-
-        try {
-            const { id, ...newData } = newCustomer;
-            const newEmployee = await createCustomer(newData);
-            setCustomers((prev) => [...prev, newEmployee]);
-
-            toast.showToast({
-                title: "Sucesso!",
-                description: "Cliente criado.",
-                status: "success",
-            });
-            
-            setIsModalOpen(false);
-        } catch (error) {
-            toast.showToast({
-                title: "Erro!",
-                description: "Não foi possível criar o cliente.",
-                status: "error",
-            });
-        } finally {
-            setIsSavingLoading(false);
-        }
-    };
 
     const customerStats = useMemo(() => {
         const totalCustomers = customers.length;
@@ -150,6 +96,58 @@ export default function CustomersScreen() {
 
     const isEmpty = processedCustomers.length === 0 && searchTerm !== "";
     const isEmptyInitial = customers.length === 0;
+
+    const fetchCustomers = useCallback(async () => {
+        setIsLoading(true);
+
+        try {
+            const data = await getCustomers();
+            setCustomers(data);
+        } catch (error) {
+            toast.showToast({
+                title: "Erro ao carregar!",
+                description:
+                    "Não foi possível buscar os clientes. Tente novamente.",
+                status: "error",
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    }, [toast]);
+
+    useEffect(() => {
+        fetchCustomers();
+    }, [fetchCustomers]);
+
+    const handleOpenAddModal = () => {
+        setIsModalOpen(true);
+    };
+
+    const handleSaveNewCustomer = async (newCustomer: Customer) => {
+        setIsSavingLoading(true);
+
+        try {
+            const { id, ...newData } = newCustomer;
+            const newEmployee = await createCustomer(newData);
+            setCustomers((prev) => [...prev, newEmployee]);
+
+            toast.showToast({
+                title: "Sucesso!",
+                description: "Cliente criado.",
+                status: "success",
+            });
+
+            setIsModalOpen(false);
+        } catch (error) {
+            toast.showToast({
+                title: "Erro!",
+                description: "Não foi possível criar o cliente.",
+                status: "error",
+            });
+        } finally {
+            setIsSavingLoading(false);
+        }
+    };
 
     if (isLoading) {
         return (

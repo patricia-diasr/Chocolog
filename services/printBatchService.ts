@@ -1,5 +1,5 @@
-import { PrintBatch, PrintBatchDetail, PrintBatchRequest } from "../types/prints";
 import api from "./api";
+import { PrintBatch, PrintBatchDetail, PrintBatchRequest } from "../types/prints";
 
 export const getPrintBatchs = async (): Promise<PrintBatch[]> => {
     const response = await api.get("/orders/print-batchs");

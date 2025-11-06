@@ -1,22 +1,32 @@
 import { useCallback, useEffect, useState } from "react";
-import { ScrollView, Flex, Box, VStack, Icon, Text, Center, Spinner } from "native-base";
+import {
+    ScrollView,
+    Flex,
+    Box,
+    VStack,
+    Icon,
+    Text,
+    Center,
+    Spinner,
+} from "native-base";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
-import FabButton from "../components/layout/FabButton";
-import PrintCard from "../components/print/PrintCard";
-import { PrintBatch } from "../types/prints";
+import { useCustomToast } from "../contexts/ToastProvider";
 import { useAppColors } from "../hooks/useAppColors";
 import { getPrintBatchs } from "../services/printBatchService";
-import { useCustomToast } from "../contexts/ToastProvider";
+import { PrintBatch } from "../types/prints";
+import FabButton from "../components/layout/FabButton";
+import PrintCard from "../components/print/PrintCard";
 
 export default function PrintBatchsScreen() {
     const { backgroundColor, mediumGreyColor, secondaryColor } = useAppColors();
     const navigation = useNavigation();
     const toast = useCustomToast();
 
-    const [printBatchs, setPrintBatchs] =
-        useState<PrintBatch[]>([]);
+    const [printBatchs, setPrintBatchs] = useState<PrintBatch[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+
+    const isEmptyInitial = printBatchs.length === 0;
 
     const fetchPrintBatchs = useCallback(async () => {
         setIsLoading(true);
@@ -39,8 +49,6 @@ export default function PrintBatchsScreen() {
     useEffect(() => {
         fetchPrintBatchs();
     }, [fetchPrintBatchs]);
-
-    const isEmptyInitial = printBatchs.length === 0;
 
     const handleAdd = () => {
         navigation.navigate("NewPrintBatch" as never);

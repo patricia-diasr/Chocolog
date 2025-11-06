@@ -1,11 +1,11 @@
 import React from "react";
 import { Text, VStack, HStack, Checkbox, Pressable } from "native-base";
-import LabelBadge from "../layout/LabelBadge";
-import InfoRow from "../layout/InfoRow";
+import { useAppColors } from "../../hooks/useAppColors";
 import { getStatusDetails } from "../../utils/statusConfig";
 import { formatDate, formatOrderDetailTitle } from "../../utils/formatters";
 import { OrderItemResponse } from "../../types/order";
-import { useAppColors } from "../../hooks/useAppColors";
+import LabelBadge from "../layout/LabelBadge";
+import InfoRow from "../layout/InfoRow";
 
 interface Props {
     item: OrderItemResponse;
@@ -20,7 +20,6 @@ export default function PrintItemCard({
 }: Props) {
     const { borderColor, whiteColor, secondaryColor, blackColor } =
         useAppColors();
-
     const statusDetails = getStatusDetails(item.status);
 
     return (

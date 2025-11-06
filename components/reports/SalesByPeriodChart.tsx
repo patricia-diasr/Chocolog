@@ -1,7 +1,5 @@
 import React from "react";
-import { useAppColors } from "../../hooks/useAppColors";
 import { Box } from "native-base";
-import { ChartDataItem } from "../../types/reports";
 import {
     LineChart as RechartsLineChart,
     Line as RechartsLine,
@@ -12,6 +10,8 @@ import {
     Legend as RechartsLegend,
     ResponsiveContainer as RechartsResponsiveContainer,
 } from "recharts";
+import { useAppColors } from "../../hooks/useAppColors";
+import { ChartDataItem } from "../../types/reports";
 import ChartCard from "./ChartCard";
 
 const ResponsiveContainer = RechartsResponsiveContainer as any;

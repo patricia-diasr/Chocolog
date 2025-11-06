@@ -1,13 +1,11 @@
 import "react-native-gesture-handler";
 import "react-native-reanimated";
 import React, { useCallback, useEffect } from "react";
+import { View } from "react-native";
 import { NativeBaseProvider } from "native-base";
 import { useFonts } from "expo-font";
 import { BerkshireSwash_400Regular } from "@expo-google-fonts/berkshire-swash";
 import * as SplashScreen from "expo-splash-screen";
-import { View } from "react-native";
-import { theme } from "./theme";
-import { Navigator } from "./navigation/index";
 import {
     Poppins_400Regular,
     Poppins_500Medium,
@@ -16,6 +14,8 @@ import {
 } from "@expo-google-fonts/poppins";
 import { ToastProvider } from "./contexts/ToastProvider";
 import { AuthProvider } from "./contexts/AuthContext";
+import { Navigator } from "./navigation/index";
+import { theme } from "./theme";
 import "./configs/calendar.ts";
 
 SplashScreen.preventAutoHideAsync();

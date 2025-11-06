@@ -2,7 +2,6 @@ import React from "react";
 import { useAppColors } from "../../hooks/useAppColors";
 import { Box, HStack, Icon, VStack, Text } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
-import { ResponsiveValue } from "native-base/lib/typescript/components/types";
 
 interface Props {
     title: string;

@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Box, Center, Text, ScrollView, Spinner, VStack } from "native-base";
-import { ReportData } from "../types/reports";
+import { useCustomToast } from "../contexts/ToastProvider";
 import { useAppColors } from "../hooks/useAppColors";
 import { useReportsData } from "../hooks/useReportsData";
-import { useCustomToast } from "../contexts/ToastProvider";
 import { getReports } from "../services/reportsService";
+import { ReportData } from "../types/reports";
 import KPISection from "../components/reports/KPISection";
 import FlavorSalesChart from "../components/reports/FlavorSalesChart";
 import OnDemandVsStockChart from "../components/reports/OnDemandVsStockChart";
@@ -20,6 +20,15 @@ export default function ReportsScreen() {
 
     const [reportData, setReportData] = useState<ReportData>();
     const [isLoading, setIsLoading] = useState<boolean>(false);
+
+    const {
+        ordersByStatusData,
+        onDemandVsStockData,
+        flavorData,
+        allSizes,
+        salesByPeriodData,
+        revenueChartData,
+    } = useReportsData(reportData);
 
     const fetchReports = useCallback(async () => {
         setIsLoading(true);
@@ -41,15 +50,6 @@ export default function ReportsScreen() {
     useEffect(() => {
         fetchReports();
     }, [fetchReports]);
-
-    const {
-        ordersByStatusData,
-        onDemandVsStockData,
-        flavorData,
-        allSizes,
-        salesByPeriodData,
-        revenueChartData,
-    } = useReportsData(reportData);
 
     if (isLoading || !reportData) {
         return (

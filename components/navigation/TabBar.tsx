@@ -1,25 +1,25 @@
 import React from "react";
 import { Box, Center, HStack, Icon, Pressable, Text } from "native-base";
-import { Ionicons } from "@expo/vector-icons";
 import { Platform } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { useAppColors } from "../../hooks/useAppColors";
 import { SCREEN_CONFIG, AppScreenName } from "../../configs/navigation";
 
-function TabBarButton({
-    route,
-    isFocused,
-    navigation,
-}: {
+interface TabBarButtonProps {
     route: { key: string; name: string };
     isFocused: boolean;
     navigation: BottomTabBarProps["navigation"];
-}) {
+}
+
+function TabBarButton({ route, isFocused, navigation }: TabBarButtonProps) {
     const config = SCREEN_CONFIG[route.name as AppScreenName];
     if (!config || !config.isTab) {
         return null;
     }
-
+    
+    const color = isFocused ? "white" : "rgba(255,255,255,0.8)";
+    
     const onPress = () => {
         const event = navigation.emit({
             type: "tabPress",
@@ -32,7 +32,6 @@ function TabBarButton({
         }
     };
 
-    const color = isFocused ? "white" : "rgba(255,255,255,0.8)";
 
     return (
         <Pressable

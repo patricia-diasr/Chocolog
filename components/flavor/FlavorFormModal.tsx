@@ -13,6 +13,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useAppColors } from "../../hooks/useAppColors";
 import { useCustomToast } from "../../contexts/ToastProvider";
+import { SIZES_NAMES } from "../../configs/order";
 import {
     Flavor,
     FlavorFormData,
@@ -31,8 +32,6 @@ interface FlavorFormModalProps {
     editingFlavor?: Flavor | null;
     isLoading: boolean;
 }
-
-const SIZES = ["350g", "500g", "Coração", "1Kg"];
 
 export default function FlavorFormModal({
     isOpen,
@@ -58,17 +57,17 @@ export default function FlavorFormModal({
     } = useAppColors();
 
     const [hasAttemptedSave, setHasAttemptedSave] = useState<boolean>(false);
-
     const [inputData, setInputData] = useState<InputData>({
         flavor: "",
         prices: [],
     });
+    const isFlavorInvalid = hasAttemptedSave && !formData.flavor.trim();
 
     useEffect(() => {
         if (isOpen) {
-            const initialPrices = SIZES.map((size) => {
+            const initialPrices = SIZES_NAMES.map((size) => {
                 const existingPrice = formData.prices.find(
-                    (p) => p.size === size,
+                    (p) => p.size.toLowerCase() === size.toLowerCase(),
                 );
                 return {
                     size: size,
@@ -177,8 +176,6 @@ export default function FlavorFormModal({
         onSave(flavorToSave);
     };
 
-    const isFlavorInvalid = hasAttemptedSave && !formData.flavor.trim();
-
     if (!formData) return null;
 
     return (
@@ -260,7 +257,7 @@ export default function FlavorFormModal({
                                     </HStack>
                                 </FormControl.Label>
                                 <VStack space={3}>
-                                    {SIZES.map((size) => {
+                                    {SIZES_NAMES.map((size) => {
                                         const priceItem = formData.prices.find(
                                             (p) => p.size === size,
                                         );
@@ -315,7 +312,7 @@ export default function FlavorFormModal({
                                     </HStack>
                                 </FormControl.Label>
                                 <VStack space={3}>
-                                    {SIZES.map((size) => {
+                                    {SIZES_NAMES.map((size) => {
                                         const priceItem = formData.prices.find(
                                             (p) => p.size === size,
                                         );

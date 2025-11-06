@@ -45,13 +45,13 @@ export default function Select<T>({
         invalidColor,
     } = useAppColors();
 
+    const selectedItem = data.find((item) => itemValue(item) === selectedValue);
+    const displayText = selectedItem ? itemLabel(selectedItem) : placeholder;
+
     const handleSelect = (value: string | number) => {
         onValueChange(value);
         setIsModalVisible(false);
     };
-
-    const selectedItem = data.find((item) => itemValue(item) === selectedValue);
-    const displayText = selectedItem ? itemLabel(selectedItem) : placeholder;
 
     return (
         <>

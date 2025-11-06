@@ -6,11 +6,6 @@ export const getEmployees = async (): Promise<Employee[]> => {
     return response.data;
 };
 
-export const getEmployee = async (id: number): Promise<Employee> => {
-    const response = await api.get(`/employees/${id}`);
-    return response.data;
-};
-
 export const createEmployee = async (
     employeeData: Omit<Employee, "id">,
 ): Promise<Employee> => {

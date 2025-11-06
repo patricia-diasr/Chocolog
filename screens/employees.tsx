@@ -12,7 +12,17 @@ import {
 } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
 import { useState, useMemo, useCallback, useEffect } from "react";
-
+import { useCustomToast } from "../contexts/ToastProvider";
+import { useAppColors } from "../hooks/useAppColors";
+import {
+    getEmployees,
+    createEmployee,
+    updateEmployee,
+    deleteEmployee,
+} from "../services/employeeService";
+import { Employee } from "../types/employee";
+import { StatItem } from "../types/stats";
+import DeleteAlert from "../components/layout/DeleteAlert";
 import StatsCard from "../components/layout/StatsCard";
 import SearchInput from "../components/layout/Searchbar";
 import FabButton from "../components/layout/FabButton";
@@ -20,17 +30,6 @@ import SortButtons, { SortOption } from "../components/layout/SortButtons";
 import EmployeeCard from "../components/employee/EmployeeCard";
 import EmployeeFormModal from "../components/employee/EmployeeFormModal";
 
-import { useAppColors } from "../hooks/useAppColors";
-import { Employee } from "../types/employee";
-import { StatItem } from "../types/stats";
-import DeleteAlert from "../components/layout/DeleteAlert";
-import { useCustomToast } from "../contexts/ToastProvider";
-import {
-    getEmployees,
-    createEmployee,
-    updateEmployee,
-    deleteEmployee,
-} from "../services/employeeService";
 
 const newEmployeeTemplate: Employee = {
     id: 0,
@@ -72,8 +71,7 @@ export default function EmployeesScreen() {
         } catch (error) {
             toast.showToast({
                 title: "Erro ao carregar!",
-                description:
-                    "Não foi possível buscar os lot. Tente novamente.",
+                description: "Não foi possível buscar os lot. Tente novamente.",
                 status: "error",
             });
         } finally {
@@ -106,8 +104,31 @@ export default function EmployeesScreen() {
 
     const handleSave = async (employeeData: Employee) => {
         setIsSavingLoading(true);
+
         const isEditing = !!employeeData.id;
         const dataToSend = { ...employeeData };
+        const loginToValidate = employeeData.login;
+        
+        const loginExists = employees.some((emp) => {
+            if (isEditing) {
+                return (
+                    emp.login === loginToValidate && emp.id !== employeeData.id
+                );
+            } else {
+                return emp.login === loginToValidate;
+            }
+        });
+
+        if (loginExists) {
+            toast.showToast({
+                title: "Login inválido",
+                description:
+                    "Este login já está sendo utilizado por outro funcionário.",
+                status: "error",
+            });
+            setIsSavingLoading(false);
+            return; 
+        }
 
         if (isEditing && !dataToSend.password) {
             delete dataToSend.password;

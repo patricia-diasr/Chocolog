@@ -14,13 +14,13 @@ import {
     Spinner,
 } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
-import { RecordItem } from "../../types/stock";
 import { useAppColors } from "../../hooks/useAppColors";
-import { SIZES } from "../../configs/order";
 import { useCustomToast } from "../../contexts/ToastProvider";
-import Select from "../layout/Select";
-import { Flavor } from "../../types/flavor";
+import { SIZES } from "../../configs/order";
 import { getFlavors } from "../../services/flavorService";
+import { Flavor } from "../../types/flavor";
+import { RecordItem } from "../../types/stock";
+import Select from "../layout/Select";
 
 interface Props {
     isOpen: boolean;
@@ -82,14 +82,6 @@ export default function RecordFormModal({
         }
     }, [toast]);
 
-    useEffect(() => {
-        fetchFlavors();
-    }, [fetchFlavors]);
-
-    useEffect(() => {
-        setHasAttemptedSave(false);
-    }, [isOpen]);
-
     const handleSave = () => {
         setHasAttemptedSave(true);
 
@@ -141,6 +133,14 @@ export default function RecordFormModal({
 
         onSave(newRecord);
     };
+
+    useEffect(() => {
+        fetchFlavors();
+    }, [fetchFlavors]);
+
+    useEffect(() => {
+        setHasAttemptedSave(false);
+    }, [isOpen]);
 
     if (isSearchLoading) {
         return (

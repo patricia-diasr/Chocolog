@@ -12,17 +12,18 @@ import {
     Pressable,
 } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
+import { DateData } from "react-native-calendars";
 import { useAppColors } from "../../hooks/useAppColors";
 import { useCustomToast } from "../../contexts/ToastProvider";
-import { PaymentRequest } from "../../types/order";
+import { formatDate } from "../../utils/formatters";
 import {
-    applyDateMask,
-    formatDate,
-    parseInputDate,
-} from "../../utils/formatters";
+    getFirstDayOfMonth,
+    getInitialDate,
+    getMonthString,
+} from "../../utils/dates";
 import { PAYMENT_METHODS } from "../../configs/order";
+import { PaymentRequest } from "../../types/order";
 import Select from "../layout/Select";
-import { DateData } from "react-native-calendars";
 import ModalCalendar from "../schedule/ModalCalendar";
 
 interface Props {
@@ -40,9 +41,6 @@ const createDefaultPayment = (): PaymentRequest => ({
     paymentMethod: "",
     paymentDate: "",
 });
-
-const getMonthString = (dateString: string) => dateString.slice(0, 7);
-const getFirstDayOfMonth = (monthString: string) => `${monthString}-01`;
 
 export default function PaymentFormModal({
     title,
@@ -63,7 +61,6 @@ export default function PaymentFormModal({
         lightGreyColor,
         invalidColor,
     } = useAppColors();
-
     const [resolvedSecondaryColor] = useToken("colors", [secondaryColor]);
 
     const [formData, setFormData] = useState<PaymentRequest>(
@@ -74,16 +71,43 @@ export default function PaymentFormModal({
     const [hasAttemptedSave, setHasAttemptedSave] = useState(false);
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
-    const initialDate = useMemo(() => {
-        const now = new Date();
-        const offset = now.getTimezoneOffset() * 60000;
-        const localTime = new Date(now.getTime() - offset);
-        return localTime.toISOString().slice(0, 10);
-    }, []);
-
+    const initialDate = useMemo(() => getInitialDate(), []);
     const [currentMonth, setCurrentMonth] = useState<string>(
         getMonthString(initialDate),
     );
+
+    const isValueInvalid = useMemo(
+        () =>
+            hasAttemptedSave &&
+            (!formData.paidAmount || formData.paidAmount <= 0),
+        [hasAttemptedSave, formData.paidAmount],
+    );
+
+    const isDateInvalid = useMemo(
+        () => hasAttemptedSave && !formData.paymentDate,
+        [hasAttemptedSave, formData.paymentDate],
+    );
+
+    const isMethodInvalid = useMemo(
+        () => hasAttemptedSave && !formData.paymentMethod,
+        [hasAttemptedSave, formData.paymentMethod],
+    );
+
+    const markedDates = useMemo(() => {
+        const marks: any = {};
+
+        if (formData.paymentDate) {
+            const selectedDate = formData.paymentDate.split("T")[0];
+            marks[selectedDate] = {
+                selected: true,
+                selectedColor: resolvedSecondaryColor,
+            };
+        }
+
+        return marks;
+    }, [formData.paymentDate, initialDate, resolvedSecondaryColor]);
+
+    const displayDateForCalendar = getFirstDayOfMonth(currentMonth);
 
     useEffect(() => {
         if (isOpen) {
@@ -109,23 +133,6 @@ export default function PaymentFormModal({
             setValueText("");
         }
     }, [isOpen, paymentData]);
-
-    const isValueInvalid = useMemo(
-        () =>
-            hasAttemptedSave &&
-            (!formData.paidAmount || formData.paidAmount <= 0),
-        [hasAttemptedSave, formData.paidAmount],
-    );
-
-    const isDateInvalid = useMemo(
-        () => hasAttemptedSave && !formData.paymentDate,
-        [hasAttemptedSave, formData.paymentDate],
-    );
-
-    const isMethodInvalid = useMemo(
-        () => hasAttemptedSave && !formData.paymentMethod,
-        [hasAttemptedSave, formData.paymentMethod],
-    );
 
     const handleInputChange = useCallback(
         (field: keyof PaymentRequest, value: any) => {
@@ -184,25 +191,9 @@ export default function PaymentFormModal({
         onSave(dataToSave as unknown as PaymentRequest);
     }, [formData, onSave, toast]);
 
-    const displayDateForCalendar = getFirstDayOfMonth(currentMonth);
-
     const handleMonthChange = useCallback((monthString: string) => {
         setCurrentMonth(monthString);
     }, []);
-
-    const markedDates = useMemo(() => {
-        const marks: any = {};
-
-        if (formData.paymentDate) {
-            const selectedDate = formData.paymentDate.split("T")[0];
-            marks[selectedDate] = {
-                selected: true,
-                selectedColor: resolvedSecondaryColor,
-            };
-        }
-
-        return marks;
-    }, [formData.paymentDate, initialDate, resolvedSecondaryColor]);
 
     return (
         <>

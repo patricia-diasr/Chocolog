@@ -1,11 +1,11 @@
 import React from "react";
 import { Text, VStack, HStack, Icon, Pressable, View } from "native-base";
+import { Animated } from "react-native";
+import { Swipeable } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
+import { useAppColors } from "../../hooks/useAppColors";
 import { Employee } from "../../types/employee";
 import LabelBadge from "../layout/LabelBadge";
-import { useAppColors } from "../../hooks/useAppColors";
-import { Swipeable } from "react-native-gesture-handler";
-import { Animated } from "react-native";
 
 interface Props {
     employee: Employee;

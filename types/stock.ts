@@ -9,12 +9,6 @@ export type StockSize = {
     quantity: number;
 };
 
-export type StockItem = {
-    flavor: string;
-    sizes: StockSize[];
-    status: StockStatus;
-};
-
 export type StockRecord = {
     id?: number;
     flavorName: string;

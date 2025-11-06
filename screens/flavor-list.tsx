@@ -8,19 +8,19 @@ import {
     Spinner,
     Text,
 } from "native-base";
-import FlavorCard from "../components/flavor/FlavorCard";
-import FlavorFormModal from "../components/flavor/FlavorFormModal";
-import DeleteAlert from "../components/layout/DeleteAlert";
-import FabButton from "../components/layout/FabButton";
-import { useAppColors } from "../hooks/useAppColors";
-import type { Flavor, FlavorFormData, PriceFormData } from "../types/flavor";
 import { useCustomToast } from "../contexts/ToastProvider";
+import { useAppColors } from "../hooks/useAppColors";
 import {
     createFlavor,
     deleteFlavor,
     getFlavors,
     updateFlavor,
 } from "../services/flavorService";
+import type { Flavor, FlavorFormData, PriceFormData } from "../types/flavor";
+import FabButton from "../components/layout/FabButton";
+import FlavorCard from "../components/flavor/FlavorCard";
+import FlavorFormModal from "../components/flavor/FlavorFormModal";
+import DeleteAlert from "../components/layout/DeleteAlert";
 
 const newFlavorData: FlavorFormData = {
     flavor: "",
@@ -44,27 +44,6 @@ export default function FlavorListScreen() {
     const [isSavingLoading, setIsSavingLoading] = useState<boolean>(false);
     const [formData, setFormData] = useState<FlavorFormData>(newFlavorData);
     const [modalState, setModalState] = useState<ModalState>("closed");
-
-    const fetchFlavors = useCallback(async () => {
-        setIsLoading(true);
-        try {
-            const data = await getFlavors();
-            setFlavors(data);
-        } catch (error) {
-            toast.showToast({
-                title: "Erro ao carregar!",
-                description:
-                    "Não foi possível buscar os sabores. Tente novamente.",
-                status: "error",
-            });
-        } finally {
-            setIsLoading(false);
-        }
-    }, [toast]);
-
-    useEffect(() => {
-        fetchFlavors();
-    }, [fetchFlavors]);
 
     const closeModal = useCallback(() => {
         setModalState("closed");
@@ -97,6 +76,27 @@ export default function FlavorListScreen() {
         setSelectedFlavor(flavor);
         setModalState("delete");
     };
+
+    const fetchFlavors = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            const data = await getFlavors();
+            setFlavors(data);
+        } catch (error) {
+            toast.showToast({
+                title: "Erro ao carregar!",
+                description:
+                    "Não foi possível buscar os sabores. Tente novamente.",
+                status: "error",
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    }, [toast]);
+
+    useEffect(() => {
+        fetchFlavors();
+    }, [fetchFlavors]);
 
     const handleSave = async (flavorData: Flavor) => {
         setIsSavingLoading(true);

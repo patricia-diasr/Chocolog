@@ -6,11 +6,6 @@ export const getFlavors = async (): Promise<Flavor[]> => {
     return response.data;
 };
 
-export const getFlavor = async (id: number): Promise<Flavor> => {
-    const response = await api.get(`/flavors/${id}`);
-    return response.data;
-};
-
 export const createFlavor = async (
     flavorData: Omit<Flavor, "id">,
 ): Promise<Flavor> => {

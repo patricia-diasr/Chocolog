@@ -12,7 +12,6 @@ interface Props {
 
 export default function ChargeInfoCard({ charge }: Props) {
     const { whiteColor, blackColor, borderColor } = useAppColors();
-
     const statusInfo = getStatusDetails(charge.status);
 
     return (

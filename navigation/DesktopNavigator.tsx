@@ -1,16 +1,16 @@
 import React from "react";
+import { View } from "react-native"; 
 import { createDrawerNavigator } from "@react-navigation/drawer";
-import { RootDrawerParamList } from "../types/navigation";
+import { useAuth } from "../contexts/AuthContext";
 import { SCREEN_CONFIG, AppScreenName } from "../configs/navigation";
+import { RootDrawerParamList } from "../types/navigation";
 import Header from "../components/navigation/Header";
 import CustomDrawerContent from "../components/navigation/DrawerContent";
-import { useAuth } from "../contexts/AuthContext";
-import { View } from "react-native"; 
 
 const Drawer = createDrawerNavigator<RootDrawerParamList>();
 
 export default function DesktopNavigator() {
-    const { userRole, logout } = useAuth();
+    const { userRole } = useAuth();
 
     const accessibleScreens = Object.entries(SCREEN_CONFIG).filter(
         ([name, config]) => {

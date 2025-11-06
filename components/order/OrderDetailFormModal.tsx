@@ -15,6 +15,8 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useAppColors } from "../../hooks/useAppColors";
 import { useCustomToast } from "../../contexts/ToastProvider";
+import { getFlavors } from "../../services/flavorService";
+import { SIZES } from "../../configs/order";
 import {
     ORDER_STATUS_MAP,
     OrderItemRequest,
@@ -22,8 +24,15 @@ import {
 } from "../../types/order";
 import Select from "../layout/Select";
 import { Flavor } from "../../types/flavor";
-import { SIZES } from "../../configs/order";
-import { getFlavors } from "../../services/flavorService";
+
+interface Props {
+    title: string;
+    isOpen: boolean;
+    onClose: () => void;
+    onSave: (data: OrderItemRequest) => void;
+    orderDetailData: OrderItemRequest | null;
+    isLoading: boolean;
+}
 
 function createDefaultOrderItemRequest(): OrderItemRequest {
     return {
@@ -33,15 +42,6 @@ function createDefaultOrderItemRequest(): OrderItemRequest {
         flavor2Id: null,
         notes: null,
     };
-}
-
-interface Props {
-    title: string;
-    isOpen: boolean;
-    onClose: () => void;
-    onSave: (data: OrderItemRequest) => void;
-    orderDetailData: OrderItemRequest | null;
-    isLoading: boolean;
 }
 
 export default function OrderItemRequestFormModal({
@@ -74,40 +74,6 @@ export default function OrderItemRequestFormModal({
 
     const isEditing = !!orderDetailData;
     const initialStatus = orderDetailData?.status;
-
-    const fetchFlavors = useCallback(async () => {
-        setIsSearchingLoading(true);
-
-        try {
-            const flavorsData = await getFlavors();
-            setFlavors(flavorsData);
-        } catch (error) {
-            toast.showToast({
-                title: "Erro ao carregar!",
-                description:
-                    "Não foi possível buscar os sabores. Tente novamente.",
-                status: "error",
-            });
-        } finally {
-            setIsSearchingLoading(false);
-        }
-    }, [toast]);
-
-    useEffect(() => {
-        fetchFlavors();
-    }, [fetchFlavors]);
-
-    useEffect(() => {
-        if (isOpen) {
-            const initialData = orderDetailData
-                ? { ...orderDetailData }
-                : createDefaultOrderItemRequest();
-            setFormData(initialData);
-        } else {
-            setHasAttemptedSave(false);
-            setFormData(createDefaultOrderItemRequest());
-        }
-    }, [isOpen, orderDetailData]);
 
     const isFormDisabled = useMemo(
         () =>
@@ -162,6 +128,40 @@ export default function OrderItemRequestFormModal({
         () => hasAttemptedSave && !formData.sizeId,
         [hasAttemptedSave, formData.sizeId],
     );
+
+    const fetchFlavors = useCallback(async () => {
+        setIsSearchingLoading(true);
+
+        try {
+            const flavorsData = await getFlavors();
+            setFlavors(flavorsData);
+        } catch (error) {
+            toast.showToast({
+                title: "Erro ao carregar!",
+                description:
+                    "Não foi possível buscar os sabores. Tente novamente.",
+                status: "error",
+            });
+        } finally {
+            setIsSearchingLoading(false);
+        }
+    }, [toast]);
+
+    useEffect(() => {
+        fetchFlavors();
+    }, [fetchFlavors]);
+
+    useEffect(() => {
+        if (isOpen) {
+            const initialData = orderDetailData
+                ? { ...orderDetailData }
+                : createDefaultOrderItemRequest();
+            setFormData(initialData);
+        } else {
+            setHasAttemptedSave(false);
+            setFormData(createDefaultOrderItemRequest());
+        }
+    }, [isOpen, orderDetailData]);
 
     const handleInputChange = useCallback(
         (field: keyof OrderItemRequest, value: any) => {

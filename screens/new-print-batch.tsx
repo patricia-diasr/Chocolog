@@ -12,21 +12,21 @@ import {
     Spinner,
 } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
-import { useAppColors } from "../hooks/useAppColors";
-import SortButtons, { SortOption } from "../components/layout/SortButtons";
-import SearchInput from "../components/layout/Searchbar";
-import FabButton from "../components/layout/FabButton";
-import PrintItemCard from "../components/print/PrintItemCard";
-import PrintAlert from "../components/print/PrintAlert";
 import { useCustomToast } from "../contexts/ToastProvider";
-import { OrderItemResponse } from "../types/order";
+import { useAppColors } from "../hooks/useAppColors";
 import { getItems } from "../services/orderService";
 import {
     createPrintBatch,
     downloadPrintBatch,
 } from "../services/printBatchService";
-import { PrintBatchDetail } from "../types/prints";
 import { triggerBrowserDownload } from "../utils/download";
+import { OrderItemResponse } from "../types/order";
+import { PrintBatchDetail } from "../types/prints";
+import SortButtons, { SortOption } from "../components/layout/SortButtons";
+import SearchInput from "../components/layout/Searchbar";
+import FabButton from "../components/layout/FabButton";
+import PrintItemCard from "../components/print/PrintItemCard";
+import PrintAlert from "../components/print/PrintAlert";
 import Breadcrumbs from "../components/navigation/Breadcrumbs";
 
 export default function NewPrintBatchScreen() {
@@ -47,6 +47,29 @@ export default function NewPrintBatchScreen() {
         { value: "all", label: "Todos", icon: "people" },
         { value: "not-printed", label: "Não impressos", icon: "warning" },
     ];
+
+    const processedPrintItems = useMemo(() => {
+        let filtered = printItems;
+
+        if (searchTerm) {
+            filtered = filtered.filter(
+                (item) =>
+                    item
+                        .customerName!.toLowerCase()
+                        .includes(searchTerm.toLowerCase()) ||
+                    item.customerPhone!.includes(searchTerm),
+            );
+        }
+
+        if (filterBy === "not-printed") {
+            filtered = filtered.filter((item) => !item.isPrinted);
+        }
+
+        return filtered;
+    }, [printItems, searchTerm, filterBy]);
+
+    const isEmpty = processedPrintItems.length === 0 && searchTerm !== "";
+    const isEmptyInitial = printItems.length === 0;
 
     const fetchItems = useCallback(async () => {
         setIsLoading(true);
@@ -138,29 +161,6 @@ export default function NewPrintBatchScreen() {
             setIsSavingLoading(false);
         }
     };
-
-    const processedPrintItems = useMemo(() => {
-        let filtered = printItems;
-
-        if (searchTerm) {
-            filtered = filtered.filter(
-                (item) =>
-                    item
-                        .customerName!.toLowerCase()
-                        .includes(searchTerm.toLowerCase()) ||
-                    item.customerPhone!.includes(searchTerm),
-            );
-        }
-
-        if (filterBy === "not-printed") {
-            filtered = filtered.filter((item) => !item.isPrinted);
-        }
-
-        return filtered;
-    }, [printItems, searchTerm, filterBy]);
-
-    const isEmpty = processedPrintItems.length === 0 && searchTerm !== "";
-    const isEmptyInitial = printItems.length === 0;
 
     if (isLoading) {
         return (

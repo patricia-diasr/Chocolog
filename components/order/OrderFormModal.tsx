@@ -13,13 +13,15 @@ import {
     useToken,
 } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
+import { DateData } from "react-native-calendars";
 import { useAppColors } from "../../hooks/useAppColors";
 import { useCustomToast } from "../../contexts/ToastProvider";
-import { ORDER_STATUS_MAP, OrderRequest, OrderStatus } from "../../types/order";
 import { formatDate } from "../../utils/formatters";
+import { getFirstDayOfMonth, getInitialDate, getMonthString } from "../../utils/dates";
+import { ORDER_STATUS_MAP, OrderRequest, OrderStatus } from "../../types/order";
 import Select from "../layout/Select";
-import { DateData } from "react-native-calendars";
 import ModalCalendar from "../schedule/ModalCalendar";
+
 interface Props {
     title: string;
     isOpen: boolean;
@@ -37,9 +39,6 @@ const createDefaultOrder = (): OrderRequest => ({
     orderItems: [],
     discount: 0,
 });
-
-const getMonthString = (dateString: string) => dateString.slice(0, 7);
-const getFirstDayOfMonth = (monthString: string) => `${monthString}-01`;
 
 export default function OrderFormModal({
     title,
@@ -59,53 +58,23 @@ export default function OrderFormModal({
         lightGreyColor,
         invalidColor,
     } = useAppColors();
-
     const [resolvedSecondaryColor] = useToken("colors", [secondaryColor]);
 
     const [formData, setFormData] = useState<OrderRequest>(
         createDefaultOrder(),
     );
-
     const [discountText, setDiscountText] = useState<string>("");
     const [dateText, setDateText] = useState<string>("");
     const [hasAttemptedSave, setHasAttemptedSave] = useState(false);
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-    const isEditing = !!orderData;
-    const initialStatus = orderData?.status;
 
-    const initialDate = useMemo(() => {
-        const now = new Date();
-        const offset = now.getTimezoneOffset() * 60000;
-        const localTime = new Date(now.getTime() - offset);
-        return localTime.toISOString().slice(0, 10);
-    }, []);
-
+    const initialDate = useMemo(() => getInitialDate(), []);
     const [currentMonth, setCurrentMonth] = useState<string>(
         getMonthString(initialDate),
     );
 
-    useEffect(() => {
-        if (isOpen) {
-            const initialData = orderData
-                ? { ...orderData }
-                : createDefaultOrder();
-
-            if (initialData.expectedPickupDate) {
-                setDateText(formatDate(initialData.expectedPickupDate));
-            } else {
-                setDateText("");
-            }
-
-            setFormData(initialData);
-            setDiscountText(
-                initialData.discount > 0 ? String(initialData.discount) : "",
-            );
-        } else {
-            setHasAttemptedSave(false);
-            setFormData(createDefaultOrder());
-            setDiscountText("");
-        }
-    }, [isOpen, orderData]);
+    const isEditing = !!orderData;
+    const initialStatus = orderData?.status;
 
     const isFormDisabled = useMemo(
         () =>
@@ -116,6 +85,7 @@ export default function OrderFormModal({
 
     const statusOptions = useMemo(() => {
         const options: { value: OrderStatus; label: string }[] = [];
+
         if (!isEditing) {
             return options;
         }
@@ -124,10 +94,10 @@ export default function OrderFormModal({
 
         if (initialStatus === "PENDING") {
             options.push({ value: "PENDING", label: ORDER_STATUS_MAP.PENDING });
+
             const canCancel = !items.some(
                 (item) => item.status === "COMPLETED",
             );
-
             if (canCancel) {
                 options.push({
                     value: "CANCELLED",
@@ -184,6 +154,45 @@ export default function OrderFormModal({
         [hasAttemptedSave, isEditing, formData.status, isFormDisabled],
     );
 
+    const markedDates = useMemo(() => {
+        const marks: any = {};
+
+        if (formData.expectedPickupDate) {
+            const selectedDate = formData.expectedPickupDate.split("T")[0];
+            marks[selectedDate] = {
+                selected: true,
+                selectedColor: resolvedSecondaryColor,
+            };
+        }
+
+        return marks;
+    }, [formData.expectedPickupDate, resolvedSecondaryColor]);
+
+    const displayDateForCalendar = getFirstDayOfMonth(currentMonth);
+
+    useEffect(() => {
+        if (isOpen) {
+            const initialData = orderData
+                ? { ...orderData }
+                : createDefaultOrder();
+
+            if (initialData.expectedPickupDate) {
+                setDateText(formatDate(initialData.expectedPickupDate));
+            } else {
+                setDateText("");
+            }
+
+            setFormData(initialData);
+            setDiscountText(
+                initialData.discount > 0 ? String(initialData.discount) : "",
+            );
+        } else {
+            setHasAttemptedSave(false);
+            setFormData(createDefaultOrder());
+            setDiscountText("");
+        }
+    }, [isOpen, orderData]);
+
     const handleInputChange = useCallback(
         (field: keyof OrderRequest, value: any) => {
             setFormData((prevData) => ({ ...prevData, [field]: value }));
@@ -208,13 +217,16 @@ export default function OrderFormModal({
             const isoString = new Date(
                 `${day.dateString}T12:00:00Z`,
             ).toISOString();
-
             handleInputChange("expectedPickupDate", isoString);
             setDateText(formatDate(isoString));
             setIsCalendarOpen(false);
         },
         [handleInputChange],
     );
+
+    const handleMonthChange = useCallback((monthString: string) => {
+        setCurrentMonth(monthString);
+    }, []);
 
     const handleSave = useCallback(() => {
         setHasAttemptedSave(true);
@@ -254,26 +266,6 @@ export default function OrderFormModal({
 
         onSave(dataToSave);
     }, [formData, onSave, toast, isEditing, isFormDisabled]);
-
-    const displayDateForCalendar = getFirstDayOfMonth(currentMonth);
-
-    const handleMonthChange = useCallback((monthString: string) => {
-        setCurrentMonth(monthString);
-    }, []);
-
-    const markedDates = useMemo(() => {
-        const marks: any = {};
-
-        if (formData.expectedPickupDate) {
-            const selectedDate = formData.expectedPickupDate.split("T")[0];
-            marks[selectedDate] = {
-                selected: true,
-                selectedColor: resolvedSecondaryColor,
-            };
-        }
-
-        return marks;
-    }, [formData.expectedPickupDate, initialDate, resolvedSecondaryColor]);
 
     return (
         <>

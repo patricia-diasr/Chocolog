@@ -38,8 +38,8 @@ const config: Record<
 };
 
 export default function Toast({ title, description, status }: Props) {
-    const toastConfig = config[status];
     const { mediumGreyColor, blackColor } = useAppColors();
+    const toastConfig = config[status];
 
     return (
         <Box

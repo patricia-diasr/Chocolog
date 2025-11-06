@@ -6,14 +6,12 @@ import LabelBadge from "../layout/LabelBadge";
 interface Props {
     name: string;
     status: StockStatus;
-    totalQuantity: number;
     totalRemainingQuantity: number;
 }
 
 export default function StockCardHeader({
     name,
     status,
-    totalQuantity,
     totalRemainingQuantity,
 }: Props) {
     const { secondaryColor, mediumGreyColor, darkGreyColor } = useAppColors();

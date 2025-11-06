@@ -1,8 +1,8 @@
 import { Box, VStack, HStack, Text, IconButton, Icon } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
-import type { Flavor } from "../../types/flavor";
-import { formatPrice } from "../../utils/formatters";
 import { useAppColors } from "../../hooks/useAppColors";
+import { formatPrice } from "../../utils/formatters";
+import type { Flavor } from "../../types/flavor";
 
 interface Props {
     flavor: Flavor;

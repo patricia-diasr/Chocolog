@@ -1,11 +1,11 @@
 import React, { useMemo, useCallback } from "react";
 import { Box, useToken, Icon, Heading } from "native-base";
+import { Ionicons } from "@expo/vector-icons";
 import { Calendar } from "react-native-calendars";
 import { Theme, DateData, MarkedDates } from "react-native-calendars/src/types";
-import { Ionicons } from "@expo/vector-icons";
 import { useAppColors } from "../../hooks/useAppColors";
 
-type Props = {
+interface Props {
     selectedDate: string;
     currentDisplayMonth: string;
     handleDayPress: (day: DateData) => void;

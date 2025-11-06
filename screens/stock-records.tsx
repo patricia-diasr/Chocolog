@@ -12,13 +12,13 @@ import {
     Spinner,
 } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
+import { useCustomToast } from "../contexts/ToastProvider";
+import { useAppColors } from "../hooks/useAppColors";
+import { createRecord, getRecords } from "../services/stockService";
+import { RecordItem, StockRecord } from "../types/stock";
 import FabButton from "../components/layout/FabButton";
 import RecordCard from "../components/stock/RecordCard";
 import RecordFormModal from "../components/stock/RecordFormModal";
-import { useAppColors } from "../hooks/useAppColors";
-import { RecordItem, StockRecord } from "../types/stock";
-import { useCustomToast } from "../contexts/ToastProvider";
-import { createRecord, getRecords } from "../services/stockService";
 
 const groupRecordsByDate = (
     records: StockRecord[],

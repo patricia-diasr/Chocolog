@@ -15,24 +15,22 @@ import {
 } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
 import { DateData } from "react-native-calendars";
+import { StatItem } from "../types/stats";
+import { useCustomToast } from "../contexts/ToastProvider";
+import { useAppColors } from "../hooks/useAppColors";
+import { getOrdersByDate } from "../services/orderService";
+import { getStatusDetails } from "../utils/statusConfig";
+import {
+    formatDate,
+    formatOrderDetailTitleWithNotes,
+} from "../utils/formatters";
+import { getFirstDayOfMonth, getMonthString } from "../utils/dates";
+import { OrderResponse } from "../types/order";
 import InfoList from "../components/layout/InfoList";
 import StatsCard from "../components/layout/StatsCard";
 import SearchInput from "../components/layout/Searchbar";
 import SortButtons, { SortOption } from "../components/layout/SortButtons";
 import MonthlyCalendar from "../components/schedule/MonthlyCalendar";
-import { StatItem } from "../types/stats";
-import { OrderResponse } from "../types/order";
-import { useAppColors } from "../hooks/useAppColors";
-import {
-    formatDate,
-    formatOrderDetailTitleWithNotes,
-} from "../utils/formatters";
-import { getStatusDetails } from "../utils/statusConfig";
-import { getOrdersByDate } from "../services/orderService";
-import { useCustomToast } from "../contexts/ToastProvider";
-
-const getMonthString = (dateString: string) => dateString.slice(0, 7);
-const getFirstDayOfMonth = (monthString: string) => `${monthString}-01`;
 
 export default function ScheduleScreen() {
     const navigation = useNavigation();
@@ -70,35 +68,6 @@ export default function ScheduleScreen() {
         { value: "all", label: "Todos", icon: "checkmark-done" },
         { value: "pending", label: "Pendentes", icon: "time" },
     ];
-
-    const fetchOrders = useCallback(async () => {
-        setIsLoading(true);
-
-        try {
-            const data = await getOrdersByDate(currentMonth);
-            setOrders(data);
-        } catch (error) {
-            toast.showToast({
-                title: "Erro ao carregar!",
-                description:
-                    "Não foi possível buscar os pedidos. Tente novamente.",
-                status: "error",
-            });
-            setOrders([]);
-        } finally {
-            setIsLoading(false);
-        }
-    }, [currentMonth, toast]);
-
-    useEffect(() => {
-        fetchOrders();
-    }, [fetchOrders]);
-
-    useEffect(() => {
-        if (getMonthString(selectedDate) !== currentMonth) {
-            setSelectedDate(getFirstDayOfMonth(currentMonth));
-        }
-    }, [currentMonth, selectedDate]);
 
     const ordersDate = useMemo(() => {
         return orders.filter(
@@ -170,27 +139,6 @@ export default function ScheduleScreen() {
     const isEmpty = processedOrders.length === 0 && searchTerm !== "";
     const isEmptyInitial = orders.length === 0;
 
-    const handleNavigateToOrder = (orderId: number) => {
-        const customerId = orders.find((o) => o.id === orderId)?.customer?.id;
-
-        if (customerId) {
-            navigation.navigate("Order", {
-                customerId: customerId,
-                orderId: orderId,
-                source: "Schedule",
-            });
-        }
-    };
-
-    const handleDayPress = useCallback((day: DateData) => {
-        setSelectedDate(day.dateString);
-        setSearchTerm("");
-    }, []);
-
-    const handleMonthChange = useCallback((monthString: string) => {
-        setCurrentMonth(monthString);
-    }, []);
-
     const markedDaysWithOrders = useMemo(() => {
         return orders.reduce((acc, order) => {
             const date = order.expectedPickupDate.slice(0, 10);
@@ -219,6 +167,56 @@ export default function ScheduleScreen() {
     }, [selectedDate, markedDaysWithOrders, resolvedSecondaryColor]);
 
     const displayDateForCalendar = getFirstDayOfMonth(currentMonth);
+
+    const fetchOrders = useCallback(async () => {
+        setIsLoading(true);
+
+        try {
+            const data = await getOrdersByDate(currentMonth);
+            setOrders(data);
+        } catch (error) {
+            toast.showToast({
+                title: "Erro ao carregar!",
+                description:
+                    "Não foi possível buscar os pedidos. Tente novamente.",
+                status: "error",
+            });
+            setOrders([]);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [currentMonth, toast]);
+
+    useEffect(() => {
+        fetchOrders();
+    }, [fetchOrders]);
+
+    useEffect(() => {
+        if (getMonthString(selectedDate) !== currentMonth) {
+            setSelectedDate(getFirstDayOfMonth(currentMonth));
+        }
+    }, [currentMonth, selectedDate]);
+
+    const handleNavigateToOrder = (orderId: number) => {
+        const customerId = orders.find((o) => o.id === orderId)?.customer?.id;
+
+        if (customerId) {
+            navigation.navigate("Order", {
+                customerId: customerId,
+                orderId: orderId,
+                source: "Schedule",
+            });
+        }
+    };
+
+    const handleDayPress = useCallback((day: DateData) => {
+        setSelectedDate(day.dateString);
+        setSearchTerm("");
+    }, []);
+
+    const handleMonthChange = useCallback((monthString: string) => {
+        setCurrentMonth(monthString);
+    }, []);
 
     if (isLoading) {
         return (

@@ -12,19 +12,19 @@ import {
     Spinner,
 } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
+import { useCustomToast } from "../contexts/ToastProvider";
+import { useAppColors } from "../hooks/useAppColors";
+import { getFlavors } from "../services/flavorService";
+import { STOCK_STATUS } from "../configs/stock";
+import { normalizeText } from "../utils/formatters";
+import { getFlavorStockStatus } from "../utils/statusConfig";
+import { StatItem } from "../types/stats";
+import { Flavor } from "../types/flavor";
+import { StockStatus } from "../types/stock";
 import StockCard from "../components/stock/StockCard";
 import StatsCard from "../components/layout/StatsCard";
 import SearchInput from "../components/layout/Searchbar";
 import SortButtons, { SortOption } from "../components/layout/SortButtons";
-import { normalizeText } from "../utils/formatters";
-import { StatItem } from "../types/stats";
-import { useAppColors } from "../hooks/useAppColors";
-import { STOCK_STATUS } from "../configs/stock";
-import { Flavor } from "../types/flavor";
-import { useCustomToast } from "../contexts/ToastProvider";
-import { getFlavors } from "../services/flavorService";
-import { getFlavorStockStatus } from "../utils/statusConfig";
-import { StockStatus } from "../types/stock";
 
 export default function StockOverviewScreen() {
     const { backgroundColor, whiteColor, mediumGreyColor, secondaryColor } =
@@ -41,68 +41,6 @@ export default function StockOverviewScreen() {
         { value: "name", label: "Nome", icon: "text" },
         { value: "quantity", label: "Quantidade", icon: "bar-chart" },
     ];
-
-    const fetchStock = useCallback(async () => {
-        setIsLoading(true);
-        try {
-            const data = await getFlavors();
-
-            const processedFlavors = data.map((flavor) => {
-                const sizeStatuses: StockStatus[] = flavor.sizes.map((size) =>
-                    getFlavorStockStatus(
-                        size.totalQuantity,
-                        size.remainingQuantity,
-                    ),
-                );
-
-                let overallStatus: StockStatus;
-
-                if (sizeStatuses.length === 0) {
-                    overallStatus = STOCK_STATUS.OUT_OF_STOCK;
-                } else if (
-                    sizeStatuses.some(
-                        (status) => status.label === STOCK_STATUS.LOW.label,
-                    )
-                ) {
-                    overallStatus = STOCK_STATUS.LOW;
-                } else if (
-                    sizeStatuses.some(
-                        (status) => status.label === STOCK_STATUS.MEDIUM.label,
-                    )
-                ) {
-                    overallStatus = STOCK_STATUS.MEDIUM;
-                } else if (
-                    sizeStatuses.some(
-                        (status) => status.label === STOCK_STATUS.HIGH.label,
-                    )
-                ) {
-                    overallStatus = STOCK_STATUS.HIGH;
-                } else {
-                    overallStatus = STOCK_STATUS.OUT_OF_STOCK;
-                }
-
-                return {
-                    ...flavor,
-                    status: overallStatus,
-                };
-            });
-
-            setFlavors(processedFlavors);
-        } catch (error) {
-            toast.showToast({
-                title: "Erro ao carregar!",
-                description:
-                    "Não foi possível buscar o estoque. Tente novamente.",
-                status: "error",
-            });
-        } finally {
-            setIsLoading(false);
-        }
-    }, [toast]);
-
-    useEffect(() => {
-        fetchStock();
-    }, [fetchStock]);
 
     const stockStats = useMemo(() => {
         const totalProducts = flavors.length;
@@ -187,6 +125,68 @@ export default function StockOverviewScreen() {
 
     const isEmpty = processedStock.length === 0 && searchTerm !== "";
     const isEmptyInitial = flavors.length === 0;
+
+    const fetchStock = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            const data = await getFlavors();
+
+            const processedFlavors = data.map((flavor) => {
+                const sizeStatuses: StockStatus[] = flavor.sizes.map((size) =>
+                    getFlavorStockStatus(
+                        size.totalQuantity,
+                        size.remainingQuantity,
+                    ),
+                );
+
+                let overallStatus: StockStatus;
+
+                if (sizeStatuses.length === 0) {
+                    overallStatus = STOCK_STATUS.OUT_OF_STOCK;
+                } else if (
+                    sizeStatuses.some(
+                        (status) => status.label === STOCK_STATUS.LOW.label,
+                    )
+                ) {
+                    overallStatus = STOCK_STATUS.LOW;
+                } else if (
+                    sizeStatuses.some(
+                        (status) => status.label === STOCK_STATUS.MEDIUM.label,
+                    )
+                ) {
+                    overallStatus = STOCK_STATUS.MEDIUM;
+                } else if (
+                    sizeStatuses.some(
+                        (status) => status.label === STOCK_STATUS.HIGH.label,
+                    )
+                ) {
+                    overallStatus = STOCK_STATUS.HIGH;
+                } else {
+                    overallStatus = STOCK_STATUS.OUT_OF_STOCK;
+                }
+
+                return {
+                    ...flavor,
+                    status: overallStatus,
+                };
+            });
+
+            setFlavors(processedFlavors);
+        } catch (error) {
+            toast.showToast({
+                title: "Erro ao carregar!",
+                description:
+                    "Não foi possível buscar o estoque. Tente novamente.",
+                status: "error",
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    }, [toast]);
+
+    useEffect(() => {
+        fetchStock();
+    }, [fetchStock]);
 
     if (isLoading) {
         return (

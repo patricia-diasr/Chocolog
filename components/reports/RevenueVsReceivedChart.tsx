@@ -1,6 +1,6 @@
 import React from "react";
-import { useAppColors } from "../../hooks/useAppColors";
 import { Box } from "native-base";
+import { ResponsiveValue } from "native-base/lib/typescript/components/types";
 import {
     LineChart as RechartsLineChart,
     Line as RechartsLine,
@@ -11,9 +11,9 @@ import {
     Legend as RechartsLegend,
     ResponsiveContainer as RechartsResponsiveContainer,
 } from "recharts";
-import ChartCard from "./ChartCard";
+import { useAppColors } from "../../hooks/useAppColors";
 import { formatPrice } from "../../utils/formatters";
-import { ResponsiveValue } from "native-base/lib/typescript/components/types";
+import ChartCard from "./ChartCard";
 
 const ResponsiveContainer = RechartsResponsiveContainer as any;
 const LineChart = RechartsLineChart as any;
