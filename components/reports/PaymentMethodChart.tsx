@@ -34,7 +34,7 @@ export default function PaymentMethodChart({ data, h }: Props) {
     const { whiteColor, lightGreyColor, mediumGreyColor } = useAppColors();
 
     return (
-        <ChartCard title="Recebido por Método de Pagamento" icon="card">
+        <ChartCard title="Métodos de Pagamento" icon="card">
             <Box h="300px">
                 <ResponsiveContainer width="100%" height="100%">
                     <BarChart
@@ -70,7 +70,6 @@ export default function PaymentMethodChart({ data, h }: Props) {
                             dataKey="amount"
                             fill="#10B981"
                             name="Valor Recebido"
-                            radius={[0, 8, 8, 0]}
                         />
                     </BarChart>
                 </ResponsiveContainer>

@@ -51,11 +51,11 @@ export default function SortButtons({
     );
 
     return (
-        <HStack space={3} alignItems="center">
+        <HStack space={3} alignItems="center" flexWrap="wrap">
             <Text fontSize="sm" color={mediumGreyColor}>
                 {label}
             </Text>
-            <HStack space={2}>
+            <HStack space={2} my={{base: 1, md:0}}>
                 {options.map((option) => (
                     <SortButton
                         key={option.value}

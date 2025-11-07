@@ -63,7 +63,6 @@ export default function OnDemandVsStockChart({ data, h }: Props) {
                         <Bar
                             dataKey="value"
                             name="Quantidade"
-                            radius={[8, 8, 0, 0]}
                         >
                             {data.map((entry, index) => (
                                 <Cell

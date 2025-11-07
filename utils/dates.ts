@@ -8,3 +8,7 @@ export const getInitialDate = (): string => {
     const localTime = new Date(now.getTime() - offset);
     return localTime.toISOString().slice(0, 10);
 };
+
+export const getISODateString = (date: Date): string => {
+    return date.toISOString().split("T")[0];
+};
