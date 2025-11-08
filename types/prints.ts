@@ -22,6 +22,5 @@ export type PrintBatchDetail = {
 }
 
 export type PrintBatchRequest = {
-    employeeId: number;
     orderItemIds: number[];
 };

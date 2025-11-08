@@ -132,7 +132,6 @@ export default function NewPrintBatchScreen() {
 
         try {
             const newPrint = {
-                employeeId: 1,
                 orderItemIds: selectedIds,
             };
 

@@ -36,7 +36,6 @@ interface Props {
 }
 
 const createDefaultPayment = (): PaymentRequest => ({
-    employeeId: 1,
     paidAmount: 0,
     paymentMethod: "",
     paymentDate: "",

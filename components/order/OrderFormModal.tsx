@@ -17,9 +17,19 @@ import { DateData } from "react-native-calendars";
 import { useAppColors } from "../../hooks/useAppColors";
 import { useCustomToast } from "../../contexts/ToastProvider";
 import { formatDate } from "../../utils/formatters";
-import { getFirstDayOfMonth, getInitialDate, getMonthString } from "../../utils/dates";
-import { ORDER_STATUS_MAP, OrderRequest, OrderStatus } from "../../types/order";
+import {
+    getFirstDayOfMonth,
+    getInitialDate,
+    getMonthString,
+} from "../../utils/dates";
+import {
+    ORDER_STATUS_MAP,
+    OrderRequest,
+    OrderResponse,
+    OrderStatus,
+} from "../../types/order";
 import Select from "../layout/Select";
+import ConfirmAlert from "../layout/ConfirmAlert";
 import ModalCalendar from "../schedule/ModalCalendar";
 
 interface Props {
@@ -27,12 +37,11 @@ interface Props {
     isOpen: boolean;
     onClose: () => void;
     onSave: (data: OrderRequest) => void;
-    orderData: OrderRequest | null;
+    orderData: OrderResponse | null;
     isLoading: boolean;
 }
 
 const createDefaultOrder = (): OrderRequest => ({
-    employeeId: 1,
     expectedPickupDate: "",
     status: undefined,
     notes: null,
@@ -67,6 +76,7 @@ export default function OrderFormModal({
     const [dateText, setDateText] = useState<string>("");
     const [hasAttemptedSave, setHasAttemptedSave] = useState(false);
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+    const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
     const initialDate = useMemo(() => getInitialDate(), []);
     const [currentMonth, setCurrentMonth] = useState<string>(
@@ -170,11 +180,45 @@ export default function OrderFormModal({
 
     const displayDateForCalendar = getFirstDayOfMonth(currentMonth);
 
+    const proceedToSave = useCallback(() => {
+        if (isEditing && isFormDisabled) {
+            const partialData = {
+                discount: formData.discount,
+                notes: formData.notes,
+            };
+            onSave(partialData);
+            return;
+        }
+
+        const dataToSave: OrderRequest = {
+            ...formData,
+            expectedPickupDate: new Date(
+                formData.expectedPickupDate!,
+            ).toISOString(),
+            status:
+                isEditing && formData.status !== initialStatus
+                    ? formData.status
+                    : undefined,
+            orderItems: isEditing ? formData.orderItems : [],
+        };
+
+        onSave(dataToSave);
+    }, [formData, onSave, isEditing, isFormDisabled, initialStatus]);
+
     useEffect(() => {
         if (isOpen) {
-            const initialData = orderData
-                ? { ...orderData }
-                : createDefaultOrder();
+            let initialData: OrderRequest;
+
+            if (orderData) {
+                initialData = {
+                    expectedPickupDate: orderData.expectedPickupDate,
+                    status: orderData.status,
+                    notes: orderData.notes,
+                    discount: orderData.charges.discount,
+                };
+            } else {
+                initialData = createDefaultOrder();
+            }
 
             if (initialData.expectedPickupDate) {
                 setDateText(formatDate(initialData.expectedPickupDate));
@@ -183,8 +227,9 @@ export default function OrderFormModal({
             }
 
             setFormData(initialData);
+
             setDiscountText(
-                initialData.discount > 0 ? String(initialData.discount) : "",
+                initialData.discount !== 0 ? String(initialData.discount) : "",
             );
         } else {
             setHasAttemptedSave(false);
@@ -202,13 +247,16 @@ export default function OrderFormModal({
 
     const handleDiscountChange = useCallback((text: string) => {
         const cleanedText = text
-            .replace(/[^0-9.]/g, "")
-            .replace(/(\..*)\./g, "$1");
+            .replace(/[^0-9.-]/g, "")
+            .replace(/(\..*)\./g, "$1")
+            .replace(/(?!^)-/g, "");
 
         setDiscountText(cleanedText);
+
+        const numericValue = parseFloat(cleanedText);
         setFormData((prevData) => ({
             ...prevData,
-            discount: parseFloat(cleanedText) || 0,
+            discount: isNaN(numericValue) ? 0 : numericValue,
         }));
     }, []);
 
@@ -244,28 +292,34 @@ export default function OrderFormModal({
                 status: "warning",
             });
             return;
-        }
+        } 
 
-        if (isEditing && isFormDisabled) {
-            const partialData = {
-                discount: formData.discount,
-                notes: formData.notes,
-            };
-            onSave(partialData);
+        const newStatus = formData.status;
+        const isChangingToCompleted =
+            newStatus === "COMPLETED" && newStatus !== initialStatus; 
+
+        const paymentStatus = orderData?.charges?.status;
+        const isPaymentPending = paymentStatus !== "PAID"; 
+
+        if (isEditing && isChangingToCompleted && isPaymentPending) {
+            setIsConfirmModalOpen(true);
             return;
-        }
+        } 
+        proceedToSave();
+    }, [
+        formData,
+        toast,
+        isEditing,
+        isFormDisabled,
+        initialStatus,
+        orderData, 
+        proceedToSave, 
+    ]); 
 
-        const dataToSave: OrderRequest = {
-            ...formData,
-            expectedPickupDate: new Date(
-                formData.expectedPickupDate!,
-            ).toISOString(),
-            status: isEditing ? formData.status : undefined,
-            orderItems: isEditing ? formData.orderItems : [],
-        };
-
-        onSave(dataToSave);
-    }, [formData, onSave, toast, isEditing, isFormDisabled]);
+    const handleConfirmSave = useCallback(async () => {
+        proceedToSave();
+        setIsConfirmModalOpen(false);
+    }, [proceedToSave]);
 
     return (
         <>
@@ -459,6 +513,15 @@ export default function OrderFormModal({
                 onMonthChange={handleMonthChange}
                 minDate={initialDate}
                 disablePastDates={true}
+            />
+
+            <ConfirmAlert
+                isOpen={isConfirmModalOpen}
+                onClose={() => setIsConfirmModalOpen(false)}
+                onConfirm={handleConfirmSave}
+                title="Confirmar Entrega"
+                message="O pagamento deste pedido ainda está pendente. Deseja realmente marcar como entregue?"
+                isLoading={isLoading}
             />
         </>
     );

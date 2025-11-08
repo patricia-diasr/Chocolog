@@ -38,7 +38,7 @@ export default function DesktopNavigator() {
                             />
                         </View>
                     ),
-                    drawerPosition: "left",
+                    drawerPosition: "right",
                 };
             }}
         >

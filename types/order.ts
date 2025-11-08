@@ -7,7 +7,7 @@ export type OrderStatus =
     | "COMPLETED"
     | "CANCELLED";
     
-export type ChargeStatus = "PAID" | "UNPAID" | "PARTIAL" | "OVERDUE";
+export type ChargeStatus = "PAID" | "UNPAID" | "PARTIAL";
 
 export type OrderItemResponse = {
     id: number;
@@ -54,7 +54,6 @@ export type OrderResponse = {
 };
 
 export type OrderRequest = {
-    employeeId?: number;
     expectedPickupDate?: string;
     status?: OrderStatus;
     notes: string | null;
@@ -72,7 +71,6 @@ export type PaymentResponse = {
 };
 
 export type PaymentRequest = {
-    employeeId: number;
     paidAmount: number;
     paymentMethod: string;
     paymentDate: string;

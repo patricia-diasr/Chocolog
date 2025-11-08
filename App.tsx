@@ -46,7 +46,10 @@ export default function App() {
     }
 
     return (
-        <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
+        <View
+            style={{ flex: 1, overflow: "hidden" }}
+            onLayout={onLayoutRootView}
+        >
             <NativeBaseProvider theme={theme}>
                 <ToastProvider>
                     <AuthProvider>

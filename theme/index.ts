@@ -1,6 +1,9 @@
 import { extendTheme } from "native-base";
 
 export const theme = extendTheme({
+    config: {
+        useSystemColorMode: true,
+    },
     colors: {
         primary: {
             50: "#f4fdfd",
