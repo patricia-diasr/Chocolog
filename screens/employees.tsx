@@ -10,8 +10,9 @@ import {
     Pressable,
     Spinner,
 } from "native-base";
+import { useState, useMemo, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
-import { useState, useMemo, useCallback, useEffect } from "react";
 import { useCustomToast } from "../contexts/ToastProvider";
 import { useAppColors } from "../hooks/useAppColors";
 import {
@@ -29,7 +30,6 @@ import FabButton from "../components/layout/FabButton";
 import SortButtons, { SortOption } from "../components/layout/SortButtons";
 import EmployeeCard from "../components/employee/EmployeeCard";
 import EmployeeFormModal from "../components/employee/EmployeeFormModal";
-
 
 const newEmployeeTemplate: Employee = {
     id: 0,
@@ -79,9 +79,11 @@ export default function EmployeesScreen() {
         }
     }, [toast]);
 
-    useEffect(() => {
-        fetchEmployees();
-    }, [fetchEmployees]);
+    useFocusEffect(
+        useCallback(() => {
+            fetchEmployees();
+        }, [fetchEmployees]),
+    );
 
     const closeModal = useCallback(() => {
         setModalState("closed");
@@ -108,7 +110,7 @@ export default function EmployeesScreen() {
         const isEditing = !!employeeData.id;
         const dataToSend = { ...employeeData };
         const loginToValidate = employeeData.login;
-        
+
         const loginExists = employees.some((emp) => {
             if (isEditing) {
                 return (
@@ -127,7 +129,7 @@ export default function EmployeesScreen() {
                 status: "error",
             });
             setIsSavingLoading(false);
-            return; 
+            return;
         }
 
         if (isEditing && !dataToSend.password) {

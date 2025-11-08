@@ -1,5 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { RouteProp, useNavigation } from "@react-navigation/native";
+import { useCallback, useMemo, useState } from "react";
+import {
+    RouteProp,
+    useNavigation,
+    useFocusEffect,
+} from "@react-navigation/native";
 import { Box, Center, Text, ScrollView, Spinner, VStack } from "native-base";
 import { useCustomToast } from "../contexts/ToastProvider";
 import { useAppColors } from "../hooks/useAppColors";
@@ -74,7 +78,7 @@ export default function CustomerScreen({ route }: Props) {
             };
         });
     }, [chargesData]);
-    
+
     const fetchCustomer = useCallback(async () => {
         setIsLoading(true);
 
@@ -99,10 +103,12 @@ export default function CustomerScreen({ route }: Props) {
         }
     }, [toast, customerId]);
 
-    useEffect(() => {
-        fetchCustomer();
-    }, [fetchCustomer]);
-
+    useFocusEffect(
+        useCallback(() => {
+            fetchCustomer();
+        }, [fetchCustomer]),
+    );
+    
     const handleUpdateCustomer = async (updatedData: Customer) => {
         setIsSavingLoading(true);
 

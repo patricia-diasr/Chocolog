@@ -1,5 +1,5 @@
-import { useState, useMemo, useCallback, useEffect } from "react";
-import { useNavigation } from "@react-navigation/native";
+import { useState, useMemo, useCallback } from "react";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import {
     ScrollView,
     VStack,
@@ -187,15 +187,19 @@ export default function ScheduleScreen() {
         }
     }, [currentMonth, toast]);
 
-    useEffect(() => {
-        fetchOrders();
-    }, [fetchOrders]);
+    useFocusEffect(
+        useCallback(() => {
+            fetchOrders();
+        }, [fetchOrders]),
+    );
 
-    useEffect(() => {
-        if (getMonthString(selectedDate) !== currentMonth) {
-            setSelectedDate(getFirstDayOfMonth(currentMonth));
-        }
-    }, [currentMonth, selectedDate]);
+    useFocusEffect(
+        useCallback(() => {
+            if (getMonthString(selectedDate) !== currentMonth) {
+                setSelectedDate(getFirstDayOfMonth(currentMonth));
+            }
+        }, [currentMonth, selectedDate]),
+    );
 
     const handleNavigateToOrder = (orderId: number) => {
         const customerId = orders.find((o) => o.id === orderId)?.customer?.id;

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
     Box,
     Center,
@@ -11,6 +11,7 @@ import {
     Flex,
     Spinner,
 } from "native-base";
+import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useCustomToast } from "../contexts/ToastProvider";
 import { useAppColors } from "../hooks/useAppColors";
@@ -19,7 +20,6 @@ import {
     createPrintBatch,
     downloadPrintBatch,
 } from "../services/printBatchService";
-import { triggerBrowserDownload } from "../utils/download";
 import { OrderItemResponse } from "../types/order";
 import { PrintBatchDetail } from "../types/prints";
 import SortButtons, { SortOption } from "../components/layout/SortButtons";
@@ -89,9 +89,11 @@ export default function NewPrintBatchScreen() {
         }
     }, [toast]);
 
-    useEffect(() => {
-        fetchItems();
-    }, [fetchItems]);
+    useFocusEffect(
+        useCallback(() => {
+            fetchItems();
+        }, [fetchItems]),
+    );
 
     const handleSelect = (id: number) => {
         if (selectedIds.includes(id)) {
@@ -141,13 +143,23 @@ export default function NewPrintBatchScreen() {
 
             toast.showToast({
                 title: "Sucesso!",
-                description: "O arquivo gerado esta sendo baixado.",
+                description: "O arquivo PDF esta sendo aberto.",
                 status: "success",
             });
 
             const pdfBlob = await downloadPrintBatch(printBatch.id);
             const filename = `lote-impressao-${printBatch.id}.pdf`;
-            triggerBrowserDownload(pdfBlob, filename);
+
+            try {
+                const fileURL = URL.createObjectURL(pdfBlob);
+                window.open(fileURL, "_blank");
+            } catch (error) {
+                toast.showToast({
+                    title: "Erro",
+                    description: "Não foi possível abrir o PDF.",
+                    status: "error",
+                });
+            }
 
             setIsModalOpen(false);
         } catch (error) {

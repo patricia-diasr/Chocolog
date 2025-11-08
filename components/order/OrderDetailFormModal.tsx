@@ -12,6 +12,7 @@ import {
     Center,
     Spinner,
 } from "native-base";
+import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAppColors } from "../../hooks/useAppColors";
 import { useCustomToast } from "../../contexts/ToastProvider";
@@ -147,9 +148,11 @@ export default function OrderItemRequestFormModal({
         }
     }, [toast]);
 
-    useEffect(() => {
-        fetchFlavors();
-    }, [fetchFlavors]);
+    useFocusEffect(
+        useCallback(() => {
+            fetchFlavors();
+        }, [fetchFlavors]),
+    );
 
     useEffect(() => {
         if (isOpen) {

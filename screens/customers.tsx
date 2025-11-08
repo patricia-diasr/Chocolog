@@ -10,8 +10,9 @@ import {
     Pressable,
     Spinner,
 } from "native-base";
+import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useCustomToast } from "../contexts/ToastProvider";
 import { useAppColors } from "../hooks/useAppColors";
 import { createCustomer, getCustomers } from "../services/customerService";
@@ -115,9 +116,11 @@ export default function CustomersScreen() {
         }
     }, [toast]);
 
-    useEffect(() => {
-        fetchCustomers();
-    }, [fetchCustomers]);
+    useFocusEffect(
+        useCallback(() => {
+            fetchCustomers();
+        }, [fetchCustomers]),
+    );
 
     const handleOpenAddModal = () => {
         setIsModalOpen(true);

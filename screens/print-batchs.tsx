@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import {
     ScrollView,
     Flex,
@@ -9,7 +9,7 @@ import {
     Center,
     Spinner,
 } from "native-base";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useCustomToast } from "../contexts/ToastProvider";
 import { useAppColors } from "../hooks/useAppColors";
@@ -46,9 +46,11 @@ export default function PrintBatchsScreen() {
         }
     }, [toast]);
 
-    useEffect(() => {
-        fetchPrintBatchs();
-    }, [fetchPrintBatchs]);
+    useFocusEffect(
+        useCallback(() => {
+            fetchPrintBatchs();
+        }, [fetchPrintBatchs]),
+    );
 
     const handleAdd = () => {
         navigation.navigate("NewPrintBatch" as never);

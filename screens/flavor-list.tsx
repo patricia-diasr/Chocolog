@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import {
     Box,
     VStack,
@@ -8,6 +8,7 @@ import {
     Spinner,
     Text,
 } from "native-base";
+import { useFocusEffect } from "@react-navigation/native";
 import { useCustomToast } from "../contexts/ToastProvider";
 import { useAppColors } from "../hooks/useAppColors";
 import {
@@ -94,9 +95,11 @@ export default function FlavorListScreen() {
         }
     }, [toast]);
 
-    useEffect(() => {
-        fetchFlavors();
-    }, [fetchFlavors]);
+    useFocusEffect(
+        useCallback(() => {
+            fetchFlavors();
+        }, [fetchFlavors]),
+    );
 
     const handleSave = async (flavorData: Flavor) => {
         setIsSavingLoading(true);

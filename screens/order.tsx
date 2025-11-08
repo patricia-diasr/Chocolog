@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Box, Center, ScrollView, Spinner, VStack, Text } from "native-base";
-import { RouteProp } from "@react-navigation/native";
+import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import { useCustomToast } from "../contexts/ToastProvider";
 import { useAppColors } from "../hooks/useAppColors";
 import {
@@ -131,10 +131,12 @@ export default function OrderScreen({ route }: Props) {
         }
     }, [toast, customerId, orderId]);
 
-    useEffect(() => {
-        fetchOrder();
-    }, [fetchOrder]);
-
+    useFocusEffect(
+        useCallback(() => {
+            fetchOrder();
+        }, [fetchOrder]),
+    );
+    
     const handleCloseModals = useCallback(
         () => setModalState({ type: null }),
         [],

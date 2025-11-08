@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Box, Center, ScrollView, Spinner, VStack, Text } from "native-base";
-import { RouteProp, useNavigation } from "@react-navigation/native";
+import { RouteProp, useFocusEffect, useNavigation } from "@react-navigation/native";
 import { useCustomToast } from "../contexts/ToastProvider";
 import { useAppColors } from "../hooks/useAppColors";
 import { getPrintBatch } from "../services/printBatchService";
@@ -85,9 +85,11 @@ export default function PrintBatchScreen({ route }: Props) {
         }
     }, [toast, printBatchId]);
 
-    useEffect(() => {
-        fetchPrintBatch();
-    }, [fetchPrintBatch]);
+    useFocusEffect(
+        useCallback(() => {
+            fetchPrintBatch();
+        }, [fetchPrintBatch]),
+    );
 
     const handleNavigateToOrder = (orderItemId: number) => {
         const item = printBatchData!.items.find((oi) => oi.id === orderItemId);

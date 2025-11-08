@@ -1,4 +1,5 @@
-import React, { useCallback, useEffect, useState, useMemo } from "react";
+import React, { useCallback, useState, useMemo } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import {
     Box,
     Center,
@@ -42,12 +43,8 @@ const periodFilterOptions = [
 ];
 
 export default function ReportsScreen() {
-    const {
-        backgroundColor,
-        secondaryColor,
-        mediumGreyColor,
-        borderColor,
-    } = useAppColors();
+    const { backgroundColor, secondaryColor, mediumGreyColor, borderColor } =
+        useAppColors();
     const [resolvedSecondaryColor] = useToken("colors", [secondaryColor]);
     const toast = useCustomToast();
 
@@ -121,14 +118,18 @@ export default function ReportsScreen() {
         }
     }, [toast, startDate, endDate, periodType]);
 
-    useEffect(() => {
-        setStartDateText(formatDate(startDate));
-        setEndDateText(formatDate(endDate));
-    }, [startDate, endDate]);
+    useFocusEffect(
+        useCallback(() => {
+            fetchReports();
+        }, [fetchReports]),
+    );
 
-    useEffect(() => {
-        fetchReports();
-    }, [fetchReports]);
+    useFocusEffect(
+        useCallback(() => {
+            setStartDateText(formatDate(startDate));
+            setEndDateText(formatDate(endDate));
+        }, [startDate, endDate]),
+    );
 
     const handleDayPress = useCallback(
         (day: DateData) => {
@@ -216,7 +217,6 @@ export default function ReportsScreen() {
                                             space={2}
                                             alignItems="center"
                                             flexWrap="wrap"
-                                            
                                         >
                                             <Text
                                                 fontSize="sm"
@@ -245,7 +245,7 @@ export default function ReportsScreen() {
                                             </HStack>
                                         </HStack>
 
-                                        <Box mt={{base: 2, md:0}}>
+                                        <Box mt={{ base: 2, md: 0 }}>
                                             <SortButtons
                                                 label="Agrupar por:"
                                                 sortBy={periodType}

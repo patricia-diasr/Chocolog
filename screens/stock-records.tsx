@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import {
     Icon,
     ScrollView,
@@ -11,6 +11,7 @@ import {
     Flex,
     Spinner,
 } from "native-base";
+import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useCustomToast } from "../contexts/ToastProvider";
 import { useAppColors } from "../hooks/useAppColors";
@@ -85,9 +86,11 @@ export default function StockRecordsScreen() {
         }
     }, [toast]);
 
-    useEffect(() => {
-        fetchRecords();
-    }, [fetchRecords]);
+    useFocusEffect(
+        useCallback(() => {
+            fetchRecords();
+        }, [fetchRecords]),
+    );
 
     const handleSaveChanges = async (newRecordData: RecordItem) => {
         setIsSavingLoading(true);

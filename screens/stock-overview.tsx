@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useCallback } from "react";
 import {
     ScrollView,
     Flex,
@@ -11,6 +11,7 @@ import {
     Pressable,
     Spinner,
 } from "native-base";
+import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useCustomToast } from "../contexts/ToastProvider";
 import { useAppColors } from "../hooks/useAppColors";
@@ -184,9 +185,11 @@ export default function StockOverviewScreen() {
         }
     }, [toast]);
 
-    useEffect(() => {
-        fetchStock();
-    }, [fetchStock]);
+    useFocusEffect(
+        useCallback(() => {
+            fetchStock();
+        }, [fetchStock]),
+    );
 
     if (isLoading) {
         return (

@@ -4,7 +4,6 @@ import { useAppColors } from "../../hooks/useAppColors";
 import { useCustomToast } from "../../contexts/ToastProvider";
 import { downloadPrintBatch } from "../../services/printBatchService";
 import { formatDate } from "../../utils/formatters";
-import { triggerBrowserDownload } from "../../utils/download";
 import InfoRow from "../layout/InfoRow";
 
 interface Props {
@@ -24,14 +23,22 @@ export default function PrintInfoCard({
 
     const dowload = async () => {
         toast.showToast({
-            title: "Realizando dowload...",
-            description: "O arquivo esta sendo baixado.",
+            title: "Abrindo lote",
+            description: "O arquivo PDF esta sendo aberto.",
             status: "info",
         });
-
         const pdfBlob = await downloadPrintBatch(id);
-        const filename = `lote-impressao-${id}.pdf`;
-        triggerBrowserDownload(pdfBlob, filename);
+
+        try {
+            const fileURL = URL.createObjectURL(pdfBlob);
+            window.open(fileURL, "_blank");
+        } catch (error) {
+            toast.showToast({
+                title: "Erro",
+                description: "Não foi possível abrir o PDF.",
+                status: "error",
+            });
+        }
     };
 
     return (
@@ -80,7 +87,7 @@ export default function PrintInfoCard({
                                 />
                             }
                         >
-                            Baixar
+                            Imprimir
                         </Button>
                     </HStack>
                     <VStack space={1.5}>
