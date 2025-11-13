@@ -215,6 +215,7 @@ export default function OrderFormModal({
                     status: orderData.status,
                     notes: orderData.notes,
                     discount: orderData.charges.discount,
+                    orderItems: orderData.orderItems || [],
                 };
             } else {
                 initialData = createDefaultOrder();
