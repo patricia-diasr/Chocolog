@@ -14,6 +14,7 @@
     "@expo-google-fonts/berkshire-swash": "^0.4.1",
     "@expo-google-fonts/poppins": "^0.2.2",
     "@expo/webpack-config": "^18.0.1",
+    "@react-native-async-storage/async-storage": "1.17.11",
     "@react-native-community/datetimepicker": "6.7.3",
     "@react-navigation/bottom-tabs": "^6.5.7",
     "@react-navigation/drawer": "^6.6.2",
@@ -32,6 +33,7 @@
     "native-base": "^3.4.28",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-is": "^19.2.0",
     "react-native": "0.71.8",
     "react-native-calendars": "^1.1313.0",
     "react-native-gesture-handler": "~2.9.0",
@@ -41,8 +43,7 @@
     "react-native-svg": "13.4.0",
     "react-native-swipe-list-view": "^3.2.9",
     "react-native-web": "~0.18.10",
-    "recharts": "^3.3.0",
-    "@react-native-async-storage/async-storage": "1.17.11"
+    "recharts": "^3.3.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

@@ -4,9 +4,9 @@
         "slug": "Chocolog",
         "version": "1.0.0",
         "orientation": "portrait",
-        "icon": "./assets/icon.png",
+        "icon": null,
         "splash": {
-            "image": "./assets/splash.png",
+            "image": null,
             "resizeMode": "contain",
             "backgroundColor": "#ffffff"
         },
@@ -19,12 +19,17 @@
         },
         "android": {
             "adaptiveIcon": {
-                "foregroundImage": "./assets/adaptive-icon.png",
+                "foregroundImage": null,
                 "backgroundColor": "#FFFFFF"
             }
         },
         "web": {
-            "favicon": "./assets/favicon.png"
+            "favicon": null,
+            "name": "Chocolog",
+            "shortName": "Chocolog",
+            "display": "fullscreen",
+            "backgroundColor": "#ffffff",
+            "themeColor": "#1f8f8f"
         }
     }
 }
