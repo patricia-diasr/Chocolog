@@ -199,6 +199,7 @@ export default function PaymentFormModal({
             <Modal isOpen={isOpen} onClose={onClose} size="xl">
                 <Modal.Content
                     maxWidth="400px"
+                    minHeight="441px"
                     bg={whiteColor}
                     rounded="2xl"
                     shadow={6}

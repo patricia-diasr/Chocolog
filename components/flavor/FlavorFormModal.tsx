@@ -182,6 +182,7 @@ export default function FlavorFormModal({
         <Modal isOpen={isOpen} onClose={onClose} size="xl">
             <Modal.Content
                 maxWidth="400px"
+                minHeight="674px"
                 bg={whiteColor}
                 rounded="2xl"
                 shadow={6}

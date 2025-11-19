@@ -82,13 +82,6 @@ export default function StockOverviewScreen() {
             },
         ];
 
-        if (outOfStockCount > 0) {
-            stats.push({
-                value: outOfStockCount,
-                label: "Sem Estoque",
-            });
-        }
-
         return {
             totalProducts,
             totalUnits,

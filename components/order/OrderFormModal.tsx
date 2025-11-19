@@ -293,19 +293,19 @@ export default function OrderFormModal({
                 status: "warning",
             });
             return;
-        } 
+        }
 
         const newStatus = formData.status;
         const isChangingToCompleted =
-            newStatus === "COMPLETED" && newStatus !== initialStatus; 
+            newStatus === "COMPLETED" && newStatus !== initialStatus;
 
         const paymentStatus = orderData?.charges?.status;
-        const isPaymentPending = paymentStatus !== "PAID"; 
+        const isPaymentPending = paymentStatus !== "PAID";
 
         if (isEditing && isChangingToCompleted && isPaymentPending) {
             setIsConfirmModalOpen(true);
             return;
-        } 
+        }
         proceedToSave();
     }, [
         formData,
@@ -313,9 +313,9 @@ export default function OrderFormModal({
         isEditing,
         isFormDisabled,
         initialStatus,
-        orderData, 
-        proceedToSave, 
-    ]); 
+        orderData,
+        proceedToSave,
+    ]);
 
     const handleConfirmSave = useCallback(async () => {
         proceedToSave();
@@ -327,6 +327,7 @@ export default function OrderFormModal({
             <Modal isOpen={isOpen} onClose={onClose} size="xl">
                 <Modal.Content
                     maxWidth="400px"
+                    minHeight="468px"
                     bg={whiteColor}
                     rounded="2xl"
                     shadow={6}

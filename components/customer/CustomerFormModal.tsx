@@ -91,6 +91,7 @@ export default function CustomerFormModal({
         <Modal isOpen={isOpen} onClose={onClose} size="xl">
             <Modal.Content
                 maxWidth="400px"
+                minHeight="509px"
                 bg={whiteColor}
                 rounded="2xl"
                 shadow={6}

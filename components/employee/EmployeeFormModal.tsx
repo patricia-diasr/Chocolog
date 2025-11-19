@@ -61,7 +61,6 @@ export default function EmployeeFormModal({
         hasAttemptedSave &&
         (passwordIsRequiredAndMissing || passwordIsProvidedAndShort);
 
-        
     useEffect(() => {
         if (isOpen) {
             setFormData(employeeData);
@@ -117,6 +116,7 @@ export default function EmployeeFormModal({
         <Modal isOpen={isOpen} onClose={onClose} size="xl">
             <Modal.Content
                 maxWidth="400px"
+                minHeight="472px"
                 bg={whiteColor}
                 rounded="2xl"
                 shadow={6}

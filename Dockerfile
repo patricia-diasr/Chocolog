@@ -1,7 +1,5 @@
 FROM node:18 AS build
 WORKDIR /app
-ARG EXPO_PUBLIC_API_URL_EXTERNAL
-ENV EXPO_PUBLIC_API_URL_EXTERNAL=$EXPO_PUBLIC_API_URL_EXTERNAL
 COPY package.json package-lock.json* yarn.lock* ./
 RUN npm install --legacy-peer-deps
 COPY . .

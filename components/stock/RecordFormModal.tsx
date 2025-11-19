@@ -160,6 +160,7 @@ export default function RecordFormModal({
         <Modal isOpen={isOpen} onClose={onClose} size="xl">
             <Modal.Content
                 maxWidth="400px"
+                minHeight="590px"
                 bg={whiteColor}
                 rounded="2xl"
                 shadow={6}
@@ -343,7 +344,7 @@ export default function RecordFormModal({
                             <Select
                                 modalTitle="Selecione um Tamanho"
                                 placeholder="Escolha o tamanho"
-                                data={SIZES}
+                                data={SIZES.filter((size) => sizeId != 4)}
                                 selectedValue={sizeId}
                                 onValueChange={setSizeId}
                                 isInvalid={isSizeInvalid}
